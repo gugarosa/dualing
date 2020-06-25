@@ -1,4 +1,4 @@
-# Dualing: Dual-based (Siamese) Learning
+# Dualing: Dual-based Learning
 
 [![Latest release](https://img.shields.io/github/release/gugarosa/dualing.svg)](https://github.com/gugarosa/dualing/releases)
 [![Open issues](https://img.shields.io/github/issues/gugarosa/dualing.svg)](https://github.com/gugarosa/dualing/issues)
