@@ -170,7 +170,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'dualing', 'Dualing Documentation',
-     author, 'dualing', 'Dualing is a library that implements dual-based (siamese) learning.',
+     author, 'dualing', 'Dualing is a library that implements dual-based neural learning.',
      'Siamese Networks'),
 ]
 

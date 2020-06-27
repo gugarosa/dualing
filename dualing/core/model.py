@@ -16,10 +16,10 @@ class Network(Model):
     def __init__(self, name=''):
         """Initialization method.
 
-        Note that basic variables shared by all childs should be declared here, e.g., layers.
+        Note that basic variables shared by all childs should be declared here, e.g., common layers.
 
         Args:
-            name (str): The network's identifier string.
+            name (str): The base network's identifier name.
 
         """
 
@@ -29,7 +29,7 @@ class Network(Model):
     def call(self, x):
         """Method that holds vital information whenever this class is called.
 
-        Note that you will need to implement this method directly on its child. Essentially,
+        Note that you need to implement this method directly on its child. Essentially,
         each neural network has its own forward pass implementation.
 
         Args:
@@ -44,7 +44,7 @@ class Network(Model):
 
 
 class Siamese(Model):
-    """An Siamese class is responsible for customly implementing Siamese Networks.
+    """An Siamese class is responsible for customly implementing Siamese Neural Networks.
 
     """
 
@@ -60,7 +60,7 @@ class Siamese(Model):
         # Overrides its parent class with any custom arguments if needed
         super(Siamese, self).__init__(name=name)
 
-        # Defining the base network
+        # Defining the base architecture
         self.N = network
 
         #
@@ -165,4 +165,4 @@ class Siamese(Model):
                 # Adding corresponding values to the progress bar
                 b.add(1, values=[('loss', self.loss_metric.result())])
 
-            # logger.file(f'Loss(G): {self.G_loss.result().numpy()} | Loss(D): {self.D_loss.result().numpy()}')
+            logger.file(f'Loss: {self.loss_metric.result()}')

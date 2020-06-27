@@ -15,7 +15,7 @@ batches = tf.data.Dataset.from_tensor_slices((x, y)).shuffle(1000000).batch(128)
 mlp = MLP()
 
 # Creating the Siamese Network
-s = Siamese(mlp, name='siamese_mlp')
+s = Siamese(mlp, name='siamese')
 
 # Compiling the Siamese Network
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.0001))
