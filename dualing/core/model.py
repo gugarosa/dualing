@@ -3,6 +3,7 @@ from tensorflow.keras import Model
 from tensorflow.keras.utils import Progbar
 
 import dualing.utils.logging as l
+import dualing.utils.losses as losses
 
 logger = l.get_logger(__name__)
 
@@ -90,7 +91,7 @@ class Siamese(Model):
         self.optimizer = optimizer
 
         # Defining the loss function
-        self.loss = tf.keras.losses.binary_crossentropy
+        self.loss = losses.contrastive_loss
 
         #
         self.loss_metric = tf.metrics.Mean(name='loss')

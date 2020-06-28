@@ -56,7 +56,7 @@ class PairDataset(Dataset):
         y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(labels, indexes[n_pairs:])
 
         #
-        y = tf.equal(y1, y2)
+        y = tf.cast(tf.equal(y1, y2), 'float32')
         
         return (x1, x2, y)
 

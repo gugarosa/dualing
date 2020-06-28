@@ -24,7 +24,7 @@ s = Siamese(mlp, name='siamese')
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
 
 # Fitting the Siamese Network
-s.fit(train.batches, epochs=1)
+s.fit(train.batches, epochs=10)
 
 
 x1, x2, y = next(iter(val.batches))
