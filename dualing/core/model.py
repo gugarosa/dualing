@@ -113,9 +113,6 @@ class Siamese(Model):
             z2 = self.N(x2)
 
             #
-            z = tf.concat([z1, z2], axis=0)
-
-            #
             dist = tf.abs(z1 - z2)
 
             #
@@ -166,3 +163,21 @@ class Siamese(Model):
                 b.add(1, values=[('loss', self.loss_metric.result())])
 
             logger.file(f'Loss: {self.loss_metric.result()}')
+
+    def predict(self, x1, x2):
+        """
+        """
+        
+        #
+        z1 = self.N(x1)
+
+        #
+        z2 = self.N(x2)
+
+        #
+        dist = tf.abs(z1 - z2)
+
+        #
+        score = tf.squeeze(self.out(dist), -1)
+
+        return score
