@@ -2,4 +2,5 @@
     the foundation of Dualing common modules.
 """
 
+from dualing.core.dataset import Dataset
 from dualing.core.model import Network, Siamese

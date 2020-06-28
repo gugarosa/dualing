@@ -1,3 +1,4 @@
+import tensorflow as tf
 from tensorflow.keras.layers import Dense, Flatten
 
 import dualing.utils.logging as l
@@ -22,7 +23,9 @@ class MLP(Network):
         super(MLP, self).__init__(name='mlp')
 
         #
-        self.fc = Dense(150)
+        self.fc1 = Dense(512)
+
+        self.fc2 = Dense(256)
 
         #
         self.flatten = Flatten()
@@ -40,8 +43,12 @@ class MLP(Network):
 
         """
 
+        x = tf.reshape(x, (x.shape[0], 784,))
+
         #
-        x = self.fc(x)
+        x = self.fc1(x)
+
+        x = self.fc2(x)
 
         #
         x = self.flatten(x)

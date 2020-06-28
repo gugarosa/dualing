@@ -1,6 +1,6 @@
 import tensorflow as tf
-
 from dualing.core import Siamese
+from dualing.datasets.pair import PairDataset
 from dualing.models.mlp import MLP
 
 # Loading the MNIST dataset
@@ -9,7 +9,7 @@ from dualing.models.mlp import MLP
 x = x.astype('float32')
 
 #
-batches = tf.data.Dataset.from_tensor_slices((x, y)).shuffle(1000000).batch(128)
+train = PairDataset(x, y, batch_size=128)
 
 # Creating the base architecture
 mlp = MLP()
@@ -18,7 +18,7 @@ mlp = MLP()
 s = Siamese(mlp, name='siamese')
 
 # Compiling the Siamese Network
-s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.0001))
+s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.01))
 
 # Fitting the Siamese Network
-s.fit(batches, epochs=10)
+s.fit(train.batches, epochs=10)

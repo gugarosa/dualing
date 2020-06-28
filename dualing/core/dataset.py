@@ -1,10 +1,12 @@
+import tensorflow as tf
+
 class Dataset:
     """A Dataset class is responsible for receiving raw data, pre-processing it and
     persisting batches that will be feed as inputs to the networks.
 
     """
 
-    def __init__(self, shuffle=True):
+    def __init__(self, seed=0):
         """Initialization method.
 
         Args:
@@ -13,10 +15,14 @@ class Dataset:
         """
 
         # Creating a property to whether data should be shuffled or not
-        self.shuffle = shuffle
+        self.seed = seed
 
         # Creating a property to hold the further batches
         self.batches = None
+
+        #
+        tf.random.set_seed(seed)
+        
 
     @property
     def shuffle(self):

@@ -158,9 +158,9 @@ class Siamese(Model):
             b = Progbar(n_batches, stateful_metrics=['loss'])
 
             # Iterate through all possible training batches
-            for (x_batch, y_batch) in batches:
+            for (x1_batch, x2_batch, y_batch) in batches:
                 # Performs the optimization step
-                self.step(x_batch, x_batch, y_batch)
+                self.step(x1_batch, x2_batch, y_batch)
 
                 # Adding corresponding values to the progress bar
                 b.add(1, values=[('loss', self.loss_metric.result())])
