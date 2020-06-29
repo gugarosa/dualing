@@ -1,31 +1,21 @@
-import tensorflow as tf
 from tensorflow.keras import Model
-from tensorflow.keras.utils import Progbar
-
-import dualing.utils.logging as l
-import dualing.utils.losses as losses
-
-logger = l.get_logger(__name__)
 
 
-class Network(Model):
-    """A Network class is responsible for easily-implementing the base architecture of
-    a Siamese Network, when custom training or additional sets are not needed.
+class Base(Model):
+    """A Base class is responsible for easily-implementing the base twin architecture of a Siamese Network.
 
     """
 
     def __init__(self, name=''):
         """Initialization method.
 
-        Note that basic variables shared by all childs should be declared here, e.g., common layers.
-
         Args:
-            name (str): The base network's identifier name.
+            name (str): Naming identifier.
 
         """
 
         # Overrides its parent class with any custom arguments if needed
-        super(Network, self).__init__(name=name)
+        super(Base, self).__init__(name=name)
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.
@@ -34,10 +24,10 @@ class Network(Model):
         each neural network has its own forward pass implementation.
 
         Args:
-            x (tf.Tensor): A tensorflow's tensor holding input data.
+            x (tf.Tensor): Tensor containing the input sample.
 
         Raises:
-            NotImplementedError
+            NotImplementedError.
 
         """
 
@@ -45,148 +35,118 @@ class Network(Model):
 
 
 class Siamese(Model):
-    """An Siamese class is responsible for customly implementing Siamese Neural Networks.
+    """An Siamese class is responsible for implementing the base of Siamese Neural Networks.
 
     """
 
-    def __init__(self, network, name=''):
+    def __init__(self, base, name=''):
         """Initialization method.
 
         Args:
-            network (Network): Base architecture.
-            name (str): The model's identifier string.
+            base (Base): Twin architecture.
+            name (str): Naming identifier.
 
         """
 
         # Overrides its parent class with any custom arguments if needed
         super(Siamese, self).__init__(name=name)
 
-        # Defining the base architecture
-        self.N = network
-
-        #
-        self.out = tf.keras.layers.Dense(1, activation='sigmoid')
+        # Defines the Siamese's base twin architecture
+        self.B = base
 
     @property
-    def N(self):
-        """Network: Base architecture.
+    def B(self):
+        """Base: Twin architecture.
 
         """
 
-        return self._N
+        return self._B
 
-    @N.setter
-    def N(self, N):
-        self._N = N
+    @B.setter
+    def B(self, B):
+        self._B = B
 
     def compile(self, optimizer):
-        """Main building method.
+        """Method that builds the network by attaching optimizer, loss and metrics.
+
+        Note that you need to implement this method directly on its child. Essentially,
+        each type of Siamese has its own set of loss and metrics.
 
         Args:
-            optimizer (tf.keras.optimizers): An optimizer instance.
+            optimizer (tf.keras.optimizers): Optimization algorithm.
+
+        Raises:
+            NotImplementedError.
 
         """
 
-        # Creates an optimizer object
-        self.optimizer = optimizer
-
-        # Defining the loss function
-        self.loss = losses.binary_crossentropy
-
-        #
-        self.loss_metric = tf.metrics.Mean(name='loss')
-
-        #
-        self.acc_metric = tf.metrics.Mean(name='acc')
+        raise NotImplementedError
 
     @tf.function
     def step(self, x1, x2, y):
-        """Performs a single batch optimization step.
+        """Method that performs a single batch optimization step.
+
+        Note that you need to implement this method directly on its child. Essentially,
+        each type of Siamese has an unique step.
 
         Args:
-            x (tf.Tensor): A tensor containing the inputs.
+            x1 (tf.Tensor): Tensor containing first samples from input pairs.
+            x2 (tf.Tensor): Tensor containing second samples from input pairs.
+            y (tf.Tensor): Tensor containing labels (1 for similar, 0 for dissimilar).
+
+        Raises:
+            NotImplementedError.
 
         """
 
-        # Using tensorflow's gradient
-        with tf.GradientTape() as tape:
-            #
-            z1 = self.N(x1)
-
-            #
-            z2 = self.N(x2)
-
-            #
-            dist = tf.abs(z1 - z2)
-
-            #
-            score = tf.squeeze(self.out(dist), -1)
-
-            #
-            loss = self.loss(y, score)
-
-            #
-            acc = tf.keras.metrics.binary_accuracy(y, score)
-
-        # Calculate the gradients based on loss for each training variable
-        gradients = tape.gradient(loss, self.N.trainable_variables)
-
-        # Applies the gradients using an optimizer
-        self.optimizer.apply_gradients(zip(gradients, self.N.trainable_variables))
-
-        # Updates the generator's loss state
-        self.loss_metric.update_state(loss)
-        self.acc_metric.update_state(acc)
+        raise NotImplementedError
 
     def fit(self, batches, epochs=100):
-        """Trains the model.
+        """Method that trains the model over training batches.
+
+        Note that you need to implement this method directly on its child. Essentially,
+        each type of Siamese may use a distinct type of dataset.
 
         Args:
-            batches (Dataset): Training batches containing samples.
-            epochs (int): The maximum number of training epochs.
+            batches (PairDataset | TripletDataset): Batches of tuples holding training samples and labels.
+            epochs (int): Maximum number of epochs.
+
+        Raises:
+            NotImplementedError.
 
         """
 
-        logger.info('Fitting model ...')
+        raise NotImplementedError
 
-        # Gathering the amount of batches
-        n_batches = tf.data.experimental.cardinality(batches).numpy()
+    def evaluate(self, batches):
+        """Method that evaluates the model over validation or testing batches.
 
-        # Iterate through all epochs
-        for e in range(epochs):
-            logger.info(f'Epoch {e+1}/{epochs}')
+        Note that you need to implement this method directly on its child. Essentially,
+        each type of Siamese may use a distinct type of dataset.
 
-            # Resetting state to further append loss
-            self.loss_metric.reset_states()
-            self.acc_metric.reset_states()
+        Args:
+            batches (PairDataset | TripletDataset): Batches of tuples holding validation / testing samples and labels.
 
-            # Defining a customized progress bar
-            b = Progbar(n_batches, stateful_metrics=['loss', 'acc'])
+        Raises:
+            NotImplementedError.
 
-            # Iterate through all possible training batches
-            for (x1_batch, x2_batch, y_batch) in batches:
-                # Performs the optimization step
-                self.step(x1_batch, x2_batch, y_batch)
+        """
 
-                # Adding corresponding values to the progress bar
-                b.add(1, values=[('loss', self.loss_metric.result()), ('acc', self.acc_metric.result())])
-
-            logger.file(f'Loss: {self.loss_metric.result()}')
+        raise NotImplementedError
 
     def predict(self, x1, x2):
+        """Method that performs a forward pass over a set of samples and returns the network's output.
+
+        Note that you need to implement this method directly on its child. Essentially,
+        each type of Siamese may predict in a different way.
+
+        Args:
+            x1 (tf.Tensor): Tensor containing first samples from input pairs.
+            x2 (tf.Tensor): Tensor containing second samples from input pairs.
+
+        Raises:
+            NotImplementedError.
+
         """
-        """
-        
-        #
-        z1 = self.N(x1)
 
-        #
-        z2 = self.N(x2)
-
-        #
-        dist = tf.abs(z1 - z2)
-
-        #
-        score = tf.squeeze(self.out(dist), -1)
-
-        return score
+        raise NotImplementedError

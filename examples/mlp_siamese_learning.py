@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
 from dualing.core import Siamese
-from dualing.datasets.pair import PairDataset
+from dualing.datasets import RandomPairDataset
 from dualing.models.mlp import MLP
 
 # Loading the MNIST dataset
@@ -11,8 +12,8 @@ x = x / 255
 x = x.astype('float32')
 
 #
-train = PairDataset(x, y, batch_size=128)
-val = PairDataset(x_val, y_val, batch_size=128)
+train = RandomPairDataset(x, y, batch_size=128)
+val = RandomPairDataset(x_val, y_val, batch_size=128)
 
 # Creating the base architecture
 mlp = MLP()
@@ -32,5 +33,3 @@ print(s.predict(x1, x2))
 plt.imshow(x1.numpy()[9])
 # plt.imshow(x2.numpy()[9])
 plt.show()
-
-    

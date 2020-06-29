@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 class Dataset:
     """A Dataset class is responsible for receiving raw data, pre-processing it and
     persisting batches that will be feed as inputs to the networks.
@@ -10,35 +11,19 @@ class Dataset:
         """Initialization method.
 
         Args:
-            shuffle (bool): Whether batches should be shuffled or not.
+            seed (int): Provides deterministic traits when using `random` module.
 
         """
 
-        # Creating a property to whether data should be shuffled or not
-        self.seed = seed
-
-        # Creating a property to hold the further batches
+        # Creates a property to hold batches
         self.batches = None
 
-        #
+        # Defines the tensorflow random seed
         tf.random.set_seed(seed)
-        
-
-    @property
-    def shuffle(self):
-        """bool: Whether data should be shuffled or not.
-
-        """
-
-        return self._shuffle
-
-    @shuffle.setter
-    def shuffle(self, shuffle):
-        self._shuffle = shuffle
 
     @property
     def batches(self):
-        """tf.data.Dataset: An instance of tensorflow's dataset batches.
+        """tf.data.Dataset: Batches of data (samples, labels).
 
         """
 
@@ -49,11 +34,13 @@ class Dataset:
         self._batches = batches
 
     def _build(self):
-        """This method serves to build up the Dataset class. Note that for each child,
-        you need to define your own building method.
+        """Method that builds the class.
+
+        Note that you need to implement this method directly on its child. Essentially,
+        each Dataset has its building procedure.
 
         Raises:
-            NotImplementedError
+            NotImplementedError.
 
         """
 
