@@ -57,6 +57,9 @@ class PairDataset(Dataset):
 
         #
         y = tf.cast(tf.equal(y1, y2), 'float32')
+
+        print(tf.math.count_nonzero(y))
+        print(y.shape)
         
         return (x1, x2, y)
 

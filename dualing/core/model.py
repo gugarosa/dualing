@@ -91,10 +91,13 @@ class Siamese(Model):
         self.optimizer = optimizer
 
         # Defining the loss function
-        self.loss = losses.contrastive_loss
+        self.loss = losses.binary_crossentropy
 
         #
         self.loss_metric = tf.metrics.Mean(name='loss')
+
+        #
+        self.acc_metric = tf.metrics.Mean(name='acc')
 
     @tf.function
     def step(self, x1, x2, y):
@@ -122,6 +125,9 @@ class Siamese(Model):
             #
             loss = self.loss(y, score)
 
+            #
+            acc = tf.keras.metrics.binary_accuracy(y, score)
+
         # Calculate the gradients based on loss for each training variable
         gradients = tape.gradient(loss, self.N.trainable_variables)
 
@@ -130,6 +136,7 @@ class Siamese(Model):
 
         # Updates the generator's loss state
         self.loss_metric.update_state(loss)
+        self.acc_metric.update_state(acc)
 
     def fit(self, batches, epochs=100):
         """Trains the model.
@@ -151,9 +158,10 @@ class Siamese(Model):
 
             # Resetting state to further append loss
             self.loss_metric.reset_states()
+            self.acc_metric.reset_states()
 
             # Defining a customized progress bar
-            b = Progbar(n_batches, stateful_metrics=['loss'])
+            b = Progbar(n_batches, stateful_metrics=['loss', 'acc'])
 
             # Iterate through all possible training batches
             for (x1_batch, x2_batch, y_batch) in batches:
@@ -161,7 +169,7 @@ class Siamese(Model):
                 self.step(x1_batch, x2_batch, y_batch)
 
                 # Adding corresponding values to the progress bar
-                b.add(1, values=[('loss', self.loss_metric.result())])
+                b.add(1, values=[('loss', self.loss_metric.result()), ('acc', self.acc_metric.result())])
 
             logger.file(f'Loss: {self.loss_metric.result()}')
 
