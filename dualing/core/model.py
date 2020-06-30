@@ -1,7 +1,7 @@
-from tensorflow.keras import Model
+import tensorflow as tf
 
 
-class Base(Model):
+class Base(tf.keras.Model):
     """A Base class is responsible for easily-implementing the base twin architecture of a Siamese Network.
 
     """
@@ -34,7 +34,7 @@ class Base(Model):
         raise NotImplementedError
 
 
-class Siamese(Model):
+class Siamese(tf.keras.Model):
     """An Siamese class is responsible for implementing the base of Siamese Neural Networks.
 
     """
@@ -108,7 +108,7 @@ class Siamese(Model):
         each type of Siamese may use a distinct type of dataset.
 
         Args:
-            batches (PairDataset | TripletDataset): Batches of tuples holding training samples and labels.
+            batches (PairDataset | RandomPairDataset | TripletDataset): Batches of tuples holding training samples and labels.
             epochs (int): Maximum number of epochs.
 
         Raises:

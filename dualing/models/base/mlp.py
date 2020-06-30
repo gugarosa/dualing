@@ -2,12 +2,12 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense, Flatten
 
 import dualing.utils.logging as l
-from dualing.core import Network
+from dualing.core import Base
 
 logger = l.get_logger(__name__)
 
 
-class MLP(Network):
+class MLP(Base):
     """A MLP class stands for a Multi-Layer Perceptron.
 
     """
@@ -17,7 +17,7 @@ class MLP(Network):
 
         """
 
-        logger.info('Overriding class: Network -> MLP.')
+        logger.info('Overriding class: Base -> MLP.')
 
         # Overrides its parent class with any custom arguments if needed
         super(MLP, self).__init__(name='mlp')

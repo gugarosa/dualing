@@ -3,4 +3,4 @@
 """
 
 from dualing.core.dataset import Dataset
-from dualing.core.model import Network, Siamese
+from dualing.core.model import Base, Siamese
