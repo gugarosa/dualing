@@ -33,6 +33,36 @@ class Dataset:
     def batches(self, batches):
         self._batches = batches
 
+    def _preprocess(self, data, shape, normalize):
+        """Pre-process the data by reshaping and normalizing, if necessary.
+
+        Args:
+            data (np.array): Array of data.
+            shape (tuple): Tuple containing the shape if the array should be forced to reshape.
+            normalize (bool): Whether data should be normalized between -1 and 1.
+
+        Returns:
+            Array of pre-processed data.
+
+        """
+
+        # If a shape is supplied
+        if shape:
+            # Reshapes the array and make sure that it is float typed
+            data = data.reshape(shape).astype('float32')
+
+        # If no shape is supplied
+        else:
+            # Just make sure that the array is float typed
+            data = data.astype('float32')
+
+        # If data should be normalized
+        if normalize:
+            # Normalize the data between -1 and 1
+            data = (data - 127.5) / 127.5
+
+        return data
+
     def _build(self):
         """Method that builds the class.
 

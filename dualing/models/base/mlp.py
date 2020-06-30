@@ -8,11 +8,11 @@ logger = l.get_logger(__name__)
 
 
 class MLP(Base):
-    """A MLP class stands for a Multi-Layer Perceptron.
+    """An MLP class stands for a Multi-Layer Perceptron implementation.
 
     """
 
-    def __init__(self):
+    def __init__(self, n_hidden=[128]):
         """Initialization method.
 
         """
@@ -22,35 +22,26 @@ class MLP(Base):
         # Overrides its parent class with any custom arguments if needed
         super(MLP, self).__init__(name='mlp')
 
-        #
-        self.fc1 = Dense(512)
-
-        self.fc2 = Dense(256)
-
-        #
-        self.flatten = Flatten()
+        # Creates fully-connected layers
+        self.fc = [Dense(units) for units in n_hidden]
 
         logger.info('Class overrided.')
+        logger.debug(f'Layers: {len(n_hidden)} | Units: {n_hidden}')
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.
 
         Args:
-            x (tf.Tensor): A tensorflow's tensor holding input data.
+            x (tf.Tensor): Tensor containing the input sample.
 
         Returns:
-            The same tensor after passing through each defined layer.
+            The layer's outputs.
 
         """
-
-        x = tf.reshape(x, (x.shape[0], 784,))
-
-        #
-        x = self.fc1(x)
-
-        x = self.fc2(x)
-
-        #
-        x = self.flatten(x)
+        
+        # Iterates through all fully-connected layers
+        for fc in self.fc:
+            # Passes down through the layer
+            x = fc(x)
 
         return x

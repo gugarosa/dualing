@@ -125,7 +125,8 @@ class Siamese(tf.keras.Model):
         each type of Siamese may use a distinct type of dataset.
 
         Args:
-            batches (PairDataset | TripletDataset): Batches of tuples holding validation / testing samples and labels.
+            batches (PairDataset | RandomPairDataset | TripletDataset): Batches of tuples
+                holding validation / testing samples and labels.
 
         Raises:
             NotImplementedError.

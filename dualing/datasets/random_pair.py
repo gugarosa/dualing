@@ -12,13 +12,15 @@ class RandomPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, seed=0):
+    def __init__(self, data, labels, batch_size=1, shape=None, normalize=True, seed=0):
         """Initialization method.
 
         Args:
             data (np.array): Array of samples.
             labels (np.array): Array of labels.
             batch_size (int): Batch size.
+            shape (tuple): A tuple containing the shape if the array should be forced to reshape.
+            normalize (bool): Whether images should be normalized between -1 and 1.
             seed (int): Provides deterministic traits when using `random` module.
 
         """
@@ -27,6 +29,9 @@ class RandomPairDataset(Dataset):
 
         # Overrides its parent class with any custom arguments if needed
         super(RandomPairDataset, self).__init__(seed)
+
+        # Pre-processes the data
+        data = self._preprocess(data, shape, normalize)
 
         # Creates pairs of data and their labels
         pairs = self._create_pairs(data, labels)
@@ -58,10 +63,12 @@ class RandomPairDataset(Dataset):
         indexes = tf.random.shuffle(tf.range(n_samples))
 
         # Gathers the `x1` and `x2` samples
-        x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(data, indexes[n_pairs:])
+        x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(
+            data, indexes[n_pairs:])
 
         # Gathers the `y1` and `y2` samples
-        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(labels, indexes[n_pairs:])
+        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(
+            labels, indexes[n_pairs:])
 
         # If `y1` and `y2` are equal, it means that samples are similar
         y = tf.cast(tf.equal(y1, y2), 'float32')
