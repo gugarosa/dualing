@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from dualing.datasets import RandomPairDataset
+from dualing.datasets import BalancedPairDataset
 from dualing.models import CrossEntropySiamese
 from dualing.models.base import MLP
 
@@ -8,11 +8,11 @@ from dualing.models.base import MLP
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
 
 # Creates the training and validation datasets
-train = RandomPairDataset(x, y, batch_size=128, shape=(x.shape[0], 784), normalize=True)
-val = RandomPairDataset(x_val, y_val, batch_size=128, shape=(x_val.shape[0], 784), normalize=True)
+train = BalancedPairDataset(x, y, n_pairs=1000, batch_size=64, shape=(x.shape[0], 784), normalize=True)
+val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, shape=(x_val.shape[0], 784), normalize=True)
 
 # Creates the base architecture
-mlp = MLP(n_hidden=[256, 128])
+mlp = MLP(n_hidden=[512, 256, 128])
 
 # Creates the cross-entropy siamese network
 s = CrossEntropySiamese(mlp, name='cross_entropy_siamese')

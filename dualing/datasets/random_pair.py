@@ -36,10 +36,15 @@ class RandomPairDataset(Dataset):
         # Creates pairs of data and their labels
         pairs = self._create_pairs(data, labels)
 
+        # Calculates the number of positive and negative pairs
+        n_pos_pairs = tf.math.count_nonzero(pairs[2])
+        n_neg_pairs = pairs[2].shape[0] - n_pos_pairs
+
         # Builds up the class
         self._build(pairs, batch_size)
 
         logger.info('Class overrided.')
+        logger.debug(f'Positive pairs: {n_pos_pairs} | Negative pairs: {n_neg_pairs}')
 
     def _create_pairs(self, data, labels):
         """Creates random pairs from data and labels.
