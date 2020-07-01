@@ -15,7 +15,8 @@ setup(name='dualing',
       install_requires=['coverage>=5.1',
                         'pylint>=2.5.2',
                         'pytest>=5.4.2',
-                        'tensorflow>=2.2.0'
+                        'tensorflow>=2.2.0',
+                        'tensorflow-addons>=0.10.0'
                         ],
       extras_require={
           'tests': ['coverage',
