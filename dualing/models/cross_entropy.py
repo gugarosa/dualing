@@ -73,17 +73,14 @@ class CrossEntropySiamese(Siamese):
             # Passes the second sample through the network
             z2 = self.B(x2)
 
-            # Calculates their absolute distance (L1)
-            dist = tf.abs(z1 - z2)
-
             # Passes the distance through sigmoid activation and removes last dimension
-            score = tf.squeeze(self.o(dist), -1)
+            y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
 
             # Calculates the loss
-            loss = self.loss(y, score)
+            loss = self.loss(y, y_pred)
 
             # Calculates the accuracy
-            acc = self.acc(y, score)
+            acc = self.acc(y, y_pred)
 
         # Calculates the gradients for each training variable based on the loss function
         gradients = tape.gradient(loss, self.B.trainable_variables)
@@ -155,13 +152,13 @@ class CrossEntropySiamese(Siamese):
         # Iterates through all batches
         for (x1_batch, x2_batch, y_batch) in batches:
             # Performs the prediction
-            score = self.predict(x1_batch, x2_batch)
+            y_pred = self.predict(x1_batch, x2_batch)
 
             # Calculates the loss
-            loss = self.loss(y_batch, score)
+            loss = self.loss(y_batch, y_pred)
 
             # Calculates the accuracy
-            acc = self.acc(y_batch, score)
+            acc = self.acc(y_batch, y_pred)
 
             # Updates the metrics' states
             self.loss_metric.update_state(loss)
@@ -191,10 +188,7 @@ class CrossEntropySiamese(Siamese):
         # Passes the second sample through the network
         z2 = self.B(x2)
 
-        # Calculates their absolute distance (L1)
-        dist = tf.abs(z1 - z2)
-
         # Passes the distance through sigmoid activation and removes last dimension
-        score = tf.squeeze(self.o(dist), -1)
+        y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
 
-        return score
+        return y_pred

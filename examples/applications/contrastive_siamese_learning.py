@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from dualing.datasets import BalancedPairDataset
-from dualing.models import OffContrastiveSiamese
+from dualing.models import ContrastiveSiamese
 from dualing.models.base import MLP
 
 # Loads the MNIST dataset
@@ -14,8 +14,8 @@ val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, shape=(x_val
 # Creates the base architecture
 mlp = MLP(n_hidden=[512, 256, 128])
 
-# Creates the offline-based contrastive siamese network
-s = OffContrastiveSiamese(mlp, distance='euclidean', margin=1.0, name='off_contrastive_siamese')
+# Creates the contrastive siamese network
+s = ContrastiveSiamese(mlp, margin=1.0, distance_metric='L2', name='contrastive_siamese')
 
 # Compiles the network
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))

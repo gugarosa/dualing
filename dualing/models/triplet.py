@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 import dualing.utils.logging as l
-from dualing.core import Siamese, TripletHardLoss
+from dualing.core import Siamese, TripletHardLoss, TripletSemiHardLoss
 
 logger = l.get_logger(__name__)
 
@@ -12,13 +12,15 @@ class TripletSiamese(Siamese):
 
     """
 
-    def __init__(self, base, distance='euclidean', margin=1.0, name=''):
+    def __init__(self, base, loss='hard', margin=1.0, soft=False, distance_metric='L2', name=''):
         """Initialization method.
 
         Args:
             base (Base): Twin architecture.
-            distance (str): Distance metric.
+            loss (str): Whether network should use hard or semi-hard negative mining.
             margin (float): Radius around the embedding space.
+            soft (bool): Whether network should use soft margin or not.
+            distance_metric (str): Distance metric.
             name (str): Naming identifier.
 
         """
@@ -28,25 +30,43 @@ class TripletSiamese(Siamese):
         # Overrides its parent class with any custom arguments if needed
         super(TripletSiamese, self).__init__(base, name=name)
 
-        # Defines the distance
-        self.distance = distance
+        # Type of loss
+        self.loss_type = loss
 
-        # Defines the margin
+        # Radius around embedding space
         self.margin = margin
+
+        # Soft margin
+        self.soft = soft
+
+        # Distance metric
+        self.distance = distance_metric
 
         logger.info('Class overrided.')
 
     @property
-    def distance(self):
-        """str: Distance metric.
+    def loss_type(self):
+        """str: Type of loss (hard or semi-hard).
 
         """
 
-        return self._distance
+        return self._loss_type
 
-    @distance.setter
-    def distance(self, distance):
-        self._distance = distance
+    @loss_type.setter
+    def loss_type(self, loss_type):
+        self._loss_type = loss_type
+
+    @property
+    def soft(self):
+        """bool: Whether soft margin should be used or not.
+
+        """
+
+        return self._soft
+
+    @soft.setter
+    def soft(self, soft):
+        self._soft = soft
 
     @property
     def margin(self):
@@ -60,6 +80,18 @@ class TripletSiamese(Siamese):
     def margin(self, margin):
         self._margin = margin
 
+    @property
+    def distance(self):
+        """str: Distance metric.
+
+        """
+
+        return self._distance
+
+    @distance.setter
+    def distance(self, distance):
+        self._distance = distance
+
     def compile(self, optimizer):
         """Method that builds the network by attaching optimizer, loss and metrics.
 
@@ -71,8 +103,15 @@ class TripletSiamese(Siamese):
         # Creates an optimizer object
         self.optimizer = optimizer
 
-        # Defines the loss function
-        self.loss = TripletHardLoss()
+        # Check it is supposed to use hard negative mining
+        if self.loss_type == 'hard':
+            # Creates the TripletHardLoss
+            self.loss = TripletHardLoss()
+        
+        # If it is supposed to use semi-hard negative mining
+        elif self.loss_type == 'semi-hard':
+            # Creates the TripletSemiHardLoss
+            self.loss = TripletSemiHardLoss()
 
         # Defines the loss metric
         self.loss_metric = tf.metrics.Mean(name='loss')
@@ -82,19 +121,18 @@ class TripletSiamese(Siamese):
         """Method that performs a single batch optimization step.
 
         Args:
-            x1 (tf.Tensor): Tensor containing first samples from input pairs.
-            x2 (tf.Tensor): Tensor containing second samples from input pairs.
-            y (tf.Tensor): Tensor containing labels (1 for similar, 0 for dissimilar).
+            x (tf.Tensor): Tensor containing samples.
+            y (tf.Tensor): Tensor containing labels.
 
         """
 
         # Uses tensorflow's gradient
         with tf.GradientTape() as tape:
-            # Passes the first sample through the network
-            z = self.B(x)
+            # Passes the batch inputs through the network
+            y_pred = self.B(x)
 
             # Calculates the loss
-            loss = self.loss(y, z, self.margin)
+            loss = self.loss(y, y_pred, self.margin, self.soft, self.distance)
 
         # Calculates the gradients for each training variable based on the loss function
         gradients = tape.gradient(loss, self.B.trainable_variables)
@@ -109,7 +147,7 @@ class TripletSiamese(Siamese):
         """Method that trains the model over training batches.
 
         Args:
-            batches (PairDataset | RandomPairDataset): Batches of tuples holding training samples and labels.
+            batches (BatchDataset): Batches of tuples holding training samples and labels.
             epochs (int): Maximum number of epochs.
 
         """
