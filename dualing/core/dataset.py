@@ -1,5 +1,9 @@
 import tensorflow as tf
 
+import dualing.utils.logging as l
+
+logger = l.get_logger(__name__)
+
 
 class Dataset:
     """A Dataset class is responsible for receiving raw data, pre-processing it and
@@ -7,19 +11,86 @@ class Dataset:
 
     """
 
-    def __init__(self, seed=0):
+    def __init__(self, batch_size, shape=None, normalize=[-1, 1], shuffle=True, seed=0):
         """Initialization method.
 
         Args:
+            batch_size (int): Batch size.
+            shape (tuple): Shape of the reshaped array.
+            normalize (tuple): Normalization bounds.
+            shuffle (bool): Whether data should be shuffled or not.
             seed (int): Provides deterministic traits when using `random` module.
 
         """
+
+        # Batch size
+        self.batch_size = batch_size
+
+        # Shape of the input tensors
+        self.shape = shape
+
+        # Normalization bounds
+        self.normalize = normalize
+
+        # Whether data should be shuffled or not
+        self.shuffle = shuffle
 
         # Creates a property to hold batches
         self.batches = None
 
         # Defines the tensorflow random seed
         tf.random.set_seed(seed)
+
+        # Debugs important information
+        logger.debug(f'Size: {shape} | Batch size: {batch_size} | Normalization: {normalize} | Shuffle: {shuffle}.')
+
+    @property
+    def batch_size(self):
+        """int: Batch size.
+
+        """
+
+        return self._batch_size
+
+    @batch_size.setter
+    def batch_size(self, batch_size):
+        self._batch_size = batch_size
+
+    @property
+    def shape(self):
+        """tuple: Shape of the input tensors.
+
+        """
+
+        return self._shape
+
+    @shape.setter
+    def shape(self, shape):
+        self._shape = shape
+
+    @property
+    def normalize(self):
+        """tuple: Normalization bounds.
+
+        """
+
+        return self._normalize
+
+    @normalize.setter
+    def normalize(self, normalize):
+        self._normalize = normalize
+
+    @property
+    def shuffle(self):
+        """bool: Whether data should be shuffled or not.
+
+        """
+
+        return self._shuffle
+
+    @shuffle.setter
+    def shuffle(self, shuffle):
+        self._shuffle = shuffle
 
     @property
     def batches(self):
@@ -33,33 +104,37 @@ class Dataset:
     def batches(self, batches):
         self._batches = batches
 
-    def _preprocess(self, data, shape, normalize):
+    def _preprocess(self, data):
         """Pre-process the data by reshaping and normalizing, if necessary.
 
         Args:
             data (np.array): Array of data.
-            shape (tuple): Tuple containing the shape if the array should be forced to reshape.
-            normalize (bool): Whether data should be normalized between -1 and 1.
 
         Returns:
-            Array of pre-processed data.
+            Pre-processed data.
 
         """
 
         # If a shape is supplied
-        if shape:
-            # Reshapes the array and make sure that it is float typed
-            data = data.reshape(shape).astype('float32')
+        if self.shape:
+            # Reshapes the array and make sure that it is `float`
+            data = data.reshape(self.shape).astype('float32')
 
         # If no shape is supplied
         else:
-            # Just make sure that the array is float typed
+            # Just make sure that the array is `float`
             data = data.astype('float32')
 
         # If data should be normalized
-        if normalize:
-            # Normalize the data between -1 and 1
-            data = (data - 127.5) / 127.5
+        if self.normalize:
+            # Gathers the lower and upper bounds of normalization
+            low, high = self.normalize[0], self.normalize[1]
+
+            # Gathers the minimum and maximum values of the data
+            _min, _max = tf.math.reduce_min(data), tf.math.reduce_max(data)
+
+            # Normalizes the data between `low` and `high`
+            data = (high - low) * ((data - _min) / (_max - _min)) + low
 
         return data
 
