@@ -45,7 +45,6 @@ class BalancedPairDataset(Dataset):
         # Builds up the class
         self._build(pairs)
 
-        logger.debug(f'Pairs: {n_pairs}.')
         logger.info('Class overrided.')
 
     @property
@@ -71,6 +70,8 @@ class BalancedPairDataset(Dataset):
             Tuple containing pairs of samples along their labels.
 
         """
+
+        logger.debug('Creating pairs ...')
 
         # Defines the number of samples
         n_samples = data.shape[0]
@@ -119,6 +120,8 @@ class BalancedPairDataset(Dataset):
 
         # Merges the positive and negative labels
         y = y_p[:n_pairs] + y_n[:n_pairs]
+
+        logger.debug(f'Pairs: {self.n_pairs}.')
 
         return x1, x2, y
 

@@ -1,7 +1,6 @@
 import tensorflow as tf
 
 import dualing.utils.logging as l
-import dualing.utils.losses as losses
 from dualing.core import Siamese
 
 logger = l.get_logger(__name__)
@@ -73,7 +72,7 @@ class TripletSiamese(Siamese):
         self.optimizer = optimizer
 
         # Defines the loss function
-        self.loss = losses.batch_all_triplet_loss
+        # self.loss = losses.batch_all_triplet_loss
 
         # Defines the loss metric
         self.loss_metric = tf.metrics.Mean(name='loss')

@@ -1,15 +1,14 @@
 import tensorflow as tf
 
 import dualing.utils.logging as l
-import dualing.utils.losses as losses
-from dualing.core import Siamese
+from dualing.core import ContrastiveLoss, Siamese
 
 logger = l.get_logger(__name__)
 
 
-class ContrastiveSiamese(Siamese):
-    """A ContrastiveSiamese class is responsible for implementing the
-    contrastive version of Siamese Neural Networks.
+class OffContrastiveSiamese(Siamese):
+    """An OffContrastiveSiamese class is responsible for implementing the
+    contrastive version of Siamese Neural Networks with an offline training, i.e., pre-feed with pairs.
 
     """
 
@@ -24,10 +23,10 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        logger.info('Overriding class: Siamese -> ContrastiveSiamese.')
+        logger.info('Overriding class: Siamese -> OffContrastiveSiamese.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(ContrastiveSiamese, self).__init__(base, name=name)
+        super(OffContrastiveSiamese, self).__init__(base, name=name)
 
         # Defines the distance
         self.distance = distance
@@ -73,7 +72,7 @@ class ContrastiveSiamese(Siamese):
         self.optimizer = optimizer
 
         # Defines the loss function
-        self.loss = losses.contrastive_loss
+        self.loss = ContrastiveLoss()
 
         # Defines the loss metric
         self.loss_metric = tf.metrics.Mean(name='loss')
@@ -122,7 +121,7 @@ class ContrastiveSiamese(Siamese):
         """Method that trains the model over training batches.
 
         Args:
-            batches (PairDataset | RandomPairDataset): Batches of tuples holding training samples and labels.
+            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding training samples and labels.
             epochs (int): Maximum number of epochs.
 
         """
@@ -156,7 +155,8 @@ class ContrastiveSiamese(Siamese):
         """Method that evaluates the model over validation or testing batches.
 
         Args:
-            batches (PairDataset | RandomPairDataset): Batches of tuples holding validation / testing samples and labels.
+            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
+                validation / testing samples and labels.
 
         """
 

@@ -11,7 +11,7 @@ class Dataset:
 
     """
 
-    def __init__(self, batch_size, shape=None, normalize=[-1, 1], shuffle=True, seed=0):
+    def __init__(self, batch_size=1, shape=None, normalize=[-1, 1], shuffle=True, seed=0):
         """Initialization method.
 
         Args:

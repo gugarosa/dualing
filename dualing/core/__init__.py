@@ -3,4 +3,5 @@
 """
 
 from dualing.core.dataset import Dataset
+from dualing.core.loss import BinaryCrossEntropy, ContrastiveLoss
 from dualing.core.model import Base, Siamese

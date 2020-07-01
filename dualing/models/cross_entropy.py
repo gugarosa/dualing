@@ -1,8 +1,7 @@
 import tensorflow as tf
 
 import dualing.utils.logging as l
-import dualing.utils.losses as losses
-from dualing.core import Siamese
+from dualing.core import BinaryCrossEntropy, Siamese
 
 logger = l.get_logger(__name__)
 
@@ -44,7 +43,7 @@ class CrossEntropySiamese(Siamese):
         self.optimizer = optimizer
 
         # Defines the loss function
-        self.loss = losses.binary_crossentropy
+        self.loss = BinaryCrossEntropy()
 
         # Defines the accuracy function
         self.acc = tf.keras.metrics.binary_accuracy
@@ -100,7 +99,7 @@ class CrossEntropySiamese(Siamese):
         """Method that trains the model over training batches.
 
         Args:
-            batches (PairDataset | RandomPairDataset): Batches of tuples holding training samples and labels.
+            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding training samples and labels.
             epochs (int): Maximum number of epochs.
 
         """
@@ -136,7 +135,8 @@ class CrossEntropySiamese(Siamese):
         """Method that evaluates the model over validation or testing batches.
 
         Args:
-            batches (PairDataset | RandomPairDataset): Batches of tuples holding validation / testing samples and labels.
+            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
+                validation / testing samples and labels.
 
         """
 
