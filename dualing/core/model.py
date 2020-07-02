@@ -1,5 +1,7 @@
 import tensorflow as tf
 
+import dualing.utils.exception as e
+
 
 class Base(tf.keras.Model):
     """A Base class is responsible for easily-implementing the base twin architecture of a Siamese Network.
@@ -64,6 +66,9 @@ class Siamese(tf.keras.Model):
 
     @B.setter
     def B(self, B):
+        if not isinstance(B, Base):
+            raise e.TypeError('`B` should be a child from Base class')
+        
         self._B = B
 
     def compile(self, optimizer):
@@ -83,16 +88,15 @@ class Siamese(tf.keras.Model):
         raise NotImplementedError
 
     @tf.function
-    def step(self, x1, x2, y):
+    def step(self, x, y):
         """Method that performs a single batch optimization step.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese has an unique step.
 
         Args:
-            x1 (tf.Tensor): Tensor containing first samples from input pairs.
-            x2 (tf.Tensor): Tensor containing second samples from input pairs.
-            y (tf.Tensor): Tensor containing labels (1 for similar, 0 for dissimilar).
+            x (tf.Tensor): Tensor containing samples.
+            y (tf.Tensor): Tensor containing labels.
 
         Raises:
             NotImplementedError.
@@ -108,7 +112,7 @@ class Siamese(tf.keras.Model):
         each type of Siamese may use a distinct type of dataset.
 
         Args:
-            batches (PairDataset | RandomPairDataset | TripletDataset): Batches of tuples holding training samples and labels.
+            batches (Dataset): Batches of tuples holding training samples and labels.
             epochs (int): Maximum number of epochs.
 
         Raises:
@@ -125,7 +129,7 @@ class Siamese(tf.keras.Model):
         each type of Siamese may use a distinct type of dataset.
 
         Args:
-            batches (PairDataset | RandomPairDataset | TripletDataset): Batches of tuples
+            batches (Dataset): Batches of tuples
                 holding validation / testing samples and labels.
 
         Raises:
@@ -135,15 +139,14 @@ class Siamese(tf.keras.Model):
 
         raise NotImplementedError
 
-    def predict(self, x1, x2):
+    def predict(self, x):
         """Method that performs a forward pass over a set of samples and returns the network's output.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese may predict in a different way.
 
         Args:
-            x1 (tf.Tensor): Tensor containing first samples from input pairs.
-            x2 (tf.Tensor): Tensor containing second samples from input pairs.
+            x (tf.Tensor): Tensor containing samples.
 
         Raises:
             NotImplementedError.

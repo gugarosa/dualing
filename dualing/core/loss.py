@@ -11,8 +11,11 @@ class BinaryCrossEntropy:
         """Method that holds vital information whenever this class is called.
 
         Args:
+            y_true (tf.Tensor): Tensor containing the true labels.
+            y_pred (tf.Tensor): Tensor containing the predictions, e.g., similar or dissimilar.
 
         Returns:
+            Binary cross-entropy loss.
 
         """
 
@@ -28,8 +31,12 @@ class ContrastiveLoss:
         """Method that holds vital information whenever this class is called.
 
         Args:
+            y_true (tf.Tensor): Tensor containing the true labels.
+            y_pred (tf.Tensor): Tensor containing the predictions, e.g., distance.
+            margin (float): Radius around the embedding space.
 
         Returns:
+            Contrastive loss.
 
         """
 
@@ -45,8 +52,14 @@ class TripletHardLoss:
         """Method that holds vital information whenever this class is called.
 
         Args:
+            y_true (tf.Tensor): Tensor containing the true labels.
+            y_pred (tf.Tensor): Tensor containing the predictions, e.g., embeddings.
+            margin (float): Radius around the embedding space.
+            soft (bool): Whether network should use soft margin or not.
+            distance_metric (str): Distance metric.
 
         Returns:
+            Triplet loss with hard negative mining.
 
         """
 
@@ -62,8 +75,13 @@ class TripletSemiHardLoss:
         """Method that holds vital information whenever this class is called.
 
         Args:
+            y_true (tf.Tensor): Tensor containing the true labels.
+            y_pred (tf.Tensor): Tensor containing the predictions, e.g., embeddings.
+            margin (float): Radius around the embedding space.
+            distance_metric (str): Distance metric.
 
         Returns:
+            Triplet loss with semi-hard negative mining.
 
         """
 

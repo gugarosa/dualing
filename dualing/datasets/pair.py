@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 import dualing.utils.constants as c
+import dualing.utils.exception as e
 import dualing.utils.logging as l
 from dualing.core import Dataset
 
@@ -57,6 +58,9 @@ class BalancedPairDataset(Dataset):
 
     @n_pairs.setter
     def n_pairs(self, n_pairs):
+        if not isinstance(n_pairs, int):
+            raise e.TypeError('`n_pairs` should be a integer')
+        
         self._n_pairs = n_pairs
 
     def _create_pairs(self, data, labels):
@@ -150,7 +154,7 @@ class RandomPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=[-1, 1], seed=0):
+    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(-1, 1), seed=0):
         """Initialization method.
 
         Args:

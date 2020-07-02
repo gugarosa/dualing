@@ -13,7 +13,7 @@ class BatchDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=[-1, 1], shuffle=True, seed=0):
+    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(-1, 1), shuffle=True, seed=0):
         """Initialization method.
 
         Args:

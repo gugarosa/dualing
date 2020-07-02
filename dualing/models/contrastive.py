@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+import dualing.utils.exception as e
 import dualing.utils.logging as l
 from dualing.core import ContrastiveLoss, Siamese
 
@@ -46,6 +47,9 @@ class ContrastiveSiamese(Siamese):
 
     @margin.setter
     def margin(self, margin):
+        if not isinstance(margin, float):
+            raise e.TypeError('`margin` should be a float')
+
         self._margin = margin
 
     @property
@@ -58,6 +62,9 @@ class ContrastiveSiamese(Siamese):
 
     @distance.setter
     def distance(self, distance):
+        if distance not in ['L1', 'L2', 'angular']:
+            raise e.ValueError('`distance` should be `L1`, `L2` or `angular`')
+
         self._distance = distance
 
     def compile(self, optimizer):

@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+import dualing.utils.exception as e
 import dualing.utils.logging as l
 
 logger = l.get_logger(__name__)
@@ -11,7 +12,7 @@ class Dataset:
 
     """
 
-    def __init__(self, batch_size=1, input_shape=None, normalize=[-1, 1], shuffle=True, seed=0):
+    def __init__(self, batch_size=1, input_shape=None, normalize=(-1, 1), shuffle=True, seed=0):
         """Initialization method.
 
         Args:
@@ -35,9 +36,6 @@ class Dataset:
         # Whether data should be shuffled or not
         self.shuffle = shuffle
 
-        # Creates a property to hold batches
-        self.batches = None
-
         # Defines the tensorflow random seed
         tf.random.set_seed(seed)
 
@@ -54,19 +52,25 @@ class Dataset:
 
     @batch_size.setter
     def batch_size(self, batch_size):
+        if not isinstance(batch_size, int):
+            raise e.TypeError('`batch_size` should be a integer')
+
         self._batch_size = batch_size
 
     @property
-    def shape(self):
+    def input_shape(self):
         """tuple: Shape of the input tensors.
 
         """
 
-        return self._shape
+        return self._input_shape
 
-    @shape.setter
-    def shape(self, shape):
-        self._shape = shape
+    @input_shape.setter
+    def input_shape(self, input_shape):
+        if not isinstance(input_shape, tuple):
+            raise e.TypeError('`input_shape` should be a tuple')
+
+        self._input_shape = input_shape
 
     @property
     def normalize(self):
@@ -78,6 +82,9 @@ class Dataset:
 
     @normalize.setter
     def normalize(self, normalize):
+        if not isinstance(normalize, tuple):
+            raise e.TypeError('`normalize` should be a tuple')
+
         self._normalize = normalize
 
     @property
@@ -90,6 +97,9 @@ class Dataset:
 
     @shuffle.setter
     def shuffle(self, shuffle):
+        if not isinstance(shuffle, bool):
+            raise e.TypeError('`shuffle` should be a boolean')
+
         self._shuffle = shuffle
 
     @property
@@ -102,6 +112,9 @@ class Dataset:
 
     @batches.setter
     def batches(self, batches):
+        if not isinstance(batches, tf.data.Dataset):
+            raise e.TypeError('`batches` should be a tf.data.Dataset')
+
         self._batches = batches
 
     def _preprocess(self, data):
