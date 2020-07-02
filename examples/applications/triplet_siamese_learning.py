@@ -1,24 +1,34 @@
 import tensorflow as tf
 
+import dualing.utils.projector as p
 from dualing.datasets import BatchDataset
 from dualing.models import TripletSiamese
-from dualing.models.base import MLP
+from dualing.models.base import CNN, MLP
 
 # Loads the MNIST dataset
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
 
 # Creates the training and validation datasets
-train = BatchDataset(x, y, batch_size=128, shape=(x.shape[0], 784), normalize=[-1, 1], shuffle=True)
-val = BatchDataset(x_val, y_val, batch_size=128, shape=(x_val.shape[0], 784), normalize=[-1, 1], shuffle=True)
+train = BatchDataset(x, y, batch_size=128, input_shape=(x.shape[0], 28, 28, 1), normalize=(0, 1), shuffle=True)
+val = BatchDataset(x_val, y_val, batch_size=128, input_shape=(x_val.shape[0], 28, 28, 1), normalize=(0, 1), shuffle=True)
 
 # Creates the base architecture
-mlp = MLP(n_hidden=[512, 256, 128])
+cnn = CNN(n_blocks=3, init_kernel=5, n_output=64, activation='linear')
 
 # Creates the triplet siamese network
-s = TripletSiamese(mlp, loss='hard', margin=1.0, soft=False, distance_metric='L2', name='triplet_siamese')
+s = TripletSiamese(cnn, loss='hard', margin=0.5, soft=True, distance_metric='L2', name='triplet_siamese')
 
 # Compiles the network
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
 
 # Fits the network
 s.fit(train.batches, epochs=10)
+
+# Evaluates the network
+# s.evaluate(val.batches)
+
+# Extract embeddings
+embeddings = s.extract_embeddings(val.preprocess(x_val))
+
+# Visualize embeddings
+p.plot_embeddings(embeddings, y_val)

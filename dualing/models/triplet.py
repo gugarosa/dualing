@@ -144,6 +144,9 @@ class TripletSiamese(Siamese):
             # Passes the batch inputs through the network
             y_pred = self.B(x)
 
+            # Performs the L2 normalization prior to the loss function
+            y_pred = tf.math.l2_normalize(y_pred, axis=-1)
+
             # Calculates the loss
             loss = self.loss(y, y_pred, self.margin, self.soft, self.distance)
 

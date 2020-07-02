@@ -71,7 +71,7 @@ class TripletSemiHardLoss:
 
     """
 
-    def __call__(self, y_true, y_pred, margin=1.0, distance_metric='L2'):
+    def __call__(self, y_true, y_pred, margin=1.0, soft=None, distance_metric='L2'):
         """Method that holds vital information whenever this class is called.
 
         Args:
@@ -85,4 +85,4 @@ class TripletSemiHardLoss:
 
         """
 
-        return tfa.losses.triplet_semihard_loss(y_true, y_pred, margin, distance)
+        return tfa.losses.triplet_semihard_loss(y_true, y_pred, margin, distance_metric)

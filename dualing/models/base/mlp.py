@@ -22,7 +22,7 @@ class MLP(Base):
         # Overrides its parent class with any custom arguments if needed
         super(MLP, self).__init__(name='mlp')
 
-        # Creates fully-connected layers
+        # Fully-connected layers
         self.fc = [Dense(units) for units in n_hidden]
 
         logger.info('Class overrided.')
