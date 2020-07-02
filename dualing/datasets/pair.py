@@ -38,7 +38,7 @@ class BalancedPairDataset(Dataset):
         self.n_pairs = n_pairs
 
         # Pre-processes the data
-        data = self._preprocess(data)
+        data = self.preprocess(data)
 
         # Creates pairs of data and labels
         pairs = self._create_pairs(data, labels)
@@ -173,7 +173,7 @@ class RandomPairDataset(Dataset):
         super(RandomPairDataset, self).__init__(batch_size, input_shape, normalize, False, seed)
 
         # Pre-processes the data
-        data = self._preprocess(data)
+        data = self.preprocess(data)
 
         # Creates pairs of data and labels
         pairs = self._create_pairs(data, labels)

@@ -33,7 +33,7 @@ class BatchDataset(Dataset):
         super(BatchDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
 
         # Pre-processes the data
-        data = self._preprocess(data)
+        data = self.preprocess(data)
 
         # Builds up the class
         self._build(data, labels)

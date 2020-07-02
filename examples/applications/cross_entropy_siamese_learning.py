@@ -9,11 +9,11 @@ from dualing.models.base import MLP
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
 
 # Creates the training and validation datasets
-train = BalancedPairDataset(x, y, n_pairs=1000, batch_size=64, input_shape=(x.shape[0], 784), normalize=(-1, 1))
-val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, input_shape=(x_val.shape[0], 784), normalize=(-1, 1))
+train = BalancedPairDataset(x, y, n_pairs=4000, batch_size=64, input_shape=(x.shape[0], 28, 28, 1), normalize=(-1, 1))
+# val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, input_shape=(x_val.shape[0], 28, 28, 1), normalize=(-1, 1))
 
 # Creates the base architecture
-mlp = MLP(n_hidden=[512, 256, 128])
+mlp = MLP()
 
 # Creates the cross-entropy siamese network
 s = CrossEntropySiamese(mlp, name='cross_entropy_siamese')
@@ -22,13 +22,15 @@ s = CrossEntropySiamese(mlp, name='cross_entropy_siamese')
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
 
 # Fits the network
-s.fit(train.batches, epochs=10)
+s.fit(train.batches, epochs=1)
 
 # Evaluates the network
-s.evaluate(val.batches)
+# s.evaluate(val.batches)
 
 # Extract embeddings
-embeddings = s.extract_embeddings(x_val, input_shape=(x_val.shape[0], 784))
+embeddings = s.extract_embeddings(train.preprocess(x))
+
+print(embeddings)
 
 # Visualize embeddings
-p.plot_embeddings(embeddings, y_val)
+p.plot_embeddings(embeddings, y)

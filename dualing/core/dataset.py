@@ -67,8 +67,8 @@ class Dataset:
 
     @input_shape.setter
     def input_shape(self, input_shape):
-        if not isinstance(input_shape, tuple):
-            raise e.TypeError('`input_shape` should be a tuple')
+        if not (isinstance(input_shape, tuple) or input_shape is None):
+            raise e.TypeError('`input_shape` should be a tuple or None')
 
         self._input_shape = input_shape
 
@@ -117,7 +117,7 @@ class Dataset:
 
         self._batches = batches
 
-    def _preprocess(self, data):
+    def preprocess(self, data):
         """Pre-process the data by reshaping and normalizing, if necessary.
 
         Args:
