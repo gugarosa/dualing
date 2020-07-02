@@ -1,9 +1,9 @@
 import tensorflow as tf
 
+import dualing.utils.projector as p
 from dualing.datasets import BalancedPairDataset
 from dualing.models import CrossEntropySiamese
 from dualing.models.base import MLP
-import dualing.utils.projector as p
 
 # Loads the MNIST dataset
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
