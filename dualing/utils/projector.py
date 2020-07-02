@@ -54,7 +54,7 @@ def plot_embeddings(embeddings, labels, dims=(0, 1)):
         indexes = np.where(labels == i)[0]
 
         # Scatter plots the desired dimensions (2-D)
-        plt.scatter(embeddings[indexes, dims[0]], embeddings[indexes, dims[1]], label=i)
+        plt.scatter(embeddings[indexes, dims[0]], embeddings[indexes, dims[1]], alpha=0.5, label=i)
 
     # Adds a legend to the plot
     plt.legend()

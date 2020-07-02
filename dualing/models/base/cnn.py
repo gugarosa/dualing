@@ -12,7 +12,7 @@ class CNN(Base):
 
     """
 
-    def __init__(self, n_conv_units=[32, 64], n_dense_units=[256, 128]):
+    def __init__(self):
         """Initialization method.
 
         """
@@ -23,19 +23,23 @@ class CNN(Base):
         super(CNN, self).__init__(name='cnn')
 
         # Creates convolutional layers
-        self.conv = [Conv2D(units, 5, strides=(2, 2), padding='same', activation='relu') for units in n_conv_units]
+        self.conv1 = Conv2D(32, 7, activation='relu', padding='same')
+        self.conv2 = Conv2D(64, 5, activation='relu', padding='same')
+        self.conv3 = Conv2D(128, 3, activation='relu', padding='same')
+        self.conv4 = Conv2D(256, 1, activation='relu', padding='same')
+        self.conv5 = Conv2D(2, 1, padding='same')
 
-        # Creates pooling layers
-        self.pool = [MaxPool2D(2, 2) for _ in range(len(n_conv_units))]
+        #
+        self.pool1 = MaxPool2D(2, padding='same')
+        self.pool2 = MaxPool2D(2, padding='same')
+        self.pool3 = MaxPool2D(2, padding='same')
+        self.pool4 = MaxPool2D(2, padding='same')
+        self.pool5 = MaxPool2D(2, padding='same')
 
-        # Creates the flattenning layer
+        #
         self.flatten = Flatten()
 
-        # Creates fully-connected layers
-        self.fc = [Dense(units, activation='relu') for units in n_dense_units]
-
         logger.info('Class overrided.')
-        logger.debug(f'Convolutional: {n_conv_units} | Dense: {n_dense_units}')
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.
@@ -48,20 +52,16 @@ class CNN(Base):
 
         """
 
-        # Iterates through all convolutional and pooling blocks
-        for conv, pool in zip(self.conv, self.pool):
-            # Passes down through convolutional
-            x = conv(x)
-
-            # Passes down through pooling
-            x = pool(x)
-
-        # Flattens the outputs
+        x = self.conv1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.pool2(x)
+        x = self.conv3(x)
+        x = self.pool3(x)
+        x = self.conv4(x)
+        x = self.pool4(x)
+        x = self.conv5(x)
+        x = self.pool5(x)
         x = self.flatten(x)
-        
-        # Iterates through all fully-connected layers
-        for fc in self.fc:
-            # Passes down through the layer
-            x = fc(x)
 
         return x
