@@ -3,13 +3,14 @@ import tensorflow as tf
 from dualing.datasets import BalancedPairDataset
 from dualing.models import CrossEntropySiamese
 from dualing.models.base import MLP
+import dualing.utils.projector as p
 
 # Loads the MNIST dataset
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
 
 # Creates the training and validation datasets
-train = BalancedPairDataset(x, y, n_pairs=1000, batch_size=64, shape=(x.shape[0], 784), normalize=[-1, 1])
-val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, shape=(x_val.shape[0], 784), normalize=[-1, 1])
+train = BalancedPairDataset(x, y, n_pairs=1000, batch_size=64, input_shape=(x.shape[0], 784), normalize=[-1, 1])
+val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, input_shape=(x_val.shape[0], 784), normalize=[-1, 1])
 
 # Creates the base architecture
 mlp = MLP(n_hidden=[512, 256, 128])
@@ -25,3 +26,9 @@ s.fit(train.batches, epochs=10)
 
 # Evaluates the network
 s.evaluate(val.batches)
+
+# Extract embeddings
+embeddings = s.extract_embeddings(x_val, input_shape=(x_val.shape[0], 784))
+
+# Visualize embeddings
+p.plot_embeddings(embeddings, y_val)

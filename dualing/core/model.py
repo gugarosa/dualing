@@ -151,3 +151,26 @@ class Siamese(tf.keras.Model):
         """
 
         raise NotImplementedError
+
+    def extract_embeddings(self, x, input_shape=None):
+        """Method that extracts embeddings by performing a forward pass over the base architecture (embedder).
+
+        Args:
+            x (np.array, tf.Tensor): Array or tensor containing the inputs to be embedded.
+            input_shape (tuple): Shape of the input layer.
+
+        Returns:
+            A tensor containing the embedded inputs.
+
+        """
+
+        # Converts the input to a tensor
+        x = tf.convert_to_tensor(x)
+
+        # Reshapes the tensor
+        x = tf.reshape(x, input_shape)
+
+        # Passes down through the embedder
+        x = self.B(x)
+
+        return x

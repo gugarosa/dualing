@@ -8,8 +8,8 @@ from dualing.models.base import MLP
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
 
 # Creates the training and validation datasets
-train = BatchDataset(x, y, batch_size=128, shape=(x.shape[0], 784), normalize=[-1, 1], shuffle=True)
-val = BatchDataset(x_val, y_val, batch_size=128, shape=(x_val.shape[0], 784), normalize=[-1, 1], shuffle=True)
+train = BatchDataset(x, y, batch_size=128, input_shape=(x.shape[0], 784), normalize=[-1, 1], shuffle=True)
+val = BatchDataset(x_val, y_val, batch_size=128, input_shape=(x_val.shape[0], 784), normalize=[-1, 1], shuffle=True)
 
 # Creates the base architecture
 mlp = MLP(n_hidden=[512, 256, 128])

@@ -11,12 +11,12 @@ class Dataset:
 
     """
 
-    def __init__(self, batch_size=1, shape=None, normalize=[-1, 1], shuffle=True, seed=0):
+    def __init__(self, batch_size=1, input_shape=None, normalize=[-1, 1], shuffle=True, seed=0):
         """Initialization method.
 
         Args:
             batch_size (int): Batch size.
-            shape (tuple): Shape of the reshaped array.
+            input_shape (tuple): Shape of the reshaped array.
             normalize (tuple): Normalization bounds.
             shuffle (bool): Whether data should be shuffled or not.
             seed (int): Provides deterministic traits when using `random` module.
@@ -27,7 +27,7 @@ class Dataset:
         self.batch_size = batch_size
 
         # Shape of the input tensors
-        self.shape = shape
+        self.input_shape = input_shape
 
         # Normalization bounds
         self.normalize = normalize
@@ -42,7 +42,7 @@ class Dataset:
         tf.random.set_seed(seed)
 
         # Debugs important information
-        logger.debug(f'Size: {shape} | Batch size: {batch_size} | Normalization: {normalize} | Shuffle: {shuffle}.')
+        logger.debug(f'Size: {input_shape} | Batch size: {batch_size} | Normalization: {normalize} | Shuffle: {shuffle}.')
 
     @property
     def batch_size(self):
@@ -116,9 +116,9 @@ class Dataset:
         """
 
         # If a shape is supplied
-        if self.shape:
+        if self.input_shape:
             # Reshapes the array and make sure that it is `float`
-            data = data.reshape(self.shape).astype('float32')
+            data = data.reshape(self.input_shape).astype('float32')
 
         # If no shape is supplied
         else:

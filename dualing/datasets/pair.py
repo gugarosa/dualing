@@ -13,7 +13,7 @@ class BalancedPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, n_pairs=2, batch_size=1, shape=None, normalize=True, shuffle=True, seed=0):
+    def __init__(self, data, labels, n_pairs=2, batch_size=1, input_shape=None, normalize=True, shuffle=True, seed=0):
         """Initialization method.
 
         Args:
@@ -21,7 +21,7 @@ class BalancedPairDataset(Dataset):
             labels (np.array): Array of labels.
             n_pairs (int): Number of pairs.
             batch_size (int): Batch size.
-            shape (tuple): Shape of the reshaped array.
+            input_shape (tuple): Shape of the reshaped array.
             normalize (tuple): Normalization bounds.
             shuffle (bool): Whether data should be shuffled or not.
             seed (int): Provides deterministic traits when using `random` module.
@@ -31,7 +31,7 @@ class BalancedPairDataset(Dataset):
         logger.info('Overriding class: Dataset -> BalancedPairDataset.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(BalancedPairDataset, self).__init__(batch_size, shape, normalize, shuffle, seed)
+        super(BalancedPairDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
 
         # Amount of pairs
         self.n_pairs = n_pairs
@@ -150,14 +150,14 @@ class RandomPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, shape=None, normalize=[-1, 1], seed=0):
+    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=[-1, 1], seed=0):
         """Initialization method.
 
         Args:
             data (np.array): Array of samples.
             labels (np.array): Array of labels.
             batch_size (int): Batch size.
-            shape (tuple): Shape of the reshaped array.
+            input_shape (tuple): Shape of the reshaped array.
             normalize (tuple): Normalization bounds.
             seed (int): Provides deterministic traits when using `random` module.
 
@@ -166,7 +166,7 @@ class RandomPairDataset(Dataset):
         logger.info('Overriding class: Dataset -> RandomPairDataset.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(RandomPairDataset, self).__init__(batch_size, shape, normalize, False, seed)
+        super(RandomPairDataset, self).__init__(batch_size, input_shape, normalize, False, seed)
 
         # Pre-processes the data
         data = self._preprocess(data)

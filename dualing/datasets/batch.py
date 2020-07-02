@@ -13,14 +13,14 @@ class BatchDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, shape=None, normalize=[-1, 1], shuffle=True, seed=0):
+    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=[-1, 1], shuffle=True, seed=0):
         """Initialization method.
 
         Args:
             data (np.array): Array of samples.
             labels (np.array): Array of labels.
             batch_size (int): Batch size.
-            shape (tuple): Shape of the reshaped array.
+            input_shape (tuple): Shape of the reshaped array.
             normalize (tuple): Normalization bounds.
             shuffle (bool): Whether data should be shuffled or not.
             seed (int): Provides deterministic traits when using `random` module.
@@ -30,7 +30,7 @@ class BatchDataset(Dataset):
         logger.info('Overriding class: Dataset -> BatchDataset.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(BatchDataset, self).__init__(batch_size, shape, normalize, shuffle, seed)
+        super(BatchDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
 
         # Pre-processes the data
         data = self._preprocess(data)
