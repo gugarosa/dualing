@@ -39,7 +39,7 @@ class CNN(Base):
         self.fc = Dense(n_output, activation=activation)
 
         logger.info('Class overrided.')
-        logger.debug(f'Blocks: {n_blocks} | Initial Kernel: {init_kernel} | Output: {n_output} with {activation}')
+        logger.debug(f'Blocks: {n_blocks} | Initial Kernel: {init_kernel} | Output ({activation}): {n_output}')
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.
