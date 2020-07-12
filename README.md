@@ -6,7 +6,7 @@
 
 ## Welcome to Dualing.
 
-Have you ever wanted to find if there is any similarity between your data? If yes, Dualing is the right package! We implement state-of-the-art dual-based neural networks, such as Siamese Networks, to cope with learning similarity functions between sets of data. Such a strategy helps in providing clearer manifolds and better-embedded data for a wide range of applications. 
+Have you ever wanted to find if there is any similarity between your data? If yes, Dualing is the right package! We implement state-of-the-art dual-based neural networks, such as Siamese Networks, to cope with learning similarity functions between sets of data. Such a strategy helps in providing clearer manifolds and better-embedded data for a wide range of applications.
 
 Use Dualing if you need a library or wish to:
 
