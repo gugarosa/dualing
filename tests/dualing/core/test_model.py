@@ -76,10 +76,16 @@ def test_siamese_predict():
 
 
 def test_siamese_extract_embeddings():
+    def call(x):
+        return x
+
     new_base = model.Base()
+    new_base.call = call
+
     new_siamese = model.Siamese(new_base)
 
     x = tf.zeros(1)
 
-    with pytest.raises(NotImplementedError):
-        new_siamese.extract_embeddings(x)
+    y = new_siamese.extract_embeddings(x)
+
+    assert y.numpy() == 0

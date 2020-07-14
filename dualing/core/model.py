@@ -87,7 +87,6 @@ class Siamese(tf.keras.Model):
 
         raise NotImplementedError
 
-    @tf.function
     def step(self, x, y):
         """Method that performs a single batch optimization step.
 
