@@ -11,6 +11,10 @@ class ContrastiveSiamese(Siamese):
     """A ContrastiveSiamese class is responsible for implementing the
     contrastive version of Siamese Neural Networks.
 
+    References:
+        I. Melekhov, J. Kannala and E. Rahtu. Siamese network features for image matching.
+        23rd International Conference on Pattern Recognition (2016).
+
     """
 
     def __init__(self, base, margin=1.0, distance_metric='L2', name=''):

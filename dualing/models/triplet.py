@@ -9,7 +9,11 @@ logger = l.get_logger(__name__)
 
 class TripletSiamese(Siamese):
     """A TripletSiamese class is responsible for implementing the
-    contrastive version of Siamese Neural Networks.
+    triplet-loss version of Siamese Neural Networks.
+
+    References:
+        X. Dong and J. Shen. Triplet loss in siamese network for object tracking.
+        Proceedings of the European Conference on Computer Vision (2018).
 
     """
 

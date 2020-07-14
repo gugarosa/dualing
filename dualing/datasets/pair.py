@@ -63,6 +63,21 @@ class BalancedPairDataset(Dataset):
         
         self._n_pairs = n_pairs
 
+    @property
+    def batches(self):
+        """tf.data.Dataset: Batches of data (samples, labels).
+
+        """
+
+        return self._batches
+
+    @batches.setter
+    def batches(self, batches):
+        if not isinstance(batches, tf.data.Dataset):
+            raise e.TypeError('`batches` should be a tf.data.Dataset')
+
+        self._batches = batches
+
     def _create_pairs(self, data, labels):
         """Creates balanced pairs from data and labels.
 

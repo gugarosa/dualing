@@ -12,7 +12,7 @@ class Dataset:
 
     """
 
-    def __init__(self, batch_size=1, input_shape=None, normalize=(-1, 1), shuffle=True, seed=0):
+    def __init__(self, batch_size=1, input_shape=None, normalize=(0, 1), shuffle=True, seed=0):
         """Initialization method.
 
         Args:
@@ -54,6 +54,8 @@ class Dataset:
     def batch_size(self, batch_size):
         if not isinstance(batch_size, int):
             raise e.TypeError('`batch_size` should be a integer')
+        if batch_size <= 0:
+            raise e.ValueError('`batch_size` should be greater than 0')
 
         self._batch_size = batch_size
 
@@ -102,20 +104,7 @@ class Dataset:
 
         self._shuffle = shuffle
 
-    @property
-    def batches(self):
-        """tf.data.Dataset: Batches of data (samples, labels).
 
-        """
-
-        return self._batches
-
-    @batches.setter
-    def batches(self, batches):
-        if not isinstance(batches, tf.data.Dataset):
-            raise e.TypeError('`batches` should be a tf.data.Dataset')
-
-        self._batches = batches
 
     def preprocess(self, data):
         """Pre-process the data by reshaping and normalizing, if necessary.

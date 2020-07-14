@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 import dualing.utils.constants as c
+import dualing.utils.exception as e
 import dualing.utils.logging as l
 from dualing.core import Dataset
 
@@ -39,6 +40,21 @@ class BatchDataset(Dataset):
         self._build(data, labels)
 
         logger.info('Class overrided.')
+
+    @property
+    def batches(self):
+        """tf.data.Dataset: Batches of data (samples, labels).
+
+        """
+
+        return self._batches
+
+    @batches.setter
+    def batches(self, batches):
+        if not isinstance(batches, tf.data.Dataset):
+            raise e.TypeError('`batches` should be a tf.data.Dataset')
+
+        self._batches = batches
 
     def _build(self, data, labels):
         """Builds the class.

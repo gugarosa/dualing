@@ -10,6 +10,10 @@ class CrossEntropySiamese(Siamese):
     """A CrossEntropySiamese class is responsible for implementing the
     cross-entropy version of Siamese Neural Networks.
 
+    References:
+        G. Koch, R. Zemel and R. Salakhutdinov. Siamese neural networks for one-shot image recognition.
+        ICML Deep Learning Workshop (2015).
+
     """
 
     def __init__(self, base, name=''):
