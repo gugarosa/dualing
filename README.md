@@ -1,6 +1,7 @@
 # Dualing: Dual-based Neural Learning
 
 [![Latest release](https://img.shields.io/github/release/gugarosa/dualing.svg)](https://github.com/gugarosa/dualing/releases)
+[![Build status](https://img.shields.io/travis/com/gugarosa/dualing/master.svg)](https://github.com/gugarosa/dualing/releases)
 [![Open issues](https://img.shields.io/github/issues/gugarosa/dualing.svg)](https://github.com/gugarosa/dualing/issues)
 [![License](https://img.shields.io/github/license/gugarosa/dualing.svg)](https://github.com/gugarosa/dualing/blob/master/LICENSE)
 
