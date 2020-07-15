@@ -25,7 +25,7 @@ s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
 s.fit(train.batches, epochs=10)
 
 # Evaluates the network
-# s.evaluate(val.batches)
+s.evaluate(val.batches)
 
 # Extract embeddings
 embeddings = s.extract_embeddings(val.preprocess(x_val))

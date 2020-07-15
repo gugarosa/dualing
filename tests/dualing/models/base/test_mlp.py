@@ -1,4 +1,5 @@
 import tensorflow as tf
+
 from dualing.models.base import mlp
 
 

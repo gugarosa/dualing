@@ -1,8 +1,8 @@
 import tensorflow as tf
 
-from dualing.models.base import mlp
-from dualing.models import triplet
 from dualing.datasets import batch
+from dualing.models import triplet
+from dualing.models.base import mlp
 
 
 def test_triplet():
@@ -114,39 +114,29 @@ def test_triplet_fit():
 
     new_siamese.fit(train.batches, epochs=1)
 
-    
-# def test_triplet_evaluate():
-#     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-#     train = batch.BatchDataset(
-#         x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
-#     new_base = mlp.MLP()
-#     new_siamese = triplet.TripletSiamese(new_base)
-#     new_siamese.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
+def test_triplet_evaluate():
+    (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
+    train = batch.BatchDataset(x[:10], y[:10], input_shape=(10, 784))
 
-#     new_siamese.fit(train.batches, epochs=1)
-#     new_siamese.evaluate(train.batches)
+    new_base = mlp.MLP()
+    new_siamese = triplet.TripletSiamese(new_base)
+    new_siamese.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
+
+    new_siamese.fit(train.batches, epochs=1)
+    new_siamese.evaluate(train.batches)
 
 
-# def test_triplet_predict():
-#     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-#     train = batch.BatchDataset(
-#         x, y, n_pairs=10, input_shape=(x.shape[0], 784))
+def test_triplet_predict():
+    (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
+    train = batch.BatchDataset(x[:10], y[:10], input_shape=(10, 784))
 
-#     new_base = mlp.MLP()
-#     new_siamese = triplet.TripletSiamese(new_base)
-#     new_siamese.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
+    new_base = mlp.MLP()
+    new_siamese = triplet.TripletSiamese(new_base)
+    new_siamese.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
 
-#     new_siamese.fit(train.batches, epochs=1)
+    new_siamese.fit(train.batches, epochs=1)
 
-#     x1 = tf.ones((1, 784))
-#     x2 = tf.ones((1, 784))
+    x = tf.ones((1, 784))
 
-#     new_siamese.distance = 'L1'
-#     new_siamese.predict(x1, x2)
-
-#     new_siamese.distance = 'L2'
-#     new_siamese.predict(x1, x2)
-
-#     new_siamese.distance = 'angular'
-#     new_siamese.predict(x1, x2)
+    new_siamese.predict(x)

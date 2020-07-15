@@ -1,8 +1,8 @@
 import tensorflow as tf
 
-from dualing.models.base import mlp
-from dualing.models import cross_entropy
 from dualing.datasets import pair
+from dualing.models import cross_entropy
+from dualing.models.base import mlp
 
 
 def test_cross_entropy():

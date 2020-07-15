@@ -76,7 +76,7 @@ class TripletSiamese(Siamese):
     def soft(self, soft):
         if not isinstance(soft, bool):
             raise e.TypeError('`soft` should be a boolean')
-        
+
         self._soft = soft
 
     @property
@@ -124,7 +124,7 @@ class TripletSiamese(Siamese):
         if self.loss_type == 'hard':
             # Creates the TripletHardLoss
             self.loss = TripletHardLoss()
-        
+
         # If it is supposed to use semi-hard negative mining
         elif self.loss_type == 'semi-hard':
             # Creates the TripletSemiHardLoss
@@ -158,7 +158,8 @@ class TripletSiamese(Siamese):
         gradients = tape.gradient(loss, self.B.trainable_variables)
 
         # Applies the gradients using an optimizer
-        self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
+        self.optimizer.apply_gradients(
+            zip(gradients, self.B.trainable_variables))
 
         # Updates the metrics' states
         self.loss_metric.update_state(loss)
@@ -196,3 +197,57 @@ class TripletSiamese(Siamese):
                 b.add(1, values=[('loss', self.loss_metric.result())])
 
             logger.file(f'Loss: {self.loss_metric.result()}')
+
+    def evaluate(self, batches):
+        """Method that evaluates the model over validation or testing batches.
+
+        Args:
+            batches (BatchDataset): Batches of tuples holding validation / test samples and labels.
+
+        """
+
+        logger.info('Evaluating model ...')
+
+        # Gathers the amount of batches
+        n_batches = tf.data.experimental.cardinality(batches).numpy()
+
+        # Resets metrics' states
+        self.loss_metric.reset_states()
+
+        # Defines a customized progress bar
+        b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['val_loss'])
+
+        # Iterates through all batches
+        for (x_batch, y_batch) in batches:
+            # Performs the prediction
+            y_pred = self.predict(x_batch)
+
+            # Calculates the loss
+            loss = self.loss(y_batch, y_pred, self.margin)
+
+            # Updates the metrics' states
+            self.loss_metric.update_state(loss)
+
+            # Adds corresponding values to the progress bar
+            b.add(1, values=[('val_loss', self.loss_metric.result())])
+
+        logger.file(f'Val Loss: {self.loss_metric.result()}')
+
+    def predict(self, x):
+        """Method that performs a forward pass over samples and returns the network's output.
+
+        Args:
+            x (tf.Tensor): Tensor containing input samples.
+
+        Returns:
+            The embedded and L2 normalized data from `x`.
+
+        """
+
+        # Passes the sample through the network
+        y_pred = self.B(x)
+
+        # Performs the L2 normalization prior to the loss function
+        y_pred = tf.math.l2_normalize(y_pred, axis=-1)
+
+        return y_pred
