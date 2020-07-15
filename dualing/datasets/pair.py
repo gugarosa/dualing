@@ -14,7 +14,7 @@ class BalancedPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, n_pairs=2, batch_size=1, input_shape=None, normalize=True, shuffle=True, seed=0):
+    def __init__(self, data, labels, n_pairs=2, batch_size=1, input_shape=None, normalize=(0, 1), shuffle=True, seed=0):
         """Initialization method.
 
         Args:
@@ -169,7 +169,7 @@ class RandomPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(-1, 1), seed=0):
+    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(0, 1), seed=0):
         """Initialization method.
 
         Args:
@@ -197,6 +197,21 @@ class RandomPairDataset(Dataset):
         self._build(pairs)
 
         logger.info('Class overrided.')
+
+    @property
+    def batches(self):
+        """tf.data.Dataset: Batches of data (samples, labels).
+
+        """
+
+        return self._batches
+
+    @batches.setter
+    def batches(self, batches):
+        if not isinstance(batches, tf.data.Dataset):
+            raise e.TypeError('`batches` should be a tf.data.Dataset')
+
+        self._batches = batches
 
     def _create_pairs(self, data, labels):
         """Creates random pairs from data and labels.
