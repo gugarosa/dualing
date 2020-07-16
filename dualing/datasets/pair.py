@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 import dualing.utils.constants as c
@@ -33,6 +34,16 @@ class BalancedPairDataset(Dataset):
 
         # Overrides its parent class with any custom arguments if needed
         super(BalancedPairDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
+
+        # Tries to assert the following statement
+        try:
+            # Checks if supplied labels are not equal
+            assert not np.all(labels == labels[0])
+
+        # If statement is not valid
+        except:
+            # Raises an error
+            raise e.ValueError('`labels` should have distinct values')
 
         # Amount of pairs
         self.n_pairs = n_pairs

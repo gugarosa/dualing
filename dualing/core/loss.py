@@ -78,6 +78,7 @@ class TripletSemiHardLoss:
             y_true (tf.Tensor): Tensor containing the true labels.
             y_pred (tf.Tensor): Tensor containing the predictions, e.g., embeddings.
             margin (float): Radius around the embedding space.
+            soft (None): Only for retro-compatibility.
             distance_metric (str): Distance metric.
 
         Returns:

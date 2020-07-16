@@ -84,8 +84,8 @@ class Dataset:
 
     @normalize.setter
     def normalize(self, normalize):
-        if not isinstance(normalize, tuple):
-            raise e.TypeError('`normalize` should be a tuple')
+        if not (isinstance(normalize, tuple) or normalize is None):
+            raise e.TypeError('`normalize` should be a tuple or None')
 
         self._normalize = normalize
 
@@ -103,8 +103,6 @@ class Dataset:
             raise e.TypeError('`shuffle` should be a boolean')
 
         self._shuffle = shuffle
-
-
 
     def preprocess(self, data):
         """Pre-process the data by reshaping and normalizing, if necessary.

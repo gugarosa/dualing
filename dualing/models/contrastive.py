@@ -53,6 +53,8 @@ class ContrastiveSiamese(Siamese):
     def margin(self, margin):
         if not isinstance(margin, float):
             raise e.TypeError('`margin` should be a float')
+        if margin <= 0:
+            raise e.ValueError('`margin` should be greater than 0')
 
         self._margin = margin
 

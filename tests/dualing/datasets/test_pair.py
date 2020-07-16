@@ -5,9 +5,13 @@ from dualing.datasets import pair
 
 def test_balanced_pair_dataset_n_pairs():
     x = np.zeros((2, 784))
-    y = np.asarray([0, 1])
 
-    new_balanced_pair_dataset = pair.BalancedPairDataset(x, y)
+    try:
+        y = np.zeros(2)
+        new_balanced_pair_dataset = pair.BalancedPairDataset(x, y)
+    except:
+        y = np.asarray([0, 1])
+        new_balanced_pair_dataset = pair.BalancedPairDataset(x, y)
 
     assert new_balanced_pair_dataset.n_pairs == 2
 
