@@ -1,3 +1,6 @@
+"""Dataset.
+"""
+
 import tensorflow as tf
 
 import dualing.utils.exception as e
@@ -40,7 +43,8 @@ class Dataset:
         tf.random.set_seed(seed)
 
         # Debugs important information
-        logger.debug(f'Size: {input_shape} | Batch size: {batch_size} | Normalization: {normalize} | Shuffle: {shuffle}.')
+        logger.debug('Size: %s | Batch size: %s | Normalization: %s | Shuffle: %s.',
+                     input_shape, batch_size, normalize, shuffle)
 
     @property
     def batch_size(self):

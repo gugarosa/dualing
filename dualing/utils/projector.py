@@ -1,3 +1,6 @@
+"""Helpers and methods to project embedded data.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -10,7 +13,7 @@ def _tensor_to_numpy(tensor):
         tensor (tf.Tensor): Tensor to be converted.
 
     Returns:
-        A nunmpy array with the same values as the tensor.
+        A numpy array with the same values as the tensor.
 
     """
 
@@ -40,13 +43,13 @@ def plot_embeddings(embeddings, labels, dims=(0, 1)):
     labels = _tensor_to_numpy(labels)
 
     # Creates figure and axis subplots
-    fig, ax = plt.subplots(figsize=(13, 7))
+    _, axis = plt.subplots(figsize=(13, 7))
 
     # Creates the axis labels strings
     x_label, y_label = f'$x_{dims[0]}$', f'$x_{dims[1]}$'
 
     # Defines some properties, such as axis labels
-    ax.set(xlabel=r'{}'.format(x_label), ylabel=r'{}'.format(y_label))
+    axis.set(xlabel=r'{}'.format(x_label), ylabel=r'{}'.format(y_label))
 
     # Iterates through every possible labels
     for i in range(np.max(labels) + 1):
@@ -54,7 +57,8 @@ def plot_embeddings(embeddings, labels, dims=(0, 1)):
         indexes = np.where(labels == i)[0]
 
         # Scatter plots the desired dimensions (2-D)
-        plt.scatter(embeddings[indexes, dims[0]], embeddings[indexes, dims[1]], alpha=0.75, label=i)
+        plt.scatter(embeddings[indexes, dims[0]],
+                    embeddings[indexes, dims[1]], alpha=0.75, label=i)
 
     # Adds a legend to the plot
     plt.legend()

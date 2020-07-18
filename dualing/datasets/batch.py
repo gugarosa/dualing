@@ -1,3 +1,6 @@
+"""Batch-based dataset.
+"""
+
 import tensorflow as tf
 
 import dualing.utils.constants as c
@@ -9,12 +12,13 @@ logger = l.get_logger(__name__)
 
 
 class BatchDataset(Dataset):
-    """A BatchDataset class is responsible for implementing a standard dataset that uses input data and labels
-    to provide batches.
+    """A BatchDataset class is responsible for implementing a standard dataset
+    that uses input data and labels to provide batches.
 
     """
 
-    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(0, 1), shuffle=True, seed=0):
+    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(0, 1),
+                 shuffle=True, seed=0):
         """Initialization method.
 
         Args:
@@ -31,7 +35,8 @@ class BatchDataset(Dataset):
         logger.info('Overriding class: Dataset -> BatchDataset.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(BatchDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
+        super(BatchDataset, self).__init__(
+            batch_size, input_shape, normalize, shuffle, seed)
 
         # Pre-processes the data
         data = self.preprocess(data)
@@ -68,9 +73,11 @@ class BatchDataset(Dataset):
         # Checks if data should be shuffled
         if self.shuffle:
             # Creates dataset from shuffled and batched data
-            self.batches = tf.data.Dataset.from_tensor_slices((data, labels)).shuffle(c.BUFFER_SIZE).batch(self.batch_size)
+            self.batches = tf.data.Dataset.from_tensor_slices(
+                (data, labels)).shuffle(c.BUFFER_SIZE).batch(self.batch_size)
 
         # If data should not be shuffled
         else:
             # Creates dataset from batched data
-            self.batches = tf.data.Dataset.from_tensor_slices((data, labels)).batch(self.batch_size)
+            self.batches = tf.data.Dataset.from_tensor_slices(
+                (data, labels)).batch(self.batch_size)

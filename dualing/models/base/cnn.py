@@ -1,4 +1,6 @@
-import tensorflow as tf
+"""Convolutional Neural Network.
+"""
+
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D
 
 import dualing.utils.logging as l
@@ -27,7 +29,7 @@ class CNN(Base):
 
         # Convolutional layers
         self.conv = [Conv2D(32 * (2 ** i), init_kernel - 2 * i, activation='relu', padding='same')
-                    for i in range(n_blocks)]
+                     for i in range(n_blocks)]
 
         # Pooling layers
         self.pool = [MaxPool2D() for _ in range(n_blocks)]
@@ -39,7 +41,7 @@ class CNN(Base):
         self.fc = Dense(n_output, activation=activation)
 
         logger.info('Class overrided.')
-        logger.debug(f'Blocks: {n_blocks} | Initial Kernel: {init_kernel} | Output ({activation}): {n_output}')
+        logger.debug('Blocks: %d| Initial Kernel: %d | Output (%s): %d', n_blocks, init_kernel, activation, n_output)
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

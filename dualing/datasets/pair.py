@@ -1,3 +1,6 @@
+"""Balanced- and random-pair datasets.
+"""
+
 import numpy as np
 import tensorflow as tf
 
@@ -10,12 +13,13 @@ logger = l.get_logger(__name__)
 
 
 class BalancedPairDataset(Dataset):
-    """A BalancedPairDataset class is responsible for implementing a dataset that creates balanced pairs of data,
-    as well as their similarity (1) or dissimilarity (0).
+    """A BalancedPairDataset class is responsible for implementing a dataset
+    that creates balanced pairs of data, as well as their similarity (1) or dissimilarity (0).
 
     """
 
-    def __init__(self, data, labels, n_pairs=2, batch_size=1, input_shape=None, normalize=(0, 1), shuffle=True, seed=0):
+    def __init__(self, data, labels, n_pairs=2, batch_size=1, input_shape=None, normalize=(0, 1),
+                 shuffle=True, seed=0):
         """Initialization method.
 
         Args:
@@ -33,7 +37,8 @@ class BalancedPairDataset(Dataset):
         logger.info('Overriding class: Dataset -> BalancedPairDataset.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(BalancedPairDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
+        super(BalancedPairDataset, self).__init__(
+            batch_size, input_shape, normalize, shuffle, seed)
 
         # Tries to assert the following statement
         try:
@@ -52,7 +57,7 @@ class BalancedPairDataset(Dataset):
         data = self.preprocess(data)
 
         # Creates pairs of data and labels
-        pairs = self._create_pairs(data, labels)
+        pairs = self.create_pairs(data, labels)
 
         # Builds up the class
         self._build(pairs)
@@ -71,7 +76,7 @@ class BalancedPairDataset(Dataset):
     def n_pairs(self, n_pairs):
         if not isinstance(n_pairs, int):
             raise e.TypeError('`n_pairs` should be a integer')
-        
+
         self._n_pairs = n_pairs
 
     @property
@@ -89,7 +94,7 @@ class BalancedPairDataset(Dataset):
 
         self._batches = batches
 
-    def _create_pairs(self, data, labels):
+    def create_pairs(self, data, labels):
         """Creates balanced pairs from data and labels.
 
         Args:
@@ -151,7 +156,7 @@ class BalancedPairDataset(Dataset):
         # Merges the positive and negative labels
         y = y_p[:n_pairs] + y_n[:n_pairs]
 
-        logger.debug(f'Pairs: {self.n_pairs}.')
+        logger.debug('Pairs: %s.', self.n_pairs)
 
         return x1, x2, y
 
@@ -166,17 +171,19 @@ class BalancedPairDataset(Dataset):
         # Checks if data should be shuffled
         if self.shuffle:
             # Creates dataset from shuffled and batched data
-            self.batches = tf.data.Dataset.from_tensor_slices(pairs).shuffle(c.BUFFER_SIZE).batch(self.batch_size)
+            self.batches = tf.data.Dataset.from_tensor_slices(
+                pairs).shuffle(c.BUFFER_SIZE).batch(self.batch_size)
 
         # If data should not be shuffled
         else:
             # Creates dataset from batched data
-            self.batches = tf.data.Dataset.from_tensor_slices(pairs).batch(self.batch_size)
+            self.batches = tf.data.Dataset.from_tensor_slices(
+                pairs).batch(self.batch_size)
 
 
 class RandomPairDataset(Dataset):
-    """A RandomPairDataset class is responsible for implementing a dataset that randomly creates pairs of data,
-    as well as their similarity (1) or dissimilarity (0).
+    """A RandomPairDataset class is responsible for implementing a dataset that
+    randomly creates pairs of data, as well as their similarity (1) or not (0).
 
     """
 
@@ -196,13 +203,14 @@ class RandomPairDataset(Dataset):
         logger.info('Overriding class: Dataset -> RandomPairDataset.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(RandomPairDataset, self).__init__(batch_size, input_shape, normalize, False, seed)
+        super(RandomPairDataset, self).__init__(
+            batch_size, input_shape, normalize, False, seed)
 
         # Pre-processes the data
         data = self.preprocess(data)
 
         # Creates pairs of data and labels
-        pairs = self._create_pairs(data, labels)
+        pairs = self.create_pairs(data, labels)
 
         # Builds up the class
         self._build(pairs)
@@ -224,7 +232,19 @@ class RandomPairDataset(Dataset):
 
         self._batches = batches
 
-    def _create_pairs(self, data, labels):
+    def _build(self, pairs):
+        """Builds the class.
+
+        Args:
+            pairs (tuple): Pairs of samples along their labels.
+
+        """
+
+        # Creates batches from tensor slices
+        self.batches = tf.data.Dataset.from_tensor_slices(
+            pairs).batch(self.batch_size)
+
+    def create_pairs(self, data, labels):
         """Creates random pairs from data and labels.
 
         Args:
@@ -248,10 +268,12 @@ class RandomPairDataset(Dataset):
         indexes = tf.random.shuffle(tf.range(n_samples))
 
         # Gathers samples
-        x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(data, indexes[n_pairs:])
+        x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(
+            data, indexes[n_pairs:])
 
         # Gathers samples
-        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(labels, indexes[n_pairs:])
+        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(
+            labels, indexes[n_pairs:])
 
         # If labels are equal, it means that samples are similar
         y = tf.cast(tf.equal(y1, y2), 'float32')
@@ -260,17 +282,7 @@ class RandomPairDataset(Dataset):
         n_pos_pairs = tf.math.count_nonzero(y)
         n_neg_pairs = y.shape[0] - n_pos_pairs
 
-        logger.debug(f'Positive pairs: {n_pos_pairs} | Negative pairs: {n_neg_pairs}')
+        logger.debug('Positive pairs: %s | Negative pairs: %s',
+                     n_pos_pairs, n_neg_pairs)
 
         return (x1, x2, y)
-
-    def _build(self, pairs):
-        """Builds the class.
-
-        Args:
-            pairs (tuple): Pairs of samples along their labels.
-
-        """
-
-        # Creates batches from tensor slices
-        self.batches = tf.data.Dataset.from_tensor_slices(pairs).batch(self.batch_size)

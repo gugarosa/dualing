@@ -1,3 +1,6 @@
+"""Cross-Entropy Siamese Network.
+"""
+
 import tensorflow as tf
 
 import dualing.utils.logging as l
@@ -11,7 +14,8 @@ class CrossEntropySiamese(Siamese):
     cross-entropy version of Siamese Neural Networks.
 
     References:
-        G. Koch, R. Zemel and R. Salakhutdinov. Siamese neural networks for one-shot image recognition.
+        G. Koch, R. Zemel and R. Salakhutdinov.
+        Siamese neural networks for one-shot image recognition.
         ICML Deep Learning Workshop (2015).
 
     """
@@ -90,7 +94,8 @@ class CrossEntropySiamese(Siamese):
         gradients = tape.gradient(loss, self.B.trainable_variables)
 
         # Applies the gradients using an optimizer
-        self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
+        self.optimizer.apply_gradients(
+            zip(gradients, self.B.trainable_variables))
 
         # Updates the metrics' states
         self.loss_metric.update_state(loss)
@@ -100,7 +105,8 @@ class CrossEntropySiamese(Siamese):
         """Method that trains the model over training batches.
 
         Args:
-            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding training samples and labels.
+            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
+                training samples and labels.
             epochs (int): Maximum number of epochs.
 
         """
@@ -111,15 +117,16 @@ class CrossEntropySiamese(Siamese):
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         # Iterates through all epochs
-        for e in range(epochs):
-            logger.info(f'Epoch {e+1}/{epochs}')
+        for epoch in range(epochs):
+            logger.info('Epoch %d/%d', epoch+1, epochs)
 
             # Resets metrics' states
             self.loss_metric.reset_states()
             self.acc_metric.reset_states()
 
             # Defines a customized progress bar
-            b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['loss', 'acc'])
+            b = tf.keras.utils.Progbar(
+                n_batches, stateful_metrics=['loss', 'acc'])
 
             # Iterates through all batches
             for (x1_batch, x2_batch, y_batch) in batches:
@@ -130,7 +137,8 @@ class CrossEntropySiamese(Siamese):
                 b.add(1, values=[('loss', self.loss_metric.result()),
                                  ('acc', self.acc_metric.result())])
 
-            logger.file(f'Loss: {self.loss_metric.result()} | Accuracy: {self.acc_metric.result()}')
+            logger.file(
+                f'Loss: {self.loss_metric.result()} | Accuracy: {self.acc_metric.result()}')
 
     def evaluate(self, batches):
         """Method that evaluates the model over validation or testing batches.
@@ -172,10 +180,11 @@ class CrossEntropySiamese(Siamese):
             b.add(1, values=[('val_loss', self.loss_metric.result()),
                              ('val_acc', self.acc_metric.result())])
 
-        logger.file(f'Val Loss: {self.loss_metric.result()} | Val Accuracy: {self.acc_metric.result()}')
+        logger.file(
+            f'Val Loss: {self.loss_metric.result()} | Val Accuracy: {self.acc_metric.result()}')
 
     def predict(self, x1, x2):
-        """Method that performs a forward pass over a set of samples and returns the network's output.
+        """Method that performs a forward pass over samples and returns the network's output.
 
         Args:
             x1 (tf.Tensor): Tensor containing first samples from input pairs.

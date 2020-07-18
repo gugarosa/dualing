@@ -1,10 +1,14 @@
+"""Base architecture and Siamese Network.
+"""
+
 import tensorflow as tf
 
 import dualing.utils.exception as e
 
 
 class Base(tf.keras.Model):
-    """A Base class is responsible for easily-implementing the base twin architecture of a Siamese Network.
+    """A Base class is responsible for easily-implementing the
+    base twin architecture of a Siamese Network.
 
     """
 
@@ -68,7 +72,7 @@ class Siamese(tf.keras.Model):
     def B(self, B):
         if not isinstance(B, Base):
             raise e.TypeError('`B` should be a child from Base class')
-        
+
         self._B = B
 
     def compile(self, optimizer):
@@ -138,7 +142,7 @@ class Siamese(tf.keras.Model):
         raise NotImplementedError
 
     def predict(self, x):
-        """Method that performs a forward pass over a set of samples and returns the network's output.
+        """Method that performs a forward pass over samples and returns the network's output.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese may predict in a different way.
@@ -154,7 +158,8 @@ class Siamese(tf.keras.Model):
         raise NotImplementedError
 
     def extract_embeddings(self, x):
-        """Method that extracts embeddings by performing a forward pass over the base architecture (embedder).
+        """Method that extracts embeddings by performing a forward pass
+        over the base architecture (embedder).
 
         Args:
             x (np.array, tf.Tensor): Array or tensor containing the inputs to be embedded.

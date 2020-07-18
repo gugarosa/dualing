@@ -1,3 +1,6 @@
+"""Contrastive Loss Siamese Network.
+"""
+
 import tensorflow as tf
 
 import dualing.utils.exception as e
@@ -118,7 +121,7 @@ class ContrastiveSiamese(Siamese):
             elif self.distance == 'L2':
                 # Calculates the L2 distance
                 y_pred = tf.linalg.norm(z1 - z2, axis=1)
-            
+
             # If distance is supposed to be angular
             elif self.distance == 'angular':
                 # Calculates the angular distance
@@ -131,7 +134,8 @@ class ContrastiveSiamese(Siamese):
         gradients = tape.gradient(loss, self.B.trainable_variables)
 
         # Applies the gradients using an optimizer
-        self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
+        self.optimizer.apply_gradients(
+            zip(gradients, self.B.trainable_variables))
 
         # Updates the metrics' states
         self.loss_metric.update_state(loss)
@@ -140,7 +144,8 @@ class ContrastiveSiamese(Siamese):
         """Method that trains the model over training batches.
 
         Args:
-            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding training samples and labels.
+            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
+                training samples and labels.
             epochs (int): Maximum number of epochs.
 
         """
@@ -151,8 +156,8 @@ class ContrastiveSiamese(Siamese):
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         # Iterates through all epochs
-        for e in range(epochs):
-            logger.info(f'Epoch {e+1}/{epochs}')
+        for epoch in range(epochs):
+            logger.info('Epoch %d/%d', epoch+1, epochs)
 
             # Resets metrics' states
             self.loss_metric.reset_states()
@@ -207,7 +212,7 @@ class ContrastiveSiamese(Siamese):
         logger.file(f'Val Loss: {self.loss_metric.result()}')
 
     def predict(self, x1, x2):
-        """Method that performs a forward pass over a set of samples and returns the network's output.
+        """Method that performs a forward pass over samples and returns the network's output.
 
         Args:
             x1 (tf.Tensor): Tensor containing first samples from input pairs.
@@ -233,7 +238,7 @@ class ContrastiveSiamese(Siamese):
         elif self.distance == 'L2':
             # Calculates the L2 distance
             y_pred = tf.linalg.norm(z1 - z2, axis=1)
-        
+
         # If distance is supposed to be angular
         elif self.distance == 'angular':
             # Calculates the angular distance

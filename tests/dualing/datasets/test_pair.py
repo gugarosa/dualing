@@ -59,7 +59,7 @@ def test_balanced_pair_dataset_create_pairs():
 
     new_balanced_pair_dataset = pair.BalancedPairDataset(x, y)
 
-    pairs = new_balanced_pair_dataset._create_pairs(x, y)
+    pairs = new_balanced_pair_dataset.create_pairs(x, y)
 
     assert len(pairs) == 3
 
@@ -70,7 +70,7 @@ def test_balanced_pair_dataset_build():
 
     new_balanced_pair_dataset = pair.BalancedPairDataset(x, y, shuffle=True)
 
-    pairs = new_balanced_pair_dataset._create_pairs(x, y)
+    pairs = new_balanced_pair_dataset.create_pairs(x, y)
 
     new_balanced_pair_dataset._build(pairs)
 
@@ -78,7 +78,7 @@ def test_balanced_pair_dataset_build():
 
     new_balanced_pair_dataset = pair.BalancedPairDataset(x, y, shuffle=False)
 
-    pairs = new_balanced_pair_dataset._create_pairs(x, y)
+    pairs = new_balanced_pair_dataset.create_pairs(x, y)
 
     new_balanced_pair_dataset._build(pairs)
 
@@ -108,13 +108,13 @@ def test_random_pair_dataset_batches_setter():
     assert new_random_pair_dataset.batches != 1
 
 
-def test_random_pair_dataset_create_pairs():
+def test_random_pair_datasetcreate_pairs():
     x = np.zeros((2, 784))
     y = np.asarray([0, 1])
 
     new_random_pair_dataset = pair.RandomPairDataset(x, y)
 
-    pairs = new_random_pair_dataset._create_pairs(x, y)
+    pairs = new_random_pair_dataset.create_pairs(x, y)
 
     assert len(pairs) == 3
 
@@ -125,7 +125,7 @@ def test_random_pair_dataset_build():
 
     new_random_pair_dataset = pair.RandomPairDataset(x, y)
 
-    pairs = new_random_pair_dataset._create_pairs(x, y)
+    pairs = new_random_pair_dataset.create_pairs(x, y)
 
     new_random_pair_dataset._build(pairs)
 

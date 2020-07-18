@@ -1,3 +1,6 @@
+"""Triplet Loss Siamese Network.
+"""
+
 import tensorflow as tf
 
 import dualing.utils.exception as e
@@ -181,8 +184,8 @@ class TripletSiamese(Siamese):
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         # Iterates through all epochs
-        for e in range(epochs):
-            logger.info(f'Epoch {e+1}/{epochs}')
+        for epoch in range(epochs):
+            logger.info('Epoch %d/%d', epoch+1, epochs)
 
             # Resets metrics' states
             self.loss_metric.reset_states()

@@ -1,4 +1,6 @@
-import tensorflow as tf
+"""Multi-Layer Perceptron.
+"""
+
 from tensorflow.keras.layers import Dense
 
 import dualing.utils.logging as l
@@ -26,7 +28,7 @@ class MLP(Base):
         self.fc = [Dense(units) for units in n_hidden]
 
         logger.info('Class overrided.')
-        logger.debug(f'Layers: {len(n_hidden)} | Units: {n_hidden}')
+        logger.debug('Layers: %d | Units: %d', len(n_hidden), n_hidden)
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.
@@ -38,7 +40,7 @@ class MLP(Base):
             The layer's outputs.
 
         """
-        
+
         # Iterates through all fully-connected layers
         for fc in self.fc:
             # Passes down through the layer
