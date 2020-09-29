@@ -16,7 +16,7 @@ val = BatchDataset(x_val, y_val, batch_size=128, input_shape=(x_val.shape[0], 28
 cnn = CNN(n_blocks=3, init_kernel=5, n_output=128, activation='linear')
 
 # Creates the triplet siamese network
-s = TripletSiamese(cnn, loss='hard', margin=0.5, soft=False, distance_metric='L1', name='triplet_siamese')
+s = TripletSiamese(cnn, loss='hard', margin=0.5, soft=False, distance_metric='L2', name='triplet_siamese')
 
 # Compiles the network
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
