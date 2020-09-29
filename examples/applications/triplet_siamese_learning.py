@@ -3,7 +3,7 @@ import tensorflow as tf
 import dualing.utils.projector as p
 from dualing.datasets import BatchDataset
 from dualing.models import TripletSiamese
-from dualing.models.base import CNN, MLP
+from dualing.models.base import CNN
 
 # Loads the MNIST dataset
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()

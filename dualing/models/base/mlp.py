@@ -28,7 +28,7 @@ class MLP(Base):
         self.fc = [Dense(units) for units in n_hidden]
 
         logger.info('Class overrided.')
-        logger.debug('Layers: %d | Units: %d', len(n_hidden), n_hidden)
+        logger.debug('Layers: %d | Units: %s', len(n_hidden), n_hidden)
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

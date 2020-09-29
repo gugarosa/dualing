@@ -16,4 +16,4 @@ def test_cnn_call():
 
     y = new_base(x)
 
-    assert y.shape == (384, 128)
+    assert y.shape == (1, 128)
