@@ -13,10 +13,10 @@ setup(name='dualing',
       url='https://github.com/gugarosa/dualing',
       license='MIT',
       install_requires=['coverage>=5.1',
-                        'matplotlib>=3.2.2',
+                        'matplotlib>=3.3.2',
                         'pylint>=2.5.2',
                         'pytest>=5.4.2',
-                        'tensorflow>=2.3.0',
+                        'tensorflow>=2.3.1',
                         'tensorflow-addons>=0.11.2'
                         ],
       extras_require={
