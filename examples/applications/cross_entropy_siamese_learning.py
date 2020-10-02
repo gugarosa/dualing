@@ -13,7 +13,7 @@ train = BalancedPairDataset(x, y, n_pairs=1000, batch_size=64, input_shape=(x.sh
 val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, input_shape=(x_val.shape[0], 784), normalize=(0, 1))
 
 # Creates the base architecture
-mlp = MLP(n_hidden=[512, 256, 128])
+mlp = MLP(n_hidden=(512, 256, 128))
 
 # Creates the cross-entropy siamese network
 s = CrossEntropySiamese(mlp, name='cross_entropy_siamese')

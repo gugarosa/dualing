@@ -14,7 +14,7 @@ class MLP(Base):
 
     """
 
-    def __init__(self, n_hidden=[128]):
+    def __init__(self, n_hidden=(128,)):
         """Initialization method.
 
         """
