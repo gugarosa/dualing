@@ -12,12 +12,12 @@ setup(name='dualing',
       author_email='gth.rosa@uol.com.br',
       url='https://github.com/gugarosa/dualing',
       license='MIT',
-      install_requires=['coverage>=5.3',
-                        'matplotlib>=3.3.2',
-                        'pylint>=2.6.0',
-                        'pytest>=6.1.0',
-                        'tensorflow>=2.3.1',
-                        'tensorflow-addons>=0.11.2'
+      install_requires=['coverage>=5.5',
+                        'matplotlib>=3.3.4',
+                        'pylint>=2.7.2',
+                        'pytest>=6.2.2',
+                        'tensorflow>=2.4.1',
+                        'tensorflow-addons>=0.12.1'
                         ],
       extras_require={
           'tests': ['coverage',
