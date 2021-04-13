@@ -4,7 +4,7 @@ from dualing.utils import logging
 def test_logger_file():
     logger = logging.get_logger(__name__)
 
-    assert logger.file('testing') == None
+    assert logger.to_file('testing') == None
 
 
 def test_get_console_handler():

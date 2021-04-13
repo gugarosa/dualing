@@ -108,16 +108,12 @@ class BalancedPairDataset(Dataset):
 
         logger.debug('Creating pairs ...')
 
-        # Defines the number of samples
+        # Defines the number of samples and number of pairs
         n_samples = data.shape[0]
-
-        # Divides equally the number of pairs
         n_pairs = self.n_pairs // 2
 
-        # Defines the positive lists
+        # Defines the positive and negative lists
         x1_p, x2_p, y_p = [], [], []
-
-        # Defines the negative lists
         x1_n, x2_n, y_n = [], [], []
 
         # Iterates until both positive and negative pairs
@@ -127,10 +123,8 @@ class BalancedPairDataset(Dataset):
 
             # If labels are equal on the particular indexes
             if tf.equal(tf.gather(labels, idx[0]), tf.gather(labels, idx[1])):
-                # Appends positive data to `x1`
+                # Appends positive data to `x1` and negative to `x2`
                 x1_p.append(tf.gather(data, idx[0]))
-
-                # Appends positive data to `x2`
                 x2_p.append(tf.gather(data, idx[1]))
 
                 # Appends positive label to `y`
@@ -138,22 +132,16 @@ class BalancedPairDataset(Dataset):
 
             # If labels are not equal on the particular indexes
             else:
-                # Appends negative data to `x1`
+                # Appends negative data to `x1` and negative to `x2`
                 x1_n.append(tf.gather(data, idx[0]))
-
-                # Appends negative data to `x2`
                 x2_n.append(tf.gather(data, idx[1]))
 
                 # Appends negative label to `y`
                 y_n.append(0.0)
 
-        # Merges the positive and negative `x1`
+        # Merges the positive and negative `x1`, `x2` and labels
         x1 = x1_p[:n_pairs] + x1_n[:n_pairs]
-
-        # Merges the positive and negative `x2`
         x2 = x2_p[:n_pairs] + x2_n[:n_pairs]
-
-        # Merges the positive and negative labels
         y = y_p[:n_pairs] + y_n[:n_pairs]
 
         logger.debug('Pairs: %s.', self.n_pairs)
@@ -258,10 +246,8 @@ class RandomPairDataset(Dataset):
 
         logger.debug('Creating pairs ...')
 
-        # Defines the number of samples
+        # Defines the number of samples and pairs
         n_samples = data.shape[0]
-
-        # Defines the number of possible pairs
         n_pairs = n_samples // 2
 
         # Randomly samples indexes

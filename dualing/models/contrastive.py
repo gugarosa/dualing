@@ -173,7 +173,7 @@ class ContrastiveSiamese(Siamese):
                 # Adds corresponding values to the progress bar
                 b.add(1, values=[('loss', self.loss_metric.result())])
 
-            logger.file(f'Loss: {self.loss_metric.result()}')
+            logger.to_file(f'Loss: {self.loss_metric.result()}')
 
     def evaluate(self, batches):
         """Method that evaluates the model over validation or testing batches.
@@ -209,7 +209,7 @@ class ContrastiveSiamese(Siamese):
             # Adds corresponding values to the progress bar
             b.add(1, values=[('val_loss', self.loss_metric.result())])
 
-        logger.file(f'Val Loss: {self.loss_metric.result()}')
+        logger.to_file(f'Val Loss: {self.loss_metric.result()}')
 
     def predict(self, x1, x2):
         """Method that performs a forward pass over samples and returns the network's output.

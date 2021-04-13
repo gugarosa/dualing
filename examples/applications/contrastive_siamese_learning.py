@@ -18,13 +18,9 @@ cnn = CNN(n_blocks=3, init_kernel=5, n_output=128)
 # Creates the contrastive siamese network
 s = ContrastiveSiamese(cnn, margin=1.0, distance_metric='L2', name='contrastive_siamese')
 
-# Compiles the network
+# Compiles, fits and evaluates the network
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
-
-# Fits the network
 s.fit(train.batches, epochs=10)
-
-# Evaluates the network
 s.evaluate(val.batches)
 
 # Extract embeddings

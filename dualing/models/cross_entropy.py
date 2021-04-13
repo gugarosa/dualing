@@ -137,7 +137,7 @@ class CrossEntropySiamese(Siamese):
                 b.add(1, values=[('loss', self.loss_metric.result()),
                                  ('acc', self.acc_metric.result())])
 
-            logger.file(
+            logger.to_file(
                 f'Loss: {self.loss_metric.result()} | Accuracy: {self.acc_metric.result()}')
 
     def evaluate(self, batches):
@@ -180,7 +180,7 @@ class CrossEntropySiamese(Siamese):
             b.add(1, values=[('val_loss', self.loss_metric.result()),
                              ('val_acc', self.acc_metric.result())])
 
-        logger.file(
+        logger.to_file(
             f'Val Loss: {self.loss_metric.result()} | Val Accuracy: {self.acc_metric.result()}')
 
     def predict(self, x1, x2):

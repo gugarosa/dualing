@@ -18,13 +18,9 @@ mlp = MLP(n_hidden=(512, 256, 128))
 # Creates the cross-entropy siamese network
 s = CrossEntropySiamese(mlp, name='cross_entropy_siamese')
 
-# Compiles the network
+# Compiles, fits and evaluates the network
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))
-
-# Fits the network
 s.fit(train.batches, epochs=10)
-
-# Evaluates the network
 s.evaluate(val.batches)
 
 # Extract embeddings
