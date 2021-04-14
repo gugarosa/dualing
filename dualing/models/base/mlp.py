@@ -17,6 +17,9 @@ class MLP(Base):
     def __init__(self, n_hidden=(128,)):
         """Initialization method.
 
+        Args:
+            n_hidden (tuple): Tuple containing the number of hidden units per layer.
+
         """
 
         logger.info('Overriding class: Base -> MLP.')

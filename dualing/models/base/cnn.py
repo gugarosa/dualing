@@ -17,6 +17,12 @@ class CNN(Base):
     def __init__(self, n_blocks=3, init_kernel=5, n_output=128, activation='sigmoid'):
         """Initialization method.
 
+        Args:
+            n_blocks (int): Number of convolutional/pooling blocks.
+            init_kernel (int): Size of initial kernel.
+            n_outputs (int): Number of output units.
+            activation (str): Output activation function.
+
         """
 
         logger.info('Overriding class: Base -> CNN.')

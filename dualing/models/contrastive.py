@@ -112,6 +112,13 @@ class ContrastiveSiamese(Siamese):
             # Passes the second sample through the network
             z2 = self.B(x2)
 
+            # Checks the rank of the output
+            if tf.rank(z1) == 3:
+                # If it is 3-rank, reduce its mean over the second dimension
+                # This is purely to allow recurrrent-based models compatibility
+                z1 = tf.reduce_mean(z1, 1)
+                z2 = tf.reduce_mean(z2, 1)
+
             # If distance is supposed to be L1
             if self.distance == 'L1':
                 # Calculates the L1 distance
@@ -228,6 +235,13 @@ class ContrastiveSiamese(Siamese):
 
         # Passes the second sample through the network
         z2 = self.B(x2)
+
+        # Checks the rank of the output
+        if tf.rank(z1) == 3:
+            # If it is 3-rank, reduce its mean over the second dimension
+            # This is purely to allow recurrrent-based models compatibility
+            z1 = tf.reduce_mean(z1, 1)
+            z2 = tf.reduce_mean(z2, 1)
 
         # If distance is supposed to be L1
         if self.distance == 'L1':
