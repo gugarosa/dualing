@@ -18,7 +18,7 @@ class RNN(Base):
         """Initialization method.
 
         Args:
-            vocab_size (int): Vocabulary size
+            vocab_size (int): Vocabulary size.
             embedding_size (int): Embedding layer units.
             hidden_size (int): Hidden layer units.
 
