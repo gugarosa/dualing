@@ -75,14 +75,8 @@ class CrossEntropySiamese(Siamese):
 
         # Uses tensorflow's gradient
         with tf.GradientTape() as tape:
-            # Passes the first sample through the network
-            z1 = self.B(x1)
-
-            # Passes the second sample through the network
-            z2 = self.B(x2)
-
-            # Passes the distance through sigmoid activation and removes last dimension
-            y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
+            # Performs the prediction
+            y_pred = self.predict(x1, x2)
 
             # Calculates the loss
             loss = self.loss(y, y_pred)

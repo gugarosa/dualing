@@ -137,6 +137,14 @@ def test_triplet_predict():
 
     new_siamese.fit(train.batches, epochs=1)
 
-    x = tf.ones((1, 784))
+    x1 = tf.ones((1, 784))
+    x2 = tf.ones((1, 784))
 
-    new_siamese.predict(x)
+    new_siamese.distance = 'L1'
+    new_siamese.predict(x1, x2)
+
+    new_siamese.distance = 'L2'
+    new_siamese.predict(x1, x2)
+
+    new_siamese.distance = 'angular'
+    new_siamese.predict(x1, x2)

@@ -153,6 +153,12 @@ class TripletSiamese(Siamese):
             # Passes the batch inputs through the network
             y_pred = self.B(x)
 
+            # Checks the rank of the output
+            if tf.rank(y_pred) == 3:
+                # If it is 3-rank, reduce its mean over the second dimension
+                # This is purely to allow recurrrent-based models compatibility
+                y_pred = tf.reduce_mean(y_pred, 1)
+
             # Performs the L2 normalization prior to the loss function
             y_pred = tf.math.l2_normalize(y_pred, axis=-1)
 
@@ -224,8 +230,17 @@ class TripletSiamese(Siamese):
 
         # Iterates through all batches
         for (x_batch, y_batch) in batches:
-            # Performs the prediction
-            y_pred = self.predict(x_batch)
+            # Passes the batch inputs through the network
+            y_pred = self.B(x_batch)
+
+            # Checks the rank of the output
+            if tf.rank(y_pred) == 3:
+                # If it is 3-rank, reduce its mean over the second dimension
+                # This is purely to allow recurrrent-based models compatibility
+                y_pred = tf.reduce_mean(y_pred, 1)
+
+            # Performs the L2 normalization prior to the loss function
+            y_pred = tf.math.l2_normalize(y_pred, axis=-1)
 
             # Calculates the loss
             loss = self.loss(y_batch, y_pred, self.margin)
@@ -238,21 +253,44 @@ class TripletSiamese(Siamese):
 
         logger.to_file(f'Val Loss: {self.loss_metric.result()}')
 
-    def predict(self, x):
+    def predict(self, x1, x2):
         """Method that performs a forward pass over samples and returns the network's output.
 
         Args:
-            x (tf.Tensor): Tensor containing input samples.
+            x1 (tf.Tensor): Tensor containing first samples from input pairs.
+            x2 (tf.Tensor): Tensor containing second samples from input pairs.
 
         Returns:
-            The embedded and L2 normalized data from `x`.
+            The distance between samples `x1` and `x2`.
 
         """
 
-        # Passes the sample through the network
-        y_pred = self.B(x)
+        # Passes the first sample through the network
+        z1 = self.B(x1)
 
-        # Performs the L2 normalization prior to the loss function
-        y_pred = tf.math.l2_normalize(y_pred, axis=-1)
+        # Passes the second sample through the network
+        z2 = self.B(x2)
+
+        # Checks the rank of the output
+        if tf.rank(z1) == 3:
+            # If it is 3-rank, reduce its mean over the second dimension
+            # This is purely to allow recurrrent-based models compatibility
+            z1 = tf.reduce_mean(z1, 1)
+            z2 = tf.reduce_mean(z2, 1)
+
+        # If distance is supposed to be L1
+        if self.distance == 'L1':
+            # Calculates the L1 distance
+            y_pred = tf.math.sqrt(tf.linalg.norm(z1 - z2, axis=1))
+
+        # If distance is supposed to be L2
+        elif self.distance == 'L2':
+            # Calculates the L2 distance
+            y_pred = tf.linalg.norm(z1 - z2, axis=1)
+
+        # If distance is supposed to be angular
+        elif self.distance == 'angular':
+            # Calculates the angular distance
+            y_pred = tf.keras.losses.cosine_similarity(z1, z2)
 
         return y_pred
