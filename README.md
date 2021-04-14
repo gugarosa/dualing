@@ -51,7 +51,10 @@ Dualing is based on the following structure, and you should pay attention to its
     - models
         - base
             - cnn
+            - gru
+            - lstm
             - mlp
+            - rnn
         - contrastive
         - cross_entropy
         - triplet

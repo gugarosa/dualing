@@ -22,7 +22,6 @@ class LSTM(Base):
             embedding_size (int): Embedding layer units.
             hidden_size (int): Hidden layer units.
 
-
         """
 
         logger.info('Overriding class: Base -> LSTM.')

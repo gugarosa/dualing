@@ -1,7 +1,7 @@
 """Recurrent Neural Network.
 """
 
-from tensorflow.keras.layers import RNN, Dense, Embedding, SimpleRNNCell
+from tensorflow.keras.layers import RNN as RNNLayer, Dense, Embedding, SimpleRNNCell
 
 import dualing.utils.logging as l
 from dualing.core import Base
@@ -22,7 +22,6 @@ class RNN(Base):
             embedding_size (int): Embedding layer units.
             hidden_size (int): Hidden layer units.
 
-
         """
 
         logger.info('Overriding class: Base -> RNN.')
@@ -37,7 +36,7 @@ class RNN(Base):
         self.cell = SimpleRNNCell(hidden_size, name='rnn_cell')
 
         # RNN layer
-        self.rnn = RNN(self.cell, name='rnn_layer', return_sequences=True)
+        self.rnn = RNNLayer(self.cell, name='rnn_layer', return_sequences=True)
 
         # Linear (dense) layer
         self.fc = Dense(vocab_size, name='out')

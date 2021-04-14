@@ -22,13 +22,12 @@ class GRU(Base):
             embedding_size (int): Embedding layer units.
             hidden_size (int): Hidden layer units.
 
-
         """
 
         logger.info('Overriding class: Base -> GRU.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(GRU, self).__init__(name='gry')
+        super(GRU, self).__init__(name='gru')
 
         # Embedding layer
         self.embedding = Embedding(vocab_size, embedding_size, name='embedding')
