@@ -30,16 +30,14 @@ def plot_embeddings(embeddings, labels, dims=(0, 1)):
     """Plots embedded data along their true labels.
 
     Args:
-        embeddings (tf.Tensor, np.array): Tensor or array holding the embedded data.
-        labels (tf.Tensor, np.array): Tensor or array holding the true labels.
+        embeddings (tf.Tensor | np.array): Tensor or array holding the embedded data.
+        labels (tf.Tensor | np.array): Tensor or array holding the true labels.
         dims (tuple): Dimensions to be plotted.
 
     """
 
-    # Makes sure that embeddings will be a numpy array
+    # Makes sure that embeddings and labels are numpy arrays
     embeddings = _tensor_to_numpy(embeddings)
-
-    # Makes sure that labels will be a numpy array
     labels = _tensor_to_numpy(labels)
 
     # Creates figure and axis subplots
@@ -56,9 +54,10 @@ def plot_embeddings(embeddings, labels, dims=(0, 1)):
         # Gathers the indexes
         indexes = np.where(labels == i)[0]
 
-        # Scatter plots the desired dimensions (2-D)
+        # Scatter plot the desired dimensions (2-D)
         plt.scatter(embeddings[indexes, dims[0]],
-                    embeddings[indexes, dims[1]], alpha=0.75, label=i)
+                    embeddings[indexes, dims[1]],
+                    alpha=0.75, label=i)
 
     # Adds a legend to the plot
     plt.legend()

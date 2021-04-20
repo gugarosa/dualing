@@ -191,8 +191,7 @@ class RandomPairDataset(Dataset):
         logger.info('Overriding class: Dataset -> RandomPairDataset.')
 
         # Overrides its parent class with any custom arguments if needed
-        super(RandomPairDataset, self).__init__(
-            batch_size, input_shape, normalize, False, seed)
+        super(RandomPairDataset, self).__init__(batch_size, input_shape, normalize, False, seed)
 
         # Pre-processes the data
         data = self.preprocess(data)
@@ -229,8 +228,7 @@ class RandomPairDataset(Dataset):
         """
 
         # Creates batches from tensor slices
-        self.batches = tf.data.Dataset.from_tensor_slices(
-            pairs).batch(self.batch_size)
+        self.batches = tf.data.Dataset.from_tensor_slices(pairs).batch(self.batch_size)
 
     def create_pairs(self, data, labels):
         """Creates random pairs from data and labels.
@@ -253,13 +251,9 @@ class RandomPairDataset(Dataset):
         # Randomly samples indexes
         indexes = tf.random.shuffle(tf.range(n_samples))
 
-        # Gathers samples
-        x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(
-            data, indexes[n_pairs:])
-
-        # Gathers samples
-        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(
-            labels, indexes[n_pairs:])
+        # Gathers samples and their labels
+        x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(data, indexes[n_pairs:])
+        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(labels, indexes[n_pairs:])
 
         # If labels are equal, it means that samples are similar
         y = tf.cast(tf.equal(y1, y2), 'float32')
@@ -268,7 +262,7 @@ class RandomPairDataset(Dataset):
         n_pos_pairs = tf.math.count_nonzero(y)
         n_neg_pairs = y.shape[0] - n_pos_pairs
 
-        logger.debug('Positive pairs: %s | Negative pairs: %s',
+        logger.debug('Positive pairs: %s | Negative pairs: %s.',
                      n_pos_pairs, n_neg_pairs)
 
         return (x1, x2, y)

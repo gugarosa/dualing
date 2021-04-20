@@ -42,7 +42,7 @@ class GRU(Base):
         self.fc = Dense(vocab_size, name='out')
 
         logger.info('Class overrided.')
-        logger.debug('Embedding: %d | Hidden: %d | Output: %d', embedding_size, hidden_size, vocab_size)
+        logger.debug('Embedding: %d | Hidden: %d | Output: %d.', embedding_size, hidden_size, vocab_size)
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

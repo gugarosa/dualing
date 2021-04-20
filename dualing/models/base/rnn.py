@@ -1,7 +1,8 @@
 """Recurrent Neural Network.
 """
 
-from tensorflow.keras.layers import RNN as RNNLayer, Dense, Embedding, SimpleRNNCell
+from tensorflow.keras.layers import RNN as RNNLayer
+from tensorflow.keras.layers import Dense, Embedding, SimpleRNNCell
 
 import dualing.utils.logging as l
 from dualing.core import Base
@@ -42,7 +43,7 @@ class RNN(Base):
         self.fc = Dense(vocab_size, name='out')
 
         logger.info('Class overrided.')
-        logger.debug('Embedding: %d | Hidden: %d | Output: %d', embedding_size, hidden_size, vocab_size)
+        logger.debug('Embedding: %d | Hidden: %d | Output: %d.', embedding_size, hidden_size, vocab_size)
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

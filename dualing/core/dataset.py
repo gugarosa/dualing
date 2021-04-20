@@ -119,15 +119,13 @@ class Dataset:
 
         """
 
+        # Makes sure that data is `float`
+        data = data.astype('float32')
+
         # If a shape is supplied
         if self.input_shape:
-            # Reshapes the array and make sure that it is `float`
-            data = data.reshape(self.input_shape).astype('float32')
-
-        # If no shape is supplied
-        else:
-            # Just make sure that the array is `float`
-            data = data.astype('float32')
+            # Reshapes the array
+            data = data.reshape(self.input_shape)
 
         # If data should be normalized
         if self.normalize:

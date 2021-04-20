@@ -205,10 +205,8 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        # Passes the first sample through the network
+        # Passes samples through the network
         z1 = self.B(x1)
-
-        # Passes the second sample through the network
         z2 = self.B(x2)
 
         # Checks the rank of the output
