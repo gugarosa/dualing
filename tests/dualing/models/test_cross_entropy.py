@@ -11,6 +11,25 @@ def test_cross_entropy():
     new_siamese = cross_entropy.CrossEntropySiamese(new_base)
 
 
+def test_cross_entropy_distance():
+    new_base = mlp.Base()
+    new_siamese = cross_entropy.CrossEntropySiamese(new_base)
+
+    assert new_siamese.distance == 'concat'
+
+
+def test_cross_entropy_distance_setter():
+    new_base = mlp.Base()
+    new_siamese = cross_entropy.CrossEntropySiamese(new_base)
+
+    try:
+        new_siamese.distance = 'a'
+    except:
+        new_siamese.distance == 'concat'
+
+    assert new_siamese.distance == 'concat'
+
+
 def test_cross_entropy_step():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
     train = pair.BalancedPairDataset(

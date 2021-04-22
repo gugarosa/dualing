@@ -16,7 +16,7 @@ val = BalancedPairDataset(x_val, y_val, n_pairs=100, batch_size=64, input_shape=
 mlp = MLP(n_hidden=(512, 256, 128))
 
 # Creates the cross-entropy siamese network
-s = CrossEntropySiamese(mlp, name='cross_entropy_siamese')
+s = CrossEntropySiamese(mlp, distance_metric='concat', name='cross_entropy_siamese')
 
 # Compiles, fits and evaluates the network
 s.compile(optimizer=tf.optimizers.Adam(learning_rate=0.001))

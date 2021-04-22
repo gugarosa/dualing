@@ -3,6 +3,7 @@
 
 import tensorflow as tf
 
+import dualing.utils.exception as e
 import dualing.utils.logging as l
 from dualing.core import BinaryCrossEntropy, Siamese
 
@@ -20,11 +21,12 @@ class CrossEntropySiamese(Siamese):
 
     """
 
-    def __init__(self, base, name=''):
+    def __init__(self, base, distance_metric='concat', name=''):
         """Initialization method.
 
         Args:
             base (Base): Twin architecture.
+            distance_metric (str): Distance metric.
             name (str): Naming identifier.
 
         """
@@ -34,10 +36,28 @@ class CrossEntropySiamese(Siamese):
         # Overrides its parent class with any custom arguments if needed
         super(CrossEntropySiamese, self).__init__(base, name=name)
 
+        # Distance metric
+        self.distance = distance_metric
+
         # Defines the output layer
         self.o = tf.keras.layers.Dense(1, activation='sigmoid')
 
         logger.info('Class overrided.')
+
+    @property
+    def distance(self):
+        """str: Distance metric.
+
+        """
+
+        return self._distance
+
+    @distance.setter
+    def distance(self, distance):
+        if distance not in ['concat', 'diff']:
+            raise e.ValueError('`distance` should be `concat`, or `diff`')
+
+        self._distance = distance
 
     def compile(self, optimizer):
         """Method that builds the network by attaching optimizer, loss and metrics.
@@ -193,8 +213,15 @@ class CrossEntropySiamese(Siamese):
         z1 = self.B(x1)
         z2 = self.B(x2)
 
-        # Passes the distance through sigmoid activation and removes last dimension
-        y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
+        # If distance is supposed to be concatenation of vectors
+        if self.distance == 'concat':
+            # Applies operation through sigmoid activation and removes last dimension
+            y_pred = tf.squeeze(self.o(tf.concat([z1, z2], -1)), -1)
+
+        # If distance is supposed to be difference of vectors
+        elif self.distance == 'diff':
+            # Applies operation through sigmoid activation and removes last dimension
+            y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
 
         # Checks if rank of predictions is equal to two
         if tf.rank(y_pred) == 2:
