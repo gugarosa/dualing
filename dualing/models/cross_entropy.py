@@ -196,4 +196,9 @@ class CrossEntropySiamese(Siamese):
         # Passes the distance through sigmoid activation and removes last dimension
         y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
 
+        # Checks if rank of predictions is equal to two
+        if tf.rank(y_pred) == 2:
+            # If yes, reduces to an one-ranked tensor
+            y_pred = tf.reduce_mean(y_pred, -1)
+
         return y_pred
