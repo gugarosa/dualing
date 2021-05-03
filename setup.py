@@ -4,7 +4,7 @@ with open('README.md', 'r') as f:
     long_description = f.read()
 
 setup(name='dualing',
-      version='1.0.2',
+      version='1.0.3',
       description='Dual-based Neural Learning',
       long_description=long_description,
       long_description_content_type='text/markdown',
