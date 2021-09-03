@@ -27,7 +27,6 @@ class CNN(Base):
 
         logger.info('Overriding class: Base -> CNN.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(CNN, self).__init__(name='cnn')
 
         # Asserting that it will be possible to create the convolutional layers

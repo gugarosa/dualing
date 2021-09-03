@@ -33,7 +33,6 @@ class ContrastiveSiamese(Siamese):
 
         logger.info('Overriding class: Siamese -> ContrastiveSiamese.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(ContrastiveSiamese, self).__init__(base, name=name)
 
         # Radius around embedding space
@@ -137,7 +136,6 @@ class ContrastiveSiamese(Siamese):
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
-        # Iterates through all epochs
         for epoch in range(epochs):
             logger.info('Epoch %d/%d', epoch+1, epochs)
 
@@ -147,7 +145,6 @@ class ContrastiveSiamese(Siamese):
             # Defines a customized progress bar
             b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['loss'])
 
-            # Iterates through all batches
             for (x1_batch, x2_batch, y_batch) in batches:
                 # Performs the optimization step
                 self.step(x1_batch, x2_batch, y_batch)
@@ -177,7 +174,6 @@ class ContrastiveSiamese(Siamese):
         # Defines a customized progress bar
         b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['val_loss'])
 
-        # Iterates through all batches
         for (x1_batch, x2_batch, y_batch) in batches:
             # Performs the prediction
             y_pred = self.predict(x1_batch, x2_batch)
@@ -216,19 +212,13 @@ class ContrastiveSiamese(Siamese):
             z1 = tf.reduce_mean(z1, 1)
             z2 = tf.reduce_mean(z2, 1)
 
-        # If distance is supposed to be L1
         if self.distance == 'L1':
-            # Calculates the L1 distance
             y_pred = tf.math.sqrt(tf.linalg.norm(z1 - z2, axis=1))
 
-        # If distance is supposed to be L2
         elif self.distance == 'L2':
-            # Calculates the L2 distance
             y_pred = tf.linalg.norm(z1 - z2, axis=1)
 
-        # If distance is supposed to be angular
         elif self.distance == 'angular':
-            # Calculates the angular distance
             y_pred = tf.keras.losses.cosine_similarity(z1, z2)
 
         return y_pred

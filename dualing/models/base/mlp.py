@@ -24,7 +24,6 @@ class MLP(Base):
 
         logger.info('Overriding class: Base -> MLP.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(MLP, self).__init__(name='mlp')
 
         # Fully-connected layers

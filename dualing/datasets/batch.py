@@ -34,13 +34,10 @@ class BatchDataset(Dataset):
 
         logger.info('Overriding class: Dataset -> BatchDataset.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(BatchDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
 
-        # Pre-processes the data
         data = self.preprocess(data)
 
-        # Builds up the class
         self._build(data, labels)
 
         logger.info('Class overrided.')
@@ -72,9 +69,7 @@ class BatchDataset(Dataset):
         # Creates a dataset from tensor slices
         batches = tf.data.Dataset.from_tensor_slices((data, labels))
 
-        # Checks if data should be shuffled
         if self.shuffle:
-            # Shuffles the data
             batches = batches.shuffle(c.BUFFER_SIZE)
 
         # Creates the actual batches

@@ -33,7 +33,6 @@ class CrossEntropySiamese(Siamese):
 
         logger.info('Overriding class: Siamese -> CrossEntropySiamese.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(CrossEntropySiamese, self).__init__(base, name=name)
 
         # Distance metric
@@ -130,7 +129,6 @@ class CrossEntropySiamese(Siamese):
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
-        # Iterates through all epochs
         for epoch in range(epochs):
             logger.info('Epoch %d/%d', epoch+1, epochs)
 
@@ -142,7 +140,6 @@ class CrossEntropySiamese(Siamese):
             b = tf.keras.utils.Progbar(
                 n_batches, stateful_metrics=['loss', 'acc'])
 
-            # Iterates through all batches
             for (x1_batch, x2_batch, y_batch) in batches:
                 # Performs the optimization step
                 self.step(x1_batch, x2_batch, y_batch)
@@ -175,7 +172,6 @@ class CrossEntropySiamese(Siamese):
         # Defines a customized progress bar
         b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['val_loss', 'val_acc'])
 
-        # Iterates through all batches
         for (x1_batch, x2_batch, y_batch) in batches:
             # Performs the prediction
             y_pred = self.predict(x1_batch, x2_batch)
@@ -213,14 +209,10 @@ class CrossEntropySiamese(Siamese):
         z1 = self.B(x1)
         z2 = self.B(x2)
 
-        # If distance is supposed to be concatenation of vectors
         if self.distance == 'concat':
-            # Applies operation through sigmoid activation and removes last dimension
             y_pred = tf.squeeze(self.o(tf.concat([z1, z2], -1)), -1)
 
-        # If distance is supposed to be difference of vectors
         elif self.distance == 'diff':
-            # Applies operation through sigmoid activation and removes last dimension
             y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
 
         # Checks if rank of predictions is equal to two

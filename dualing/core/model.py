@@ -20,7 +20,6 @@ class Base(tf.keras.Model):
 
         """
 
-        # Overrides its parent class with any custom arguments if needed
         super(Base, self).__init__(name=name)
 
     def call(self, x):
@@ -54,7 +53,6 @@ class Siamese(tf.keras.Model):
 
         """
 
-        # Overrides its parent class with any custom arguments if needed
         super(Siamese, self).__init__(name=name)
 
         # Defines the Siamese's base twin architecture
@@ -170,10 +168,7 @@ class Siamese(tf.keras.Model):
 
         """
 
-        # Converts the input to a tensor
         x = tf.convert_to_tensor(x)
-
-        # Passes down through the embedder
         x = self.B(x)
 
         return x

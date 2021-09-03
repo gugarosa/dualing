@@ -42,7 +42,6 @@ class Dataset:
         # Defines the tensorflow random seed
         tf.random.set_seed(seed)
 
-        # Debugs important information
         logger.debug('Size: %s | Batch size: %s | Normalization: %s | Shuffle: %s.',
                      input_shape, batch_size, normalize, shuffle)
 
@@ -119,15 +118,11 @@ class Dataset:
 
         """
 
-        # Makes sure that data is `float`
         data = data.astype('float32')
 
-        # If a shape is supplied
         if self.input_shape:
-            # Reshapes the array
             data = data.reshape(self.input_shape)
 
-        # If data should be normalized
         if self.normalize:
             # Gathers the lower and upper bounds of normalization
             low, high = self.normalize[0], self.normalize[1]

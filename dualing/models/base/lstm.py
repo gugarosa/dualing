@@ -26,7 +26,6 @@ class LSTM(Base):
 
         logger.info('Overriding class: Base -> LSTM.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(LSTM, self).__init__(name='lstm')
 
         # Embedding layer

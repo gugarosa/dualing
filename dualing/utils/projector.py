@@ -17,12 +17,9 @@ def _tensor_to_numpy(tensor):
 
     """
 
-    # Checks if the inputted tensor is really a tensor
     if tf.is_tensor(tensor):
-        # If yes, returns its numpy version
         return tensor.numpy()
 
-    # If no, just returns it
     return tensor
 
 
@@ -59,8 +56,5 @@ def plot_embeddings(embeddings, labels, dims=(0, 1)):
                     embeddings[indexes, dims[1]],
                     alpha=0.75, label=i)
 
-    # Adds a legend to the plot
     plt.legend()
-
-    # Shows the plot
     plt.show()

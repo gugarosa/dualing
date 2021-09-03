@@ -26,7 +26,6 @@ class GRU(Base):
 
         logger.info('Overriding class: Base -> GRU.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(GRU, self).__init__(name='gru')
 
         # Embedding layer

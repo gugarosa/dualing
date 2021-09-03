@@ -27,7 +27,6 @@ class RNN(Base):
 
         logger.info('Overriding class: Base -> RNN.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(RNN, self).__init__(name='rnn')
 
         # Embedding layer

@@ -35,7 +35,6 @@ class TripletSiamese(Siamese):
 
         logger.info('Overriding class: Siamese -> TripletSiamese.')
 
-        # Overrides its parent class with any custom arguments if needed
         super(TripletSiamese, self).__init__(base, name=name)
 
         # Type of loss
@@ -127,12 +126,10 @@ class TripletSiamese(Siamese):
 
         # Check it is supposed to use hard negative mining
         if self.loss_type == 'hard':
-            # Creates the TripletHardLoss
             self.loss = TripletHardLoss()
 
         # If it is supposed to use semi-hard negative mining
         elif self.loss_type == 'semi-hard':
-            # Creates the TripletSemiHardLoss
             self.loss = TripletSemiHardLoss()
 
         # Defines the loss metric
@@ -189,7 +186,6 @@ class TripletSiamese(Siamese):
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
-        # Iterates through all epochs
         for epoch in range(epochs):
             logger.info('Epoch %d/%d', epoch+1, epochs)
 
@@ -199,7 +195,6 @@ class TripletSiamese(Siamese):
             # Defines a customized progress bar
             b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['loss'])
 
-            # Iterates through all batches
             for (x_batch, y_batch) in batches:
                 # Performs the optimization step
                 self.step(x_batch, y_batch)
@@ -228,7 +223,6 @@ class TripletSiamese(Siamese):
         # Defines a customized progress bar
         b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['val_loss'])
 
-        # Iterates through all batches
         for (x_batch, y_batch) in batches:
             # Passes the batch inputs through the network
             y_pred = self.B(x_batch)
@@ -276,19 +270,13 @@ class TripletSiamese(Siamese):
             z1 = tf.reduce_mean(z1, 1)
             z2 = tf.reduce_mean(z2, 1)
 
-        # If distance is supposed to be L1
         if self.distance == 'L1':
-            # Calculates the L1 distance
             y_pred = tf.math.sqrt(tf.linalg.norm(z1 - z2, axis=1))
 
-        # If distance is supposed to be L2
         elif self.distance == 'L2':
-            # Calculates the L2 distance
             y_pred = tf.linalg.norm(z1 - z2, axis=1)
 
-        # If distance is supposed to be angular
         elif self.distance == 'angular':
-            # Calculates the angular distance
             y_pred = tf.keras.losses.cosine_similarity(z1, z2)
 
         return y_pred
