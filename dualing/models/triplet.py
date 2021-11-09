@@ -47,7 +47,12 @@ class TripletSiamese(Siamese):
         self.soft = soft
 
         # Distance metric
-        self.distance = distance_metric
+        if distance_metric == 'L1':
+            self.distance = 'L2'
+        elif distance_metric == 'L2':
+            self.distance = 'squared-L2'
+        else:
+            self.distance = 'angular'
 
         logger.info('Class overrided.')
 
