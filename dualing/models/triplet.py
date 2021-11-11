@@ -113,7 +113,7 @@ class TripletSiamese(Siamese):
 
     @distance.setter
     def distance(self, distance):
-        if distance not in ['L1', 'L2', 'angular']:
+        if distance not in ['L1', 'L2', 'squared-L2', 'angular']:
             raise e.ValueError('`distance` should be `L1`, `L2` or `angular`')
 
         self._distance = distance

@@ -71,7 +71,7 @@ def test_triplet_distance():
     new_base = mlp.Base()
     new_siamese = triplet.TripletSiamese(new_base)
 
-    assert new_siamese.distance == 'L2'
+    assert new_siamese.distance == 'squared-L2'
 
 
 def test_triplet_distance_setter():
@@ -83,7 +83,7 @@ def test_triplet_distance_setter():
     except:
         new_siamese.distance == 'L2'
 
-    assert new_siamese.distance == 'L2'
+    assert new_siamese.distance == 'squared-L2'
 
 
 def test_triplet_step():
