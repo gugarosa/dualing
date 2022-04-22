@@ -19,7 +19,7 @@ setup(
         "pre-commit>=2.17.0",
         "pylint>=2.7.2",
         "pytest>=6.2.2",
-        "tensorflow<=2.6.2",
+        "tensorflow<2.8.1",
         "tensorflow-addons<=0.14.0",
     ],
     extras_require={
