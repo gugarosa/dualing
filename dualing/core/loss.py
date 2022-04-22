@@ -1,6 +1,8 @@
 """Losses.
 """
 
+from typing import Optional
+
 import tensorflow as tf
 import tensorflow_addons as tfa
 
@@ -8,15 +10,15 @@ import tensorflow_addons as tfa
 class BinaryCrossEntropy:
     """A BinaryCrossEntropy class defines the binary cross-entropy loss."""
 
-    def __call__(self, y_true, y_pred):
+    def __call__(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
         """Method that holds vital information whenever this class is called.
 
         Args:
-            y_true (tf.Tensor): Tensor containing the true labels.
-            y_pred (tf.Tensor): Tensor containing the predictions, e.g., similar or dissimilar.
+            y_true: Tensor containing the true labels.
+            y_pred: Tensor containing the predictions, e.g., similar or dissimilar.
 
         Returns:
-            Binary cross-entropy loss.
+            (tf.Tensor): Binary cross-entropy loss.
 
         """
 
@@ -26,16 +28,18 @@ class BinaryCrossEntropy:
 class ContrastiveLoss:
     """A ContrastiveEntropy class defines the contrastive loss."""
 
-    def __call__(self, y_true, y_pred, margin=1.0):
+    def __call__(
+        self, y_true: tf.Tensor, y_pred: tf.Tensor, margin: Optional[float] = 1.0
+    ) -> tf.Tensor:
         """Method that holds vital information whenever this class is called.
 
         Args:
-            y_true (tf.Tensor): Tensor containing the true labels.
-            y_pred (tf.Tensor): Tensor containing the predictions, e.g., distance.
-            margin (float): Radius around the embedding space.
+            y_true: Tensor containing the true labels.
+            y_pred: Tensor containing the predictions, e.g., distance.
+            margin: Radius around the embedding space.
 
         Returns:
-            Contrastive loss.
+            (tf.Tensor): Contrastive loss.
 
         """
 
@@ -45,18 +49,25 @@ class ContrastiveLoss:
 class TripletHardLoss:
     """A TripletHardLoss class defines the triplet loss with hard negative mining."""
 
-    def __call__(self, y_true, y_pred, margin=1.0, soft=False, distance_metric="L2"):
+    def __call__(
+        self,
+        y_true: tf.Tensor,
+        y_pred: tf.Tensor,
+        margin: Optional[float] = 1.0,
+        soft: Optional[bool] = False,
+        distance_metric: Optional[str] = "L2",
+    ) -> tf.Tensor:
         """Method that holds vital information whenever this class is called.
 
         Args:
-            y_true (tf.Tensor): Tensor containing the true labels.
-            y_pred (tf.Tensor): Tensor containing the predictions, e.g., embeddings.
-            margin (float): Radius around the embedding space.
-            soft (bool): Whether network should use soft margin or not.
-            distance_metric (str): Distance metric.
+            y_true: Tensor containing the true labels.
+            y_pred: Tensor containing the predictions, e.g., embeddings.
+            margin: Radius around the embedding space.
+            soft: Whether network should use soft margin or not.
+            distance_metric: Distance metric.
 
         Returns:
-            Triplet loss with hard negative mining.
+            (tf.Tensor): Triplet loss with hard negative mining.
 
         """
 
@@ -68,18 +79,25 @@ class TripletHardLoss:
 class TripletSemiHardLoss:
     """A TripletSemiHardLoss class defines the triplet loss with semi-hard negative mining."""
 
-    def __call__(self, y_true, y_pred, margin=1.0, soft=None, distance_metric="L2"):
+    def __call__(
+        self,
+        y_true: tf.Tensor,
+        y_pred: tf.Tensor,
+        margin: Optional[float] = 1.0,
+        soft: Optional[bool] = None,
+        distance_metric: Optional[str] = "L2",
+    ) -> tf.Tensor:
         """Method that holds vital information whenever this class is called.
 
         Args:
-            y_true (tf.Tensor): Tensor containing the true labels.
-            y_pred (tf.Tensor): Tensor containing the predictions, e.g., embeddings.
-            margin (float): Radius around the embedding space.
-            soft (None): Only for retro-compatibility.
-            distance_metric (str): Distance metric.
+            y_true: Tensor containing the true labels.
+            y_pred: Tensor containing the predictions, e.g., embeddings.
+            margin: Radius around the embedding space.
+            soft: Only for retro-compatibility.
+            distance_metric: Distance metric.
 
         Returns:
-            Triplet loss with semi-hard negative mining.
+            (tf.Tensor): Triplet loss with semi-hard negative mining.
 
         """
 

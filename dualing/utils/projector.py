@@ -1,19 +1,21 @@
 """Helpers and methods to project embedded data.
 """
 
+from typing import Optional, Tuple, Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
 
-def _tensor_to_numpy(tensor):
+def _tensor_to_numpy(tensor: tf.Tensor) -> np.ndarray:
     """Converts a tensor to a numpy array.
 
     Args:
-        tensor (tf.Tensor): Tensor to be converted.
+        tensor: Tensor to be converted.
 
     Returns:
-        A numpy array with the same values as the tensor.
+        (np.ndarray): Array with the same values as the tensor.
 
     """
 
@@ -23,13 +25,17 @@ def _tensor_to_numpy(tensor):
     return tensor
 
 
-def plot_embeddings(embeddings, labels, dims=(0, 1)):
+def plot_embeddings(
+    embeddings: Union[tf.Tensor, np.array],
+    labels: Union[tf.Tensor, np.array],
+    dims: Optional[Tuple[int, ...]] = (0, 1),
+) -> None:
     """Plots embedded data along their true labels.
 
     Args:
-        embeddings (tf.Tensor | np.array): Tensor or array holding the embedded data.
-        labels (tf.Tensor | np.array): Tensor or array holding the true labels.
-        dims (tuple): Dimensions to be plotted.
+        embeddings: Tensor or array holding the embedded data.
+        labels: Tensor or array holding the true labels.
+        dims: Dimensions to be plotted.
 
     """
 

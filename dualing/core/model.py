@@ -1,9 +1,13 @@
 """Base architecture and Siamese Network.
 """
 
+from typing import Optional, Union
+
+import numpy as np
 import tensorflow as tf
 
 import dualing.utils.exception as e
+from dualing.core.dataset import Dataset
 
 
 class Base(tf.keras.Model):
@@ -12,24 +16,24 @@ class Base(tf.keras.Model):
 
     """
 
-    def __init__(self, name=""):
+    def __init__(self, name: Optional[str] = "") -> None:
         """Initialization method.
 
         Args:
-            name (str): Naming identifier.
+            name: Naming identifier.
 
         """
 
         super(Base, self).__init__(name=name)
 
-    def call(self, x):
+    def call(self, x: tf.Tensor) -> None:
         """Method that holds vital information whenever this class is called.
 
         Note that you need to implement this method directly on its child. Essentially,
         each neural network has its own forward pass implementation.
 
         Args:
-            x (tf.Tensor): Tensor containing the input sample.
+            x: Tensor containing the input sample.
 
         Raises:
             NotImplementedError.
@@ -42,12 +46,12 @@ class Base(tf.keras.Model):
 class Siamese(tf.keras.Model):
     """An Siamese class is responsible for implementing the base of Siamese Neural Networks."""
 
-    def __init__(self, base, name=""):
+    def __init__(self, base: Base, name: Optional[str] = "") -> None:
         """Initialization method.
 
         Args:
-            base (Base): Twin architecture.
-            name (str): Naming identifier.
+            base: Twin architecture.
+            name: Naming identifier.
 
         """
 
@@ -57,26 +61,26 @@ class Siamese(tf.keras.Model):
         self.B = base
 
     @property
-    def B(self):
-        """Base: Twin architecture."""
+    def B(self) -> Base:
+        """Twin architecture."""
 
         return self._B
 
     @B.setter
-    def B(self, B):
+    def B(self, B: Base) -> None:
         if not isinstance(B, Base):
             raise e.TypeError("`B` should be a child from Base class")
 
         self._B = B
 
-    def compile(self, optimizer):
+    def compile(self, optimizer: tf.keras.optimizers) -> None:
         """Method that builds the network by attaching optimizer, loss and metrics.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese has its own set of loss and metrics.
 
         Args:
-            optimizer (tf.keras.optimizers): Optimization algorithm.
+            optimizer: Optimization algorithm.
 
         Raises:
             NotImplementedError.
@@ -85,15 +89,15 @@ class Siamese(tf.keras.Model):
 
         raise NotImplementedError
 
-    def step(self, x, y):
+    def step(self, x: tf.Tensor, y: tf.Tensor) -> None:
         """Method that performs a single batch optimization step.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese has an unique step.
 
         Args:
-            x (tf.Tensor): Tensor containing samples.
-            y (tf.Tensor): Tensor containing labels.
+            x: Tensor containing samples.
+            y: Tensor containing labels.
 
         Raises:
             NotImplementedError.
@@ -102,15 +106,15 @@ class Siamese(tf.keras.Model):
 
         raise NotImplementedError
 
-    def fit(self, batches, epochs=100):
+    def fit(self, batches: Dataset, epochs: Optional[int] = 100) -> None:
         """Method that trains the model over training batches.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese may use a distinct type of dataset.
 
         Args:
-            batches (Dataset): Batches of tuples holding training samples and labels.
-            epochs (int): Maximum number of epochs.
+            batches: Batches of tuples holding training samples and labels.
+            epochs: Maximum number of epochs.
 
         Raises:
             NotImplementedError.
@@ -119,14 +123,14 @@ class Siamese(tf.keras.Model):
 
         raise NotImplementedError
 
-    def evaluate(self, batches):
+    def evaluate(self, batches: Dataset) -> None:
         """Method that evaluates the model over validation or testing batches.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese may use a distinct type of dataset.
 
         Args:
-            batches (Dataset): Batches of tuples holding validation / testing samples and labels.
+            batches: Batches of tuples holding validation / testing samples and labels.
 
         Raises:
             NotImplementedError.
@@ -135,14 +139,14 @@ class Siamese(tf.keras.Model):
 
         raise NotImplementedError
 
-    def predict(self, x):
+    def predict(self, x: tf.Tensor) -> None:
         """Method that performs a forward pass over samples and returns the network's output.
 
         Note that you need to implement this method directly on its child. Essentially,
         each type of Siamese may predict in a different way.
 
         Args:
-            x (tf.Tensor): Tensor containing samples.
+            x: Tensor containing samples.
 
         Raises:
             NotImplementedError.
@@ -151,16 +155,15 @@ class Siamese(tf.keras.Model):
 
         raise NotImplementedError
 
-    def extract_embeddings(self, x):
+    def extract_embeddings(self, x: Union[np.array, tf.Tensor]) -> tf.Tensor:
         """Method that extracts embeddings by performing a forward pass
         over the base architecture (embedder).
 
         Args:
-            x (np.array, tf.Tensor): Array or tensor containing the inputs to be embedded.
-            input_shape (tuple): Shape of the input layer.
+            x: Array or tensor containing the inputs to be embedded.
 
         Returns:
-            A tensor containing the embedded inputs.
+            (tf.Tensor): A tensor containing the embedded inputs.
 
         """
 

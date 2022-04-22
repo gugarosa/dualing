@@ -1,6 +1,9 @@
 """Dataset.
 """
 
+from typing import Optional, Tuple
+
+import numpy as np
 import tensorflow as tf
 
 import dualing.utils.exception as e
@@ -16,16 +19,21 @@ class Dataset:
     """
 
     def __init__(
-        self, batch_size=1, input_shape=None, normalize=(0, 1), shuffle=True, seed=0
+        self,
+        batch_size: Optional[int] = 1,
+        input_shape: Optional[Tuple[int, ...]] = None,
+        normalize: Optional[Tuple[int, int]] = (0, 1),
+        shuffle: Optional[bool] = True,
+        seed: Optional[int] = 0,
     ):
         """Initialization method.
 
         Args:
-            batch_size (int): Batch size.
-            input_shape (tuple): Shape of the reshaped array.
-            normalize (tuple): Normalization bounds.
-            shuffle (bool): Whether data should be shuffled or not.
-            seed (int): Provides deterministic traits when using `random` module.
+            batch_size: Batch size.
+            input_shape: Shape of the reshaped array.
+            normalize: Normalization bounds.
+            shuffle: Whether data should be shuffled or not.
+            seed: Provides deterministic traits when using `random` module.
 
         """
 
@@ -53,13 +61,13 @@ class Dataset:
         )
 
     @property
-    def batch_size(self):
-        """int: Batch size."""
+    def batch_size(self) -> int:
+        """Batch size."""
 
         return self._batch_size
 
     @batch_size.setter
-    def batch_size(self, batch_size):
+    def batch_size(self, batch_size: int) -> None:
         if not isinstance(batch_size, int):
             raise e.TypeError("`batch_size` should be a integer")
         if batch_size <= 0:
@@ -68,26 +76,26 @@ class Dataset:
         self._batch_size = batch_size
 
     @property
-    def input_shape(self):
-        """tuple: Shape of the input tensors."""
+    def input_shape(self: Tuple[int, ...]):
+        """Shape of the input tensors."""
 
         return self._input_shape
 
     @input_shape.setter
-    def input_shape(self, input_shape):
+    def input_shape(self, input_shape: Tuple[int, ...]) -> None:
         if not (isinstance(input_shape, tuple) or input_shape is None):
             raise e.TypeError("`input_shape` should be a tuple or None")
 
         self._input_shape = input_shape
 
     @property
-    def normalize(self):
-        """tuple: Normalization bounds."""
+    def normalize(self) -> Tuple[int, int]:
+        """Normalization bounds."""
 
         return self._normalize
 
     @normalize.setter
-    def normalize(self, normalize):
+    def normalize(self, normalize: Tuple[int, int]) -> None:
         if not (isinstance(normalize, tuple) or normalize is None):
             raise e.TypeError("`normalize` should be a tuple or None")
 
@@ -95,25 +103,25 @@ class Dataset:
 
     @property
     def shuffle(self):
-        """bool: Whether data should be shuffled or not."""
+        """Whether data should be shuffled or not."""
 
         return self._shuffle
 
     @shuffle.setter
-    def shuffle(self, shuffle):
+    def shuffle(self, shuffle: bool) -> None:
         if not isinstance(shuffle, bool):
             raise e.TypeError("`shuffle` should be a boolean")
 
         self._shuffle = shuffle
 
-    def preprocess(self, data):
+    def preprocess(self, data: np.array) -> np.array:
         """Pre-process the data by reshaping and normalizing, if necessary.
 
         Args:
-            data (np.array): Array of data.
+            data: Array of data.
 
         Returns:
-            Pre-processed data.
+            (np.array): Pre-processed data.
 
         """
 
@@ -134,7 +142,7 @@ class Dataset:
 
         return data
 
-    def _build(self):
+    def _build(self) -> None:
         """Method that builds the class.
 
         Note that you need to implement this method directly on its child. Essentially,
