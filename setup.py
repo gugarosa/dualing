@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="dualing",
-    version="1.0.3",
+    version="1.0.4",
     description="Dual-based Neural Learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
