@@ -1,6 +1,9 @@
 """Batch-based dataset.
 """
 
+from typing import Optional, Tuple
+
+import numpy as np
 import tensorflow as tf
 
 import dualing.utils.constants as c
@@ -19,24 +22,24 @@ class BatchDataset(Dataset):
 
     def __init__(
         self,
-        data,
-        labels,
-        batch_size=1,
-        input_shape=None,
-        normalize=(0, 1),
-        shuffle=True,
-        seed=0,
-    ):
+        data: np.array,
+        labels: np.array,
+        batch_size: Optional[int] = 1,
+        input_shape: Optional[Tuple[int, ...]] = None,
+        normalize: Optional[Tuple[int, int]] = (0, 1),
+        shuffle: Optional[bool] = True,
+        seed: Optional[int] = 0,
+    ) -> None:
         """Initialization method.
 
         Args:
-            data (np.array): Array of samples.
-            labels (np.array): Array of labels.
-            batch_size (int): Batch size.
-            input_shape (tuple): Shape of the reshaped array.
-            normalize (tuple): Normalization bounds.
-            shuffle (bool): Whether data should be shuffled or not.
-            seed (int): Provides deterministic traits when using `random` module.
+            data: Array of samples.
+            labels: Array of labels.
+            batch_size: Batch size.
+            input_shape: Shape of the reshaped array.
+            normalize: Normalization bounds.
+            shuffle: Whether data should be shuffled or not.
+            seed: Provides deterministic traits when using `random` module.
 
         """
 
@@ -53,24 +56,24 @@ class BatchDataset(Dataset):
         logger.info("Class overrided.")
 
     @property
-    def batches(self):
-        """tf.data.Dataset: Batches of data (samples, labels)."""
+    def batches(self) -> tf.data.Dataset:
+        """Batches of data (samples, labels)."""
 
         return self._batches
 
     @batches.setter
-    def batches(self, batches):
+    def batches(self, batches: tf.data.Dataset) -> None:
         if not isinstance(batches, tf.data.Dataset):
             raise e.TypeError("`batches` should be a tf.data.Dataset")
 
         self._batches = batches
 
-    def _build(self, data, labels):
+    def _build(self, data: np.array, labels: np.array) -> None:
         """Builds the class.
 
         Args:
-            data (np.array): Array of samples.
-            labels (np.array): Array of labels.
+            data: Array of samples.
+            labels: Array of labels.
 
         """
 

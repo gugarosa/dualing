@@ -1,10 +1,14 @@
 """Contrastive Loss Siamese Network.
 """
 
+from typing import Optional, Union
+
 import tensorflow as tf
 
 import dualing.utils.exception as e
 from dualing.core import ContrastiveLoss, Siamese
+from dualing.core.model import Base
+from dualing.datasets.pair import BalancedPairDataset, RandomPairDataset
 from dualing.utils import logging
 
 logger = logging.get_logger(__name__)
@@ -20,14 +24,20 @@ class ContrastiveSiamese(Siamese):
 
     """
 
-    def __init__(self, base, margin=1.0, distance_metric="L2", name=""):
+    def __init__(
+        self,
+        base: Base,
+        margin: Optional[float] = 1.0,
+        distance_metric: Optional[str] = "L2",
+        name: Optional[str] = "",
+    ) -> None:
         """Initialization method.
 
         Args:
-            base (Base): Twin architecture.
-            margin (float): Radius around the embedding space.
-            distance_metric (str): Distance metric.
-            name (str): Naming identifier.
+            base: Twin architecture.
+            margin: Radius around the embedding space.
+            distance_metric: Distance metric.
+            name: Naming identifier.
 
         """
 
@@ -44,13 +54,13 @@ class ContrastiveSiamese(Siamese):
         logger.info("Class overrided.")
 
     @property
-    def margin(self):
-        """float: Radius around the embedding space."""
+    def margin(self) -> float:
+        """Radius around the embedding space."""
 
         return self._margin
 
     @margin.setter
-    def margin(self, margin):
+    def margin(self, margin: float) -> None:
         if not isinstance(margin, float):
             raise e.TypeError("`margin` should be a float")
         if margin <= 0:
@@ -59,23 +69,23 @@ class ContrastiveSiamese(Siamese):
         self._margin = margin
 
     @property
-    def distance(self):
-        """str: Distance metric."""
+    def distance(self) -> str:
+        """Distance metric."""
 
         return self._distance
 
     @distance.setter
-    def distance(self, distance):
+    def distance(self, distance: str) -> None:
         if distance not in ["L1", "L2", "angular"]:
             raise e.ValueError("`distance` should be `L1`, `L2` or `angular`")
 
         self._distance = distance
 
-    def compile(self, optimizer):
+    def compile(self, optimizer: tf.keras.optimizers) -> None:
         """Method that builds the network by attaching optimizer, loss and metrics.
 
         Args:
-            optimizer (tf.keras.optimizers): Optimization algorithm.
+            optimizer: Optimization algorithm.
 
         """
 
@@ -89,13 +99,13 @@ class ContrastiveSiamese(Siamese):
         self.loss_metric = tf.metrics.Mean(name="loss")
 
     @tf.function
-    def step(self, x1, x2, y):
+    def step(self, x1: tf.Tensor, x2: tf.Tensor, y: tf.Tensor) -> None:
         """Method that performs a single batch optimization step.
 
         Args:
-            x1 (tf.Tensor): Tensor containing first samples from input pairs.
-            x2 (tf.Tensor): Tensor containing second samples from input pairs.
-            y (tf.Tensor): Tensor containing labels (1 for similar, 0 for dissimilar).
+            x1: Tensor containing first samples from input pairs.
+            x2: Tensor containing second samples from input pairs.
+            y: Tensor containing labels (1 for similar, 0 for dissimilar).
 
         """
 
@@ -116,13 +126,16 @@ class ContrastiveSiamese(Siamese):
         # Updates the metrics' states
         self.loss_metric.update_state(loss)
 
-    def fit(self, batches, epochs=100):
+    def fit(
+        self,
+        batches: Union[BalancedPairDataset, RandomPairDataset],
+        epochs: Optional[int] = 100,
+    ) -> None:
         """Method that trains the model over training batches.
 
         Args:
-            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
-                training samples and labels.
-            epochs (int): Maximum number of epochs.
+            batches: Batches of tuples holding training samples and labels.
+            epochs: Maximum number of epochs.
 
         """
 
@@ -149,12 +162,11 @@ class ContrastiveSiamese(Siamese):
 
             logger.to_file(f"Loss: {self.loss_metric.result()}")
 
-    def evaluate(self, batches):
+    def evaluate(self, batches: Union[BalancedPairDataset, RandomPairDataset]) -> None:
         """Method that evaluates the model over validation or testing batches.
 
         Args:
-            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
-                validation / testing samples and labels.
+            batches: Batches of tuples holding validation / testing samples and labels.
 
         """
 
@@ -184,15 +196,15 @@ class ContrastiveSiamese(Siamese):
 
         logger.to_file(f"Val Loss: {self.loss_metric.result()}")
 
-    def predict(self, x1, x2):
+    def predict(self, x1: tf.Tensor, x2: tf.Tensor) -> tf.Tensor:
         """Method that performs a forward pass over samples and returns the network's output.
 
         Args:
-            x1 (tf.Tensor): Tensor containing first samples from input pairs.
-            x2 (tf.Tensor): Tensor containing second samples from input pairs.
+            x1: Tensor containing first samples from input pairs.
+            x2: Tensor containing second samples from input pairs.
 
         Returns:
-            The distance between samples `x1` and `x2`.
+            (tf.Tensor): The distance between samples `x1` and `x2`.
 
         """
 

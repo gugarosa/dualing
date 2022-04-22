@@ -1,6 +1,9 @@
 """Convolutional Neural Network.
 """
 
+from typing import Optional
+
+import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D
 
 from dualing.core import Base
@@ -12,14 +15,20 @@ logger = logging.get_logger(__name__)
 class CNN(Base):
     """A CNN class stands for a standard Convolutional Neural Network implementation."""
 
-    def __init__(self, n_blocks=3, init_kernel=5, n_output=128, activation="sigmoid"):
+    def __init__(
+        self,
+        n_blocks: Optional[int] = 3,
+        init_kernel: Optional[int] = 5,
+        n_output: Optional[int] = 128,
+        activation: Optional[str] = "sigmoid",
+    ):
         """Initialization method.
 
         Args:
-            n_blocks (int): Number of convolutional/pooling blocks.
-            init_kernel (int): Size of initial kernel.
-            n_outputs (int): Number of output units.
-            activation (str): Output activation function.
+            n_blocks: Number of convolutional/pooling blocks.
+            init_kernel: Size of initial kernel.
+            n_outputs: Number of output units.
+            activation: Output activation function.
 
         """
 
@@ -56,14 +65,14 @@ class CNN(Base):
             n_output,
         )
 
-    def call(self, x):
+    def call(self, x: tf.Tensor) -> tf.Tensor:
         """Method that holds vital information whenever this class is called.
 
         Args:
-            x (tf.Tensor): Tensor containing the input sample.
+            x: Tensor containing the input sample.
 
         Returns:
-            The layer's outputs.
+            (tf.Tensor): The layer's outputs.
 
         """
 

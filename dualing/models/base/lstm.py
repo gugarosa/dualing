@@ -1,6 +1,9 @@
 """Long Short-Term Memory.
 """
 
+from typing import Optional
+
+import tensorflow as tf
 from tensorflow.keras.layers import RNN, Dense, Embedding, LSTMCell
 
 from dualing.core import Base
@@ -12,13 +15,18 @@ logger = logging.get_logger(__name__)
 class LSTM(Base):
     """An LSTM class stands for a standard Long Short-Term Memory implementation."""
 
-    def __init__(self, vocab_size=1, embedding_size=32, hidden_size=64):
+    def __init__(
+        self,
+        vocab_size: Optional[int] = 1,
+        embedding_size: Optional[int] = 32,
+        hidden_size: Optional[int] = 64,
+    ):
         """Initialization method.
 
         Args:
-            vocab_size (int): Vocabulary size.
-            embedding_size (int): Embedding layer units.
-            hidden_size (int): Hidden layer units.
+            vocab_size: Vocabulary size.
+            embedding_size: Embedding layer units.
+            hidden_size: Hidden layer units.
 
         """
 
@@ -46,14 +54,14 @@ class LSTM(Base):
             vocab_size,
         )
 
-    def call(self, x):
+    def call(self, x: tf.Tensor) -> tf.Tensor:
         """Method that holds vital information whenever this class is called.
 
         Args:
-            x (tf.Tensor): Tensor containing the input sample.
+            x: Tensor containing the input sample.
 
         Returns:
-            The layer's outputs.
+            (tf.Tensor): The layer's outputs.
 
         """
 

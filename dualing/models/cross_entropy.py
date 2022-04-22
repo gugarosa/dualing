@@ -1,10 +1,14 @@
 """Cross-Entropy Siamese Network.
 """
 
+from typing import Optional, Union
+
 import tensorflow as tf
 
 import dualing.utils.exception as e
 from dualing.core import BinaryCrossEntropy, Siamese
+from dualing.core.model import Base
+from dualing.datasets.pair import BalancedPairDataset, RandomPairDataset
 from dualing.utils import logging
 
 logger = logging.get_logger(__name__)
@@ -21,13 +25,18 @@ class CrossEntropySiamese(Siamese):
 
     """
 
-    def __init__(self, base, distance_metric="concat", name=""):
+    def __init__(
+        self,
+        base: Base,
+        distance_metric: Optional[str] = "concat",
+        name: Optional[str] = "",
+    ):
         """Initialization method.
 
         Args:
-            base (Base): Twin architecture.
-            distance_metric (str): Distance metric.
-            name (str): Naming identifier.
+            base: Twin architecture.
+            distance_metric: Distance metric.
+            name: Naming identifier.
 
         """
 
@@ -44,23 +53,23 @@ class CrossEntropySiamese(Siamese):
         logger.info("Class overrided.")
 
     @property
-    def distance(self):
-        """str: Distance metric."""
+    def distance(self) -> str:
+        """Distance metric."""
 
         return self._distance
 
     @distance.setter
-    def distance(self, distance):
+    def distance(self, distance: str) -> None:
         if distance not in ["concat", "diff"]:
             raise e.ValueError("`distance` should be `concat`, or `diff`")
 
         self._distance = distance
 
-    def compile(self, optimizer):
+    def compile(self, optimizer: tf.keras.optimizers) -> None:
         """Method that builds the network by attaching optimizer, loss and metrics.
 
         Args:
-            optimizer (tf.keras.optimizers): Optimization algorithm.
+            optimizer: Optimization algorithm.
 
         """
 
@@ -80,13 +89,13 @@ class CrossEntropySiamese(Siamese):
         self.acc_metric = tf.metrics.Mean(name="acc")
 
     @tf.function
-    def step(self, x1, x2, y):
+    def step(self, x1: tf.Tensor, x2: tf.Tensor, y: tf.Tensor) -> None:
         """Method that performs a single batch optimization step.
 
         Args:
-            x1 (tf.Tensor): Tensor containing first samples from input pairs.
-            x2 (tf.Tensor): Tensor containing second samples from input pairs.
-            y (tf.Tensor): Tensor containing labels (1 for similar, 0 for dissimilar).
+            x1: Tensor containing first samples from input pairs.
+            x2: Tensor containing second samples from input pairs.
+            y: Tensor containing labels (1 for similar, 0 for dissimilar).
 
         """
 
@@ -111,13 +120,16 @@ class CrossEntropySiamese(Siamese):
         self.loss_metric.update_state(loss)
         self.acc_metric.update_state(acc)
 
-    def fit(self, batches, epochs=100):
+    def fit(
+        self,
+        batches: Union[BalancedPairDataset, RandomPairDataset],
+        epochs: Optional[int] = 100,
+    ) -> None:
         """Method that trains the model over training batches.
 
         Args:
-            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
-                training samples and labels.
-            epochs (int): Maximum number of epochs.
+            batches: Batches of tuples holding training samples and labels.
+            epochs: Maximum number of epochs.
 
         """
 
@@ -153,12 +165,11 @@ class CrossEntropySiamese(Siamese):
                 f"Loss: {self.loss_metric.result()} | Accuracy: {self.acc_metric.result()}"
             )
 
-    def evaluate(self, batches):
+    def evaluate(self, batches: Union[BalancedPairDataset, RandomPairDataset]) -> None:
         """Method that evaluates the model over validation or testing batches.
 
         Args:
-            batches (BalancedPairDataset, RandomPairDataset): Batches of tuples holding
-                validation / testing samples and labels.
+            batches: Batches of tuples holding validation / testing samples and labels.
 
         """
 
@@ -201,15 +212,15 @@ class CrossEntropySiamese(Siamese):
             f"Val Loss: {self.loss_metric.result()} | Val Accuracy: {self.acc_metric.result()}"
         )
 
-    def predict(self, x1, x2):
+    def predict(self, x1: tf.Tensor, x2: tf.Tensor) -> tf.Tensor:
         """Method that performs a forward pass over samples and returns the network's output.
 
         Args:
-            x1 (tf.Tensor): Tensor containing first samples from input pairs.
-            x2 (tf.Tensor): Tensor containing second samples from input pairs.
+            x1: Tensor containing first samples from input pairs.
+            x2: Tensor containing second samples from input pairs.
 
         Returns:
-            The similarity score between samples `x1` and `x2`.
+            (tf.Tensor): The similarity score between samples `x1` and `x2`.
 
         """
 

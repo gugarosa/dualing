@@ -1,6 +1,8 @@
 """Balanced- and random-pair datasets.
 """
 
+from typing import Optional, Tuple
+
 import numpy as np
 import tensorflow as tf
 
@@ -20,26 +22,26 @@ class BalancedPairDataset(Dataset):
 
     def __init__(
         self,
-        data,
-        labels,
-        n_pairs=2,
-        batch_size=1,
-        input_shape=None,
-        normalize=(0, 1),
-        shuffle=True,
-        seed=0,
+        data: np.array,
+        labels: np.array,
+        n_pairs: Optional[int] = 2,
+        batch_size: Optional[int] = 1,
+        input_shape: Optional[Tuple[int, ...]] = None,
+        normalize: Optional[Tuple[int, int]] = (0, 1),
+        shuffle: Optional[bool] = True,
+        seed: Optional[int] = 0,
     ):
         """Initialization method.
 
         Args:
-            data (np.array): Array of samples.
-            labels (np.array): Array of labels.
-            n_pairs (int): Number of pairs.
-            batch_size (int): Batch size.
-            input_shape (tuple): Shape of the reshaped array.
-            normalize (tuple): Normalization bounds.
-            shuffle (bool): Whether data should be shuffled or not.
-            seed (int): Provides deterministic traits when using `random` module.
+            data: Array of samples.
+            labels: Array of labels.
+            n_pairs: Number of pairs.
+            batch_size: Batch size.
+            input_shape: Shape of the reshaped array.
+            normalize: Normalization bounds.
+            shuffle: Whether data should be shuffled or not.
+            seed: Provides deterministic traits when using `random` module.
 
         """
 
@@ -67,32 +69,34 @@ class BalancedPairDataset(Dataset):
         logger.info("Class overrided.")
 
     @property
-    def n_pairs(self):
-        """int: Amount of pairs."""
+    def n_pairs(self) -> int:
+        """Amount of pairs."""
 
         return self._n_pairs
 
     @n_pairs.setter
-    def n_pairs(self, n_pairs):
+    def n_pairs(self, n_pairs: int) -> None:
         if not isinstance(n_pairs, int):
             raise e.TypeError("`n_pairs` should be a integer")
 
         self._n_pairs = n_pairs
 
     @property
-    def batches(self):
-        """tf.data.Dataset: Batches of data (samples, labels)."""
+    def batches(self) -> tf.data.Dataset:
+        """Batches of data (samples, labels)."""
 
         return self._batches
 
     @batches.setter
-    def batches(self, batches):
+    def batches(self, batches: tf.data.Dataset) -> None:
         if not isinstance(batches, tf.data.Dataset):
             raise e.TypeError("`batches` should be a tf.data.Dataset")
 
         self._batches = batches
 
-    def create_pairs(self, data, labels):
+    def create_pairs(
+        self, data: np.array, labels: np.array
+    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         """Creates balanced pairs from data and labels.
 
         Args:
@@ -100,7 +104,7 @@ class BalancedPairDataset(Dataset):
             labels (np.array): Array of labels.
 
         Returns:
-            Tuple containing pairs of samples along their labels.
+            (Tuple[tf.Tensor, tf.Tensor, tf.Tensor]): Tuple containing pairs of samples along their labels.
 
         """
 
@@ -146,11 +150,11 @@ class BalancedPairDataset(Dataset):
 
         return x1, x2, y
 
-    def _build(self, pairs):
+    def _build(self, pairs: Tuple[tf.Tensor, tf.Tensor]) -> None:
         """Builds the class.
 
         Args:
-            pairs (tuple): Pairs of samples along their labels.
+            pairs: Pairs of samples along their labels.
 
         """
 
@@ -174,17 +178,23 @@ class RandomPairDataset(Dataset):
     """
 
     def __init__(
-        self, data, labels, batch_size=1, input_shape=None, normalize=(0, 1), seed=0
+        self,
+        data: np.array,
+        labels: np.array,
+        batch_size: Optional[int] = 1,
+        input_shape: Optional[Tuple[int, ...]] = None,
+        normalize: Optional[Tuple[int, int]] = (0, 1),
+        seed: Optional[int] = 0,
     ):
         """Initialization method.
 
         Args:
-            data (np.array): Array of samples.
-            labels (np.array): Array of labels.
-            batch_size (int): Batch size.
-            input_shape (tuple): Shape of the reshaped array.
-            normalize (tuple): Normalization bounds.
-            seed (int): Provides deterministic traits when using `random` module.
+            data: Array of samples.
+            labels: Array of labels.
+            batch_size: Batch size.
+            input_shape: Shape of the reshaped array.
+            normalize: Normalization bounds.
+            seed: Provides deterministic traits when using `random` module.
 
         """
 
@@ -202,29 +212,31 @@ class RandomPairDataset(Dataset):
         logger.info("Class overrided.")
 
     @property
-    def batches(self):
-        """tf.data.Dataset: Batches of data (samples, labels)."""
+    def batches(self) -> tf.data.Dataset:
+        """Batches of data (samples, labels)."""
 
         return self._batches
 
     @batches.setter
-    def batches(self, batches):
+    def batches(self, batches: tf.data.Dataset) -> None:
         if not isinstance(batches, tf.data.Dataset):
             raise e.TypeError("`batches` should be a tf.data.Dataset")
 
         self._batches = batches
 
-    def _build(self, pairs):
+    def _build(self, pairs: Tuple[tf.Tensor, tf.Tensor]) -> None:
         """Builds the class.
 
         Args:
-            pairs (tuple): Pairs of samples along their labels.
+            pairs: Pairs of samples along their labels.
 
         """
 
         self.batches = tf.data.Dataset.from_tensor_slices(pairs).batch(self.batch_size)
 
-    def create_pairs(self, data, labels):
+    def create_pairs(
+        self, data: np.array, labels: np.array
+    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         """Creates random pairs from data and labels.
 
         Args:
@@ -232,7 +244,7 @@ class RandomPairDataset(Dataset):
             labels (np.array): Array of labels.
 
         Returns:
-            Tuple containing pairs of samples along their labels.
+            (Tuple[tf.Tensor, tf.Tensor, tf.Tensor]): Tuple containing pairs of samples along their labels.
 
         """
 
