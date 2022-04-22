@@ -3,18 +3,16 @@
 
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D
 
-import dualing.utils.logging as l
 from dualing.core import Base
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class CNN(Base):
-    """A CNN class stands for a standard Convolutional Neural Network implementation.
+    """A CNN class stands for a standard Convolutional Neural Network implementation."""
 
-    """
-
-    def __init__(self, n_blocks=3, init_kernel=5, n_output=128, activation='sigmoid'):
+    def __init__(self, n_blocks=3, init_kernel=5, n_output=128, activation="sigmoid"):
         """Initialization method.
 
         Args:
@@ -25,16 +23,20 @@ class CNN(Base):
 
         """
 
-        logger.info('Overriding class: Base -> CNN.')
+        logger.info("Overriding class: Base -> CNN.")
 
-        super(CNN, self).__init__(name='cnn')
+        super(CNN, self).__init__(name="cnn")
 
         # Asserting that it will be possible to create the convolutional layers
         assert init_kernel - 2 * (n_blocks - 1) >= 1
 
         # Convolutional layers
-        self.conv = [Conv2D(32 * (2 ** i), init_kernel - 2 * i, activation='relu', padding='same')
-                     for i in range(n_blocks)]
+        self.conv = [
+            Conv2D(
+                32 * (2**i), init_kernel - 2 * i, activation="relu", padding="same"
+            )
+            for i in range(n_blocks)
+        ]
 
         # Pooling layers
         self.pool = [MaxPool2D() for _ in range(n_blocks)]
@@ -45,8 +47,14 @@ class CNN(Base):
         # Final fully-connected layer
         self.fc = Dense(n_output, activation=activation)
 
-        logger.info('Class overrided.')
-        logger.debug('Blocks: %d | Initial Kernel: %d | Output (%s): %d.', n_blocks, init_kernel, activation, n_output)
+        logger.info("Class overrided.")
+        logger.debug(
+            "Blocks: %d | Initial Kernel: %d | Output (%s): %d.",
+            n_blocks,
+            init_kernel,
+            activation,
+            n_output,
+        )
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

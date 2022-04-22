@@ -3,16 +3,14 @@
 
 from tensorflow.keras.layers import RNN, Dense, Embedding, GRUCell
 
-import dualing.utils.logging as l
 from dualing.core import Base
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class GRU(Base):
-    """A GRU class stands for a standard Gated Recurrent Unit implementation.
-
-    """
+    """A GRU class stands for a standard Gated Recurrent Unit implementation."""
 
     def __init__(self, vocab_size=1, embedding_size=32, hidden_size=64):
         """Initialization method.
@@ -24,24 +22,29 @@ class GRU(Base):
 
         """
 
-        logger.info('Overriding class: Base -> GRU.')
+        logger.info("Overriding class: Base -> GRU.")
 
-        super(GRU, self).__init__(name='gru')
+        super(GRU, self).__init__(name="gru")
 
         # Embedding layer
-        self.embedding = Embedding(vocab_size, embedding_size, name='embedding')
+        self.embedding = Embedding(vocab_size, embedding_size, name="embedding")
 
         # GRU cell
-        self.cell = GRUCell(hidden_size, name='gru_cell')
+        self.cell = GRUCell(hidden_size, name="gru_cell")
 
         # RNN layer
-        self.rnn = RNN(self.cell, name='rnn_layer', return_sequences=True)
+        self.rnn = RNN(self.cell, name="rnn_layer", return_sequences=True)
 
         # Linear (dense) layer
-        self.fc = Dense(vocab_size, name='out')
+        self.fc = Dense(vocab_size, name="out")
 
-        logger.info('Class overrided.')
-        logger.debug('Embedding: %d | Hidden: %d | Output: %d.', embedding_size, hidden_size, vocab_size)
+        logger.info("Class overrided.")
+        logger.debug(
+            "Embedding: %d | Hidden: %d | Output: %d.",
+            embedding_size,
+            hidden_size,
+            vocab_size,
+        )
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

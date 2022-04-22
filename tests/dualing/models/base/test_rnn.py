@@ -6,7 +6,7 @@ from dualing.models.base import rnn
 def test_rnn():
     new_base = rnn.RNN()
 
-    assert new_base.name == 'rnn'
+    assert new_base.name == "rnn"
 
 
 def test_rnn_call():

@@ -36,7 +36,7 @@ def test_balanced_pair_dataset_batches():
 
     new_balanced_pair_dataset = pair.BalancedPairDataset(x, y)
 
-    assert new_balanced_pair_dataset.batches != None
+    assert new_balanced_pair_dataset.batches is not None
 
 
 def test_balanced_pair_dataset_batches_setter():
@@ -74,7 +74,7 @@ def test_balanced_pair_dataset_build():
 
     new_balanced_pair_dataset._build(pairs)
 
-    assert new_balanced_pair_dataset.batches != None
+    assert new_balanced_pair_dataset.batches is not None
 
     new_balanced_pair_dataset = pair.BalancedPairDataset(x, y, shuffle=False)
 
@@ -82,7 +82,7 @@ def test_balanced_pair_dataset_build():
 
     new_balanced_pair_dataset._build(pairs)
 
-    assert new_balanced_pair_dataset.batches != None
+    assert new_balanced_pair_dataset.batches is not None
 
 
 def test_random_pair_dataset_batches():
@@ -91,7 +91,7 @@ def test_random_pair_dataset_batches():
 
     new_random_pair_dataset = pair.RandomPairDataset(x, y)
 
-    assert new_random_pair_dataset.batches != None
+    assert new_random_pair_dataset.batches is not None
 
 
 def test_random_pair_dataset_batches_setter():
@@ -129,4 +129,4 @@ def test_random_pair_dataset_build():
 
     new_random_pair_dataset._build(pairs)
 
-    assert new_random_pair_dataset.batches != None
+    assert new_random_pair_dataset.batches is not None

@@ -4,16 +4,14 @@
 from tensorflow.keras.layers import RNN as RNNLayer
 from tensorflow.keras.layers import Dense, Embedding, SimpleRNNCell
 
-import dualing.utils.logging as l
 from dualing.core import Base
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class RNN(Base):
-    """An RNN class stands for a standard Recurrent Neural Network implementation.
-
-    """
+    """An RNN class stands for a standard Recurrent Neural Network implementation."""
 
     def __init__(self, vocab_size=1, embedding_size=32, hidden_size=64):
         """Initialization method.
@@ -25,24 +23,29 @@ class RNN(Base):
 
         """
 
-        logger.info('Overriding class: Base -> RNN.')
+        logger.info("Overriding class: Base -> RNN.")
 
-        super(RNN, self).__init__(name='rnn')
+        super(RNN, self).__init__(name="rnn")
 
         # Embedding layer
-        self.embedding = Embedding(vocab_size, embedding_size, name='embedding')
+        self.embedding = Embedding(vocab_size, embedding_size, name="embedding")
 
         # RNN cell
-        self.cell = SimpleRNNCell(hidden_size, name='rnn_cell')
+        self.cell = SimpleRNNCell(hidden_size, name="rnn_cell")
 
         # RNN layer
-        self.rnn = RNNLayer(self.cell, name='rnn_layer', return_sequences=True)
+        self.rnn = RNNLayer(self.cell, name="rnn_layer", return_sequences=True)
 
         # Linear (dense) layer
-        self.fc = Dense(vocab_size, name='out')
+        self.fc = Dense(vocab_size, name="out")
 
-        logger.info('Class overrided.')
-        logger.debug('Embedding: %d | Hidden: %d | Output: %d.', embedding_size, hidden_size, vocab_size)
+        logger.info("Class overrided.")
+        logger.debug(
+            "Embedding: %d | Hidden: %d | Output: %d.",
+            embedding_size,
+            hidden_size,
+            vocab_size,
+        )
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

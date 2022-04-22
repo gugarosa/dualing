@@ -20,7 +20,7 @@ def test_tensor_to_numpy():
 
 def test_plot_embeddings():
     embeddings = tf.ones((5, 5))
-    labels = tf.zeros(5, dtype='int32')
+    labels = tf.zeros(5, dtype="int32")
     dims = (0, 1)
 
     projector.plot_embeddings(embeddings, labels, dims)

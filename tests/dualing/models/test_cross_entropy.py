@@ -5,17 +5,11 @@ from dualing.models import cross_entropy
 from dualing.models.base import mlp
 
 
-def test_cross_entropy():
-    new_base = mlp.Base()
-
-    new_siamese = cross_entropy.CrossEntropySiamese(new_base)
-
-
 def test_cross_entropy_distance():
     new_base = mlp.Base()
     new_siamese = cross_entropy.CrossEntropySiamese(new_base)
 
-    assert new_siamese.distance == 'concat'
+    assert new_siamese.distance == "concat"
 
 
 def test_cross_entropy_distance_setter():
@@ -23,17 +17,15 @@ def test_cross_entropy_distance_setter():
     new_siamese = cross_entropy.CrossEntropySiamese(new_base)
 
     try:
-        new_siamese.distance = 'a'
+        new_siamese.distance = "a"
     except:
-        new_siamese.distance == 'concat'
+        new_siamese.distance == "concat"
 
-    assert new_siamese.distance == 'concat'
+    assert new_siamese.distance == "concat"
 
 
 def test_cross_entropy_step():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = cross_entropy.CrossEntropySiamese(new_base)
@@ -48,8 +40,7 @@ def test_cross_entropy_step():
 
 def test_cross_entropy_fit():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
+    train = pair.BalancedPairDataset(x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = cross_entropy.CrossEntropySiamese(new_base)
@@ -60,8 +51,7 @@ def test_cross_entropy_fit():
 
 def test_cross_entropy_evaluate():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
+    train = pair.BalancedPairDataset(x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = cross_entropy.CrossEntropySiamese(new_base)
@@ -73,8 +63,7 @@ def test_cross_entropy_evaluate():
 
 def test_cross_entropy_predict():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
+    train = pair.BalancedPairDataset(x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = cross_entropy.CrossEntropySiamese(new_base)

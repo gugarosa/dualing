@@ -6,7 +6,7 @@ from dualing.models.base import gru
 def test_gru():
     new_base = gru.GRU()
 
-    assert new_base.name == 'gru'
+    assert new_base.name == "gru"
 
 
 def test_gru_call():

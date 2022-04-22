@@ -9,7 +9,7 @@ def test_batch_dataset_batches():
 
     new_batch_dataset = batch.BatchDataset(x, y)
 
-    assert new_batch_dataset.batches != None
+    assert new_batch_dataset.batches is not None
 
 
 def test_batch_dataset_batches_setter():
@@ -32,8 +32,8 @@ def test_batch_dataset_build():
 
     new_batch_dataset = batch.BatchDataset(x, y, shuffle=True)
 
-    assert new_batch_dataset.batches != None
+    assert new_batch_dataset.batches is not None
 
     new_batch_dataset = batch.BatchDataset(x, y, shuffle=False)
 
-    assert new_batch_dataset.batches != None
+    assert new_batch_dataset.batches is not None

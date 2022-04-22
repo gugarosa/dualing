@@ -6,7 +6,7 @@ from dualing.models.base import lstm
 def test_lstm():
     new_base = lstm.LSTM()
 
-    assert new_base.name == 'lstm'
+    assert new_base.name == "lstm"
 
 
 def test_lstm_call():

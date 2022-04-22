@@ -4,10 +4,10 @@
 import tensorflow as tf
 
 import dualing.utils.exception as e
-import dualing.utils.logging as l
 from dualing.core import ContrastiveLoss, Siamese
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class ContrastiveSiamese(Siamese):
@@ -20,7 +20,7 @@ class ContrastiveSiamese(Siamese):
 
     """
 
-    def __init__(self, base, margin=1.0, distance_metric='L2', name=''):
+    def __init__(self, base, margin=1.0, distance_metric="L2", name=""):
         """Initialization method.
 
         Args:
@@ -31,7 +31,7 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        logger.info('Overriding class: Siamese -> ContrastiveSiamese.')
+        logger.info("Overriding class: Siamese -> ContrastiveSiamese.")
 
         super(ContrastiveSiamese, self).__init__(base, name=name)
 
@@ -41,37 +41,33 @@ class ContrastiveSiamese(Siamese):
         # Distance metric
         self.distance = distance_metric
 
-        logger.info('Class overrided.')
+        logger.info("Class overrided.")
 
     @property
     def margin(self):
-        """float: Radius around the embedding space.
-
-        """
+        """float: Radius around the embedding space."""
 
         return self._margin
 
     @margin.setter
     def margin(self, margin):
         if not isinstance(margin, float):
-            raise e.TypeError('`margin` should be a float')
+            raise e.TypeError("`margin` should be a float")
         if margin <= 0:
-            raise e.ValueError('`margin` should be greater than 0')
+            raise e.ValueError("`margin` should be greater than 0")
 
         self._margin = margin
 
     @property
     def distance(self):
-        """str: Distance metric.
-
-        """
+        """str: Distance metric."""
 
         return self._distance
 
     @distance.setter
     def distance(self, distance):
-        if distance not in ['L1', 'L2', 'angular']:
-            raise e.ValueError('`distance` should be `L1`, `L2` or `angular`')
+        if distance not in ["L1", "L2", "angular"]:
+            raise e.ValueError("`distance` should be `L1`, `L2` or `angular`")
 
         self._distance = distance
 
@@ -90,7 +86,7 @@ class ContrastiveSiamese(Siamese):
         self.loss = ContrastiveLoss()
 
         # Defines the loss metric
-        self.loss_metric = tf.metrics.Mean(name='loss')
+        self.loss_metric = tf.metrics.Mean(name="loss")
 
     @tf.function
     def step(self, x1, x2, y):
@@ -115,8 +111,7 @@ class ContrastiveSiamese(Siamese):
         gradients = tape.gradient(loss, self.B.trainable_variables)
 
         # Applies the gradients using an optimizer
-        self.optimizer.apply_gradients(
-            zip(gradients, self.B.trainable_variables))
+        self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
 
         # Updates the metrics' states
         self.loss_metric.update_state(loss)
@@ -131,28 +126,28 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        logger.info('Fitting model ...')
+        logger.info("Fitting model ...")
 
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         for epoch in range(epochs):
-            logger.info('Epoch %d/%d', epoch+1, epochs)
+            logger.info("Epoch %d/%d", epoch + 1, epochs)
 
             # Resets metrics' states
             self.loss_metric.reset_states()
 
             # Defines a customized progress bar
-            b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['loss'])
+            b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["loss"])
 
             for (x1_batch, x2_batch, y_batch) in batches:
                 # Performs the optimization step
                 self.step(x1_batch, x2_batch, y_batch)
 
                 # Adds corresponding values to the progress bar
-                b.add(1, values=[('loss', self.loss_metric.result())])
+                b.add(1, values=[("loss", self.loss_metric.result())])
 
-            logger.to_file(f'Loss: {self.loss_metric.result()}')
+            logger.to_file(f"Loss: {self.loss_metric.result()}")
 
     def evaluate(self, batches):
         """Method that evaluates the model over validation or testing batches.
@@ -163,7 +158,7 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        logger.info('Evaluating model ...')
+        logger.info("Evaluating model ...")
 
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
@@ -172,7 +167,7 @@ class ContrastiveSiamese(Siamese):
         self.loss_metric.reset_states()
 
         # Defines a customized progress bar
-        b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['val_loss'])
+        b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["val_loss"])
 
         for (x1_batch, x2_batch, y_batch) in batches:
             # Performs the prediction
@@ -185,9 +180,9 @@ class ContrastiveSiamese(Siamese):
             self.loss_metric.update_state(loss)
 
             # Adds corresponding values to the progress bar
-            b.add(1, values=[('val_loss', self.loss_metric.result())])
+            b.add(1, values=[("val_loss", self.loss_metric.result())])
 
-        logger.to_file(f'Val Loss: {self.loss_metric.result()}')
+        logger.to_file(f"Val Loss: {self.loss_metric.result()}")
 
     def predict(self, x1, x2):
         """Method that performs a forward pass over samples and returns the network's output.
@@ -212,13 +207,13 @@ class ContrastiveSiamese(Siamese):
             z1 = tf.reduce_mean(z1, 1)
             z2 = tf.reduce_mean(z2, 1)
 
-        if self.distance == 'L1':
+        if self.distance == "L1":
             y_pred = tf.math.sqrt(tf.linalg.norm(z1 - z2, axis=1))
 
-        elif self.distance == 'L2':
+        elif self.distance == "L2":
             y_pred = tf.linalg.norm(z1 - z2, axis=1)
 
-        elif self.distance == 'angular':
+        elif self.distance == "angular":
             y_pred = tf.keras.losses.cosine_similarity(z1, z2)
 
         return y_pred

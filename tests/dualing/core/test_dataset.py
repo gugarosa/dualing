@@ -27,7 +27,7 @@ def test_dataset_batch_size_setter():
 def test_dataset_input_shape():
     new_dataset = dataset.Dataset()
 
-    assert new_dataset.input_shape == None
+    assert new_dataset.input_shape is None
 
 
 def test_dataset_input_shape_setter():
@@ -36,7 +36,7 @@ def test_dataset_input_shape_setter():
     except:
         new_dataset = dataset.Dataset()
 
-    assert new_dataset.input_shape == None
+    assert new_dataset.input_shape is None
 
 
 def test_dataset_normalize():
@@ -57,7 +57,7 @@ def test_dataset_normalize_setter():
 def test_dataset_shuffle():
     new_dataset = dataset.Dataset()
 
-    assert new_dataset.shuffle == True
+    assert new_dataset.shuffle is True
 
 
 def test_dataset_shuffle_setter():
@@ -66,7 +66,7 @@ def test_dataset_shuffle_setter():
     except:
         new_dataset = dataset.Dataset()
 
-    assert new_dataset.shuffle == True
+    assert new_dataset.shuffle is True
 
 
 def test_dataset_preprocess():

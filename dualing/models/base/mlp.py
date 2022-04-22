@@ -3,16 +3,14 @@
 
 from tensorflow.keras.layers import Dense
 
-import dualing.utils.logging as l
 from dualing.core import Base
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class MLP(Base):
-    """An MLP class stands for a Multi-Layer Perceptron implementation.
-
-    """
+    """An MLP class stands for a Multi-Layer Perceptron implementation."""
 
     def __init__(self, n_hidden=(128,)):
         """Initialization method.
@@ -22,15 +20,15 @@ class MLP(Base):
 
         """
 
-        logger.info('Overriding class: Base -> MLP.')
+        logger.info("Overriding class: Base -> MLP.")
 
-        super(MLP, self).__init__(name='mlp')
+        super(MLP, self).__init__(name="mlp")
 
         # Fully-connected layers
         self.fc = [Dense(units) for units in n_hidden]
 
-        logger.info('Class overrided.')
-        logger.debug('Layers: %d | Units: %s.', len(n_hidden), n_hidden)
+        logger.info("Class overrided.")
+        logger.debug("Layers: %d | Units: %s.", len(n_hidden), n_hidden)
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.

@@ -6,10 +6,10 @@ import tensorflow as tf
 
 import dualing.utils.constants as c
 import dualing.utils.exception as e
-import dualing.utils.logging as l
 from dualing.core import Dataset
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class BalancedPairDataset(Dataset):
@@ -18,8 +18,17 @@ class BalancedPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, n_pairs=2, batch_size=1, input_shape=None, normalize=(0, 1),
-                 shuffle=True, seed=0):
+    def __init__(
+        self,
+        data,
+        labels,
+        n_pairs=2,
+        batch_size=1,
+        input_shape=None,
+        normalize=(0, 1),
+        shuffle=True,
+        seed=0,
+    ):
         """Initialization method.
 
         Args:
@@ -34,17 +43,18 @@ class BalancedPairDataset(Dataset):
 
         """
 
-        logger.info('Overriding class: Dataset -> BalancedPairDataset.')
+        logger.info("Overriding class: Dataset -> BalancedPairDataset.")
 
         super(BalancedPairDataset, self).__init__(
-            batch_size, input_shape, normalize, shuffle, seed)
+            batch_size, input_shape, normalize, shuffle, seed
+        )
 
         try:
             # Checks if supplied labels are not equal
             assert not np.all(labels == labels[0])
 
         except:
-            raise e.ValueError('`labels` should have distinct values')
+            raise e.ValueError("`labels` should have distinct values")
 
         # Amount of pairs
         self.n_pairs = n_pairs
@@ -54,35 +64,31 @@ class BalancedPairDataset(Dataset):
 
         self._build(pairs)
 
-        logger.info('Class overrided.')
+        logger.info("Class overrided.")
 
     @property
     def n_pairs(self):
-        """int: Amount of pairs.
-
-        """
+        """int: Amount of pairs."""
 
         return self._n_pairs
 
     @n_pairs.setter
     def n_pairs(self, n_pairs):
         if not isinstance(n_pairs, int):
-            raise e.TypeError('`n_pairs` should be a integer')
+            raise e.TypeError("`n_pairs` should be a integer")
 
         self._n_pairs = n_pairs
 
     @property
     def batches(self):
-        """tf.data.Dataset: Batches of data (samples, labels).
-
-        """
+        """tf.data.Dataset: Batches of data (samples, labels)."""
 
         return self._batches
 
     @batches.setter
     def batches(self, batches):
         if not isinstance(batches, tf.data.Dataset):
-            raise e.TypeError('`batches` should be a tf.data.Dataset')
+            raise e.TypeError("`batches` should be a tf.data.Dataset")
 
         self._batches = batches
 
@@ -98,7 +104,7 @@ class BalancedPairDataset(Dataset):
 
         """
 
-        logger.debug('Creating pairs ...')
+        logger.debug("Creating pairs ...")
 
         # Defines the number of samples and number of pairs
         n_samples = data.shape[0]
@@ -111,7 +117,7 @@ class BalancedPairDataset(Dataset):
         # Iterates until both positive and negative pairs
         while len(y_p) < n_pairs or len(y_n) < n_pairs:
             # Samples two random indexes
-            idx = tf.random.uniform([2], maxval=n_samples, dtype='int32')
+            idx = tf.random.uniform([2], maxval=n_samples, dtype="int32")
 
             # If labels are equal on the particular indexes
             if tf.equal(tf.gather(labels, idx[0]), tf.gather(labels, idx[1])):
@@ -136,7 +142,7 @@ class BalancedPairDataset(Dataset):
         x2 = x2_p[:n_pairs] + x2_n[:n_pairs]
         y = y_p[:n_pairs] + y_n[:n_pairs]
 
-        logger.debug('Pairs: %s.', self.n_pairs)
+        logger.debug("Pairs: %s.", self.n_pairs)
 
         return x1, x2, y
 
@@ -149,12 +155,16 @@ class BalancedPairDataset(Dataset):
         """
 
         if self.shuffle:
-            self.batches = tf.data.Dataset.from_tensor_slices(
-                pairs).shuffle(c.BUFFER_SIZE).batch(self.batch_size)
+            self.batches = (
+                tf.data.Dataset.from_tensor_slices(pairs)
+                .shuffle(c.BUFFER_SIZE)
+                .batch(self.batch_size)
+            )
 
         else:
-            self.batches = tf.data.Dataset.from_tensor_slices(
-                pairs).batch(self.batch_size)
+            self.batches = tf.data.Dataset.from_tensor_slices(pairs).batch(
+                self.batch_size
+            )
 
 
 class RandomPairDataset(Dataset):
@@ -163,7 +173,9 @@ class RandomPairDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(0, 1), seed=0):
+    def __init__(
+        self, data, labels, batch_size=1, input_shape=None, normalize=(0, 1), seed=0
+    ):
         """Initialization method.
 
         Args:
@@ -176,29 +188,29 @@ class RandomPairDataset(Dataset):
 
         """
 
-        logger.info('Overriding class: Dataset -> RandomPairDataset.')
+        logger.info("Overriding class: Dataset -> RandomPairDataset.")
 
-        super(RandomPairDataset, self).__init__(batch_size, input_shape, normalize, False, seed)
+        super(RandomPairDataset, self).__init__(
+            batch_size, input_shape, normalize, False, seed
+        )
 
         data = self.preprocess(data)
         pairs = self.create_pairs(data, labels)
 
         self._build(pairs)
 
-        logger.info('Class overrided.')
+        logger.info("Class overrided.")
 
     @property
     def batches(self):
-        """tf.data.Dataset: Batches of data (samples, labels).
-
-        """
+        """tf.data.Dataset: Batches of data (samples, labels)."""
 
         return self._batches
 
     @batches.setter
     def batches(self, batches):
         if not isinstance(batches, tf.data.Dataset):
-            raise e.TypeError('`batches` should be a tf.data.Dataset')
+            raise e.TypeError("`batches` should be a tf.data.Dataset")
 
         self._batches = batches
 
@@ -224,7 +236,7 @@ class RandomPairDataset(Dataset):
 
         """
 
-        logger.debug('Creating pairs ...')
+        logger.debug("Creating pairs ...")
 
         # Defines the number of samples and pairs
         n_samples = data.shape[0]
@@ -235,16 +247,19 @@ class RandomPairDataset(Dataset):
 
         # Gathers samples and their labels
         x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(data, indexes[n_pairs:])
-        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(labels, indexes[n_pairs:])
+        y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(
+            labels, indexes[n_pairs:]
+        )
 
         # If labels are equal, it means that samples are similar
-        y = tf.cast(tf.equal(y1, y2), 'float32')
+        y = tf.cast(tf.equal(y1, y2), "float32")
 
         # Calculates the number of positive and negative pairs
         n_pos_pairs = tf.math.count_nonzero(y)
         n_neg_pairs = y.shape[0] - n_pos_pairs
 
-        logger.debug('Positive pairs: %s | Negative pairs: %s.',
-                     n_pos_pairs, n_neg_pairs)
+        logger.debug(
+            "Positive pairs: %s | Negative pairs: %s.", n_pos_pairs, n_neg_pairs
+        )
 
         return (x1, x2, y)

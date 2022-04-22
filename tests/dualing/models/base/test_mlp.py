@@ -6,7 +6,7 @@ from dualing.models.base import mlp
 def test_mlp():
     new_base = mlp.MLP()
 
-    assert new_base.name == 'mlp'
+    assert new_base.name == "mlp"
 
 
 def test_mlp_call():

@@ -6,9 +6,7 @@ import tensorflow_addons as tfa
 
 
 class BinaryCrossEntropy:
-    """A BinaryCrossEntropy class defines the binary cross-entropy loss.
-
-    """
+    """A BinaryCrossEntropy class defines the binary cross-entropy loss."""
 
     def __call__(self, y_true, y_pred):
         """Method that holds vital information whenever this class is called.
@@ -26,9 +24,7 @@ class BinaryCrossEntropy:
 
 
 class ContrastiveLoss:
-    """A ContrastiveEntropy class defines the contrastive loss.
-
-    """
+    """A ContrastiveEntropy class defines the contrastive loss."""
 
     def __call__(self, y_true, y_pred, margin=1.0):
         """Method that holds vital information whenever this class is called.
@@ -47,11 +43,9 @@ class ContrastiveLoss:
 
 
 class TripletHardLoss:
-    """A TripletHardLoss class defines the triplet loss with hard negative mining.
+    """A TripletHardLoss class defines the triplet loss with hard negative mining."""
 
-    """
-
-    def __call__(self, y_true, y_pred, margin=1.0, soft=False, distance_metric='L2'):
+    def __call__(self, y_true, y_pred, margin=1.0, soft=False, distance_metric="L2"):
         """Method that holds vital information whenever this class is called.
 
         Args:
@@ -66,15 +60,15 @@ class TripletHardLoss:
 
         """
 
-        return tfa.losses.triplet_hard_loss(y_true, y_pred, margin, soft, distance_metric)
+        return tfa.losses.triplet_hard_loss(
+            y_true, y_pred, margin, soft, distance_metric
+        )
 
 
 class TripletSemiHardLoss:
-    """A TripletSemiHardLoss class defines the triplet loss with semi-hard negative mining.
+    """A TripletSemiHardLoss class defines the triplet loss with semi-hard negative mining."""
 
-    """
-
-    def __call__(self, y_true, y_pred, margin=1.0, soft=None, distance_metric='L2'):
+    def __call__(self, y_true, y_pred, margin=1.0, soft=None, distance_metric="L2"):
         """Method that holds vital information whenever this class is called.
 
         Args:

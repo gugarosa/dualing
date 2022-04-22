@@ -4,10 +4,10 @@
 import tensorflow as tf
 
 import dualing.utils.exception as e
-import dualing.utils.logging as l
 from dualing.core import Siamese, TripletHardLoss, TripletSemiHardLoss
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class TripletSiamese(Siamese):
@@ -20,7 +20,9 @@ class TripletSiamese(Siamese):
 
     """
 
-    def __init__(self, base, loss='hard', margin=1.0, soft=False, distance_metric='L2', name=''):
+    def __init__(
+        self, base, loss="hard", margin=1.0, soft=False, distance_metric="L2", name=""
+    ):
         """Initialization method.
 
         Args:
@@ -33,7 +35,7 @@ class TripletSiamese(Siamese):
 
         """
 
-        logger.info('Overriding class: Siamese -> TripletSiamese.')
+        logger.info("Overriding class: Siamese -> TripletSiamese.")
 
         super(TripletSiamese, self).__init__(base, name=name)
 
@@ -47,74 +49,66 @@ class TripletSiamese(Siamese):
         self.soft = soft
 
         # Distance metric
-        if distance_metric == 'L1':
-            self.distance = 'L2'
-        elif distance_metric == 'L2':
-            self.distance = 'squared-L2'
+        if distance_metric == "L1":
+            self.distance = "L2"
+        elif distance_metric == "L2":
+            self.distance = "squared-L2"
         else:
-            self.distance = 'angular'
+            self.distance = "angular"
 
-        logger.info('Class overrided.')
+        logger.info("Class overrided.")
 
     @property
     def loss_type(self):
-        """str: Type of loss (hard or semi-hard).
-
-        """
+        """str: Type of loss (hard or semi-hard)."""
 
         return self._loss_type
 
     @loss_type.setter
     def loss_type(self, loss_type):
-        if loss_type not in ['hard', 'semi-hard']:
-            raise e.ValueError('`loss_type` should be `hard` or `semi-hard`')
+        if loss_type not in ["hard", "semi-hard"]:
+            raise e.ValueError("`loss_type` should be `hard` or `semi-hard`")
 
         self._loss_type = loss_type
 
     @property
     def soft(self):
-        """bool: Whether soft margin should be used or not.
-
-        """
+        """bool: Whether soft margin should be used or not."""
 
         return self._soft
 
     @soft.setter
     def soft(self, soft):
         if not isinstance(soft, bool):
-            raise e.TypeError('`soft` should be a boolean')
+            raise e.TypeError("`soft` should be a boolean")
 
         self._soft = soft
 
     @property
     def margin(self):
-        """float: Radius around the embedding space.
-
-        """
+        """float: Radius around the embedding space."""
 
         return self._margin
 
     @margin.setter
     def margin(self, margin):
         if not isinstance(margin, float):
-            raise e.TypeError('`margin` should be a float')
+            raise e.TypeError("`margin` should be a float")
         if margin <= 0:
-            raise e.ValueError('`margin` should be greater than 0')
+            raise e.ValueError("`margin` should be greater than 0")
 
         self._margin = margin
 
     @property
     def distance(self):
-        """str: Distance metric.
-
-        """
+        """str: Distance metric."""
 
         return self._distance
 
     @distance.setter
     def distance(self, distance):
-        if distance not in ['L1', 'L2', 'squared-L2', 'angular']:
-            raise e.ValueError('`distance` should be `L1`, `L2` or `angular`')
+        if distance not in ["L1", "L2", "squared-L2", "angular"]:
+            raise e.ValueError("`distance` should be `L1`, `L2` or `angular`")
 
         self._distance = distance
 
@@ -130,15 +124,15 @@ class TripletSiamese(Siamese):
         self.optimizer = optimizer
 
         # Check it is supposed to use hard negative mining
-        if self.loss_type == 'hard':
+        if self.loss_type == "hard":
             self.loss = TripletHardLoss()
 
         # If it is supposed to use semi-hard negative mining
-        elif self.loss_type == 'semi-hard':
+        elif self.loss_type == "semi-hard":
             self.loss = TripletSemiHardLoss()
 
         # Defines the loss metric
-        self.loss_metric = tf.metrics.Mean(name='loss')
+        self.loss_metric = tf.metrics.Mean(name="loss")
 
     @tf.function
     def step(self, x, y):
@@ -171,8 +165,7 @@ class TripletSiamese(Siamese):
         gradients = tape.gradient(loss, self.B.trainable_variables)
 
         # Applies the gradients using an optimizer
-        self.optimizer.apply_gradients(
-            zip(gradients, self.B.trainable_variables))
+        self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
 
         # Updates the metrics' states
         self.loss_metric.update_state(loss)
@@ -186,28 +179,28 @@ class TripletSiamese(Siamese):
 
         """
 
-        logger.info('Fitting model ...')
+        logger.info("Fitting model ...")
 
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         for epoch in range(epochs):
-            logger.info('Epoch %d/%d', epoch+1, epochs)
+            logger.info("Epoch %d/%d", epoch + 1, epochs)
 
             # Resets metrics' states
             self.loss_metric.reset_states()
 
             # Defines a customized progress bar
-            b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['loss'])
+            b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["loss"])
 
             for (x_batch, y_batch) in batches:
                 # Performs the optimization step
                 self.step(x_batch, y_batch)
 
                 # Adds corresponding values to the progress bar
-                b.add(1, values=[('loss', self.loss_metric.result())])
+                b.add(1, values=[("loss", self.loss_metric.result())])
 
-            logger.to_file(f'Loss: {self.loss_metric.result()}')
+            logger.to_file(f"Loss: {self.loss_metric.result()}")
 
     def evaluate(self, batches):
         """Method that evaluates the model over validation or testing batches.
@@ -217,7 +210,7 @@ class TripletSiamese(Siamese):
 
         """
 
-        logger.info('Evaluating model ...')
+        logger.info("Evaluating model ...")
 
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
@@ -226,7 +219,7 @@ class TripletSiamese(Siamese):
         self.loss_metric.reset_states()
 
         # Defines a customized progress bar
-        b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['val_loss'])
+        b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["val_loss"])
 
         for (x_batch, y_batch) in batches:
             # Passes the batch inputs through the network
@@ -248,9 +241,9 @@ class TripletSiamese(Siamese):
             self.loss_metric.update_state(loss)
 
             # Adds corresponding values to the progress bar
-            b.add(1, values=[('val_loss', self.loss_metric.result())])
+            b.add(1, values=[("val_loss", self.loss_metric.result())])
 
-        logger.to_file(f'Val Loss: {self.loss_metric.result()}')
+        logger.to_file(f"Val Loss: {self.loss_metric.result()}")
 
     def predict(self, x1, x2):
         """Method that performs a forward pass over samples and returns the network's output.
@@ -275,13 +268,13 @@ class TripletSiamese(Siamese):
             z1 = tf.reduce_mean(z1, 1)
             z2 = tf.reduce_mean(z2, 1)
 
-        if self.distance == 'L1':
+        if self.distance == "L1":
             y_pred = tf.math.sqrt(tf.linalg.norm(z1 - z2, axis=1))
 
-        elif self.distance == 'L2':
+        elif self.distance == "L2":
             y_pred = tf.linalg.norm(z1 - z2, axis=1)
 
-        elif self.distance == 'angular':
+        elif self.distance == "angular":
             y_pred = tf.keras.losses.cosine_similarity(z1, z2)
 
         return y_pred

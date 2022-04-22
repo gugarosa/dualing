@@ -5,10 +5,10 @@ import tensorflow as tf
 
 import dualing.utils.constants as c
 import dualing.utils.exception as e
-import dualing.utils.logging as l
 from dualing.core import Dataset
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class BatchDataset(Dataset):
@@ -17,8 +17,16 @@ class BatchDataset(Dataset):
 
     """
 
-    def __init__(self, data, labels, batch_size=1, input_shape=None, normalize=(0, 1),
-                 shuffle=True, seed=0):
+    def __init__(
+        self,
+        data,
+        labels,
+        batch_size=1,
+        input_shape=None,
+        normalize=(0, 1),
+        shuffle=True,
+        seed=0,
+    ):
         """Initialization method.
 
         Args:
@@ -32,28 +40,28 @@ class BatchDataset(Dataset):
 
         """
 
-        logger.info('Overriding class: Dataset -> BatchDataset.')
+        logger.info("Overriding class: Dataset -> BatchDataset.")
 
-        super(BatchDataset, self).__init__(batch_size, input_shape, normalize, shuffle, seed)
+        super(BatchDataset, self).__init__(
+            batch_size, input_shape, normalize, shuffle, seed
+        )
 
         data = self.preprocess(data)
 
         self._build(data, labels)
 
-        logger.info('Class overrided.')
+        logger.info("Class overrided.")
 
     @property
     def batches(self):
-        """tf.data.Dataset: Batches of data (samples, labels).
-
-        """
+        """tf.data.Dataset: Batches of data (samples, labels)."""
 
         return self._batches
 
     @batches.setter
     def batches(self, batches):
         if not isinstance(batches, tf.data.Dataset):
-            raise e.TypeError('`batches` should be a tf.data.Dataset')
+            raise e.TypeError("`batches` should be a tf.data.Dataset")
 
         self._batches = batches
 

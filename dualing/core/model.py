@@ -12,7 +12,7 @@ class Base(tf.keras.Model):
 
     """
 
-    def __init__(self, name=''):
+    def __init__(self, name=""):
         """Initialization method.
 
         Args:
@@ -40,11 +40,9 @@ class Base(tf.keras.Model):
 
 
 class Siamese(tf.keras.Model):
-    """An Siamese class is responsible for implementing the base of Siamese Neural Networks.
+    """An Siamese class is responsible for implementing the base of Siamese Neural Networks."""
 
-    """
-
-    def __init__(self, base, name=''):
+    def __init__(self, base, name=""):
         """Initialization method.
 
         Args:
@@ -60,16 +58,14 @@ class Siamese(tf.keras.Model):
 
     @property
     def B(self):
-        """Base: Twin architecture.
-
-        """
+        """Base: Twin architecture."""
 
         return self._B
 
     @B.setter
     def B(self, B):
         if not isinstance(B, Base):
-            raise e.TypeError('`B` should be a child from Base class')
+            raise e.TypeError("`B` should be a child from Base class")
 
         self._B = B
 

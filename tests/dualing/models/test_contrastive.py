@@ -5,11 +5,6 @@ from dualing.models import contrastive
 from dualing.models.base import mlp
 
 
-def test_contrastive():
-    new_base = mlp.Base()
-    new_siamese = contrastive.ContrastiveSiamese(new_base)
-
-
 def test_contrastive_margin():
     new_base = mlp.Base()
     new_siamese = contrastive.ContrastiveSiamese(new_base)
@@ -33,7 +28,7 @@ def test_contrastive_distance():
     new_base = mlp.Base()
     new_siamese = contrastive.ContrastiveSiamese(new_base)
 
-    assert new_siamese.distance == 'L2'
+    assert new_siamese.distance == "L2"
 
 
 def test_contrastive_distance_setter():
@@ -41,17 +36,15 @@ def test_contrastive_distance_setter():
     new_siamese = contrastive.ContrastiveSiamese(new_base)
 
     try:
-        new_siamese.distance = 'a'
+        new_siamese.distance = "a"
     except:
-        new_siamese.distance == 'L2'
+        new_siamese.distance == "L2"
 
-    assert new_siamese.distance == 'L2'
+    assert new_siamese.distance == "L2"
 
 
 def test_contrastive_step():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = contrastive.ContrastiveSiamese(new_base)
@@ -66,8 +59,7 @@ def test_contrastive_step():
 
 def test_contrastive_fit():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
+    train = pair.BalancedPairDataset(x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = contrastive.ContrastiveSiamese(new_base)
@@ -78,8 +70,7 @@ def test_contrastive_fit():
 
 def test_contrastive_evaluate():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
+    train = pair.BalancedPairDataset(x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = contrastive.ContrastiveSiamese(new_base)
@@ -91,8 +82,7 @@ def test_contrastive_evaluate():
 
 def test_contrastive_predict():
     (x, y), (_, _) = tf.keras.datasets.mnist.load_data()
-    train = pair.BalancedPairDataset(
-        x, y, n_pairs=10, input_shape=(x.shape[0], 784))
+    train = pair.BalancedPairDataset(x, y, n_pairs=10, input_shape=(x.shape[0], 784))
 
     new_base = mlp.MLP()
     new_siamese = contrastive.ContrastiveSiamese(new_base)
@@ -103,11 +93,11 @@ def test_contrastive_predict():
     x1 = tf.ones((1, 784))
     x2 = tf.ones((1, 784))
 
-    new_siamese.distance = 'L1'
+    new_siamese.distance = "L1"
     new_siamese.predict(x1, x2)
 
-    new_siamese.distance = 'L2'
+    new_siamese.distance = "L2"
     new_siamese.predict(x1, x2)
 
-    new_siamese.distance = 'angular'
+    new_siamese.distance = "angular"
     new_siamese.predict(x1, x2)

@@ -4,10 +4,10 @@
 import tensorflow as tf
 
 import dualing.utils.exception as e
-import dualing.utils.logging as l
 from dualing.core import BinaryCrossEntropy, Siamese
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class CrossEntropySiamese(Siamese):
@@ -21,7 +21,7 @@ class CrossEntropySiamese(Siamese):
 
     """
 
-    def __init__(self, base, distance_metric='concat', name=''):
+    def __init__(self, base, distance_metric="concat", name=""):
         """Initialization method.
 
         Args:
@@ -31,7 +31,7 @@ class CrossEntropySiamese(Siamese):
 
         """
 
-        logger.info('Overriding class: Siamese -> CrossEntropySiamese.')
+        logger.info("Overriding class: Siamese -> CrossEntropySiamese.")
 
         super(CrossEntropySiamese, self).__init__(base, name=name)
 
@@ -39,22 +39,20 @@ class CrossEntropySiamese(Siamese):
         self.distance = distance_metric
 
         # Defines the output layer
-        self.o = tf.keras.layers.Dense(1, activation='sigmoid')
+        self.o = tf.keras.layers.Dense(1, activation="sigmoid")
 
-        logger.info('Class overrided.')
+        logger.info("Class overrided.")
 
     @property
     def distance(self):
-        """str: Distance metric.
-
-        """
+        """str: Distance metric."""
 
         return self._distance
 
     @distance.setter
     def distance(self, distance):
-        if distance not in ['concat', 'diff']:
-            raise e.ValueError('`distance` should be `concat`, or `diff`')
+        if distance not in ["concat", "diff"]:
+            raise e.ValueError("`distance` should be `concat`, or `diff`")
 
         self._distance = distance
 
@@ -76,10 +74,10 @@ class CrossEntropySiamese(Siamese):
         self.acc = tf.keras.metrics.binary_accuracy
 
         # Defines the loss metric
-        self.loss_metric = tf.metrics.Mean(name='loss')
+        self.loss_metric = tf.metrics.Mean(name="loss")
 
         # Defines the accuracy metric
-        self.acc_metric = tf.metrics.Mean(name='acc')
+        self.acc_metric = tf.metrics.Mean(name="acc")
 
     @tf.function
     def step(self, x1, x2, y):
@@ -107,8 +105,7 @@ class CrossEntropySiamese(Siamese):
         gradients = tape.gradient(loss, self.B.trainable_variables)
 
         # Applies the gradients using an optimizer
-        self.optimizer.apply_gradients(
-            zip(gradients, self.B.trainable_variables))
+        self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
 
         # Updates the metrics' states
         self.loss_metric.update_state(loss)
@@ -124,32 +121,37 @@ class CrossEntropySiamese(Siamese):
 
         """
 
-        logger.info('Fitting model ...')
+        logger.info("Fitting model ...")
 
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         for epoch in range(epochs):
-            logger.info('Epoch %d/%d', epoch+1, epochs)
+            logger.info("Epoch %d/%d", epoch + 1, epochs)
 
             # Resets metrics' states
             self.loss_metric.reset_states()
             self.acc_metric.reset_states()
 
             # Defines a customized progress bar
-            b = tf.keras.utils.Progbar(
-                n_batches, stateful_metrics=['loss', 'acc'])
+            b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["loss", "acc"])
 
             for (x1_batch, x2_batch, y_batch) in batches:
                 # Performs the optimization step
                 self.step(x1_batch, x2_batch, y_batch)
 
                 # Adds corresponding values to the progress bar
-                b.add(1, values=[('loss', self.loss_metric.result()),
-                                 ('acc', self.acc_metric.result())])
+                b.add(
+                    1,
+                    values=[
+                        ("loss", self.loss_metric.result()),
+                        ("acc", self.acc_metric.result()),
+                    ],
+                )
 
             logger.to_file(
-                f'Loss: {self.loss_metric.result()} | Accuracy: {self.acc_metric.result()}')
+                f"Loss: {self.loss_metric.result()} | Accuracy: {self.acc_metric.result()}"
+            )
 
     def evaluate(self, batches):
         """Method that evaluates the model over validation or testing batches.
@@ -160,7 +162,7 @@ class CrossEntropySiamese(Siamese):
 
         """
 
-        logger.info('Evaluating model ...')
+        logger.info("Evaluating model ...")
 
         # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
@@ -170,7 +172,7 @@ class CrossEntropySiamese(Siamese):
         self.acc_metric.reset_states()
 
         # Defines a customized progress bar
-        b = tf.keras.utils.Progbar(n_batches, stateful_metrics=['val_loss', 'val_acc'])
+        b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["val_loss", "val_acc"])
 
         for (x1_batch, x2_batch, y_batch) in batches:
             # Performs the prediction
@@ -187,11 +189,17 @@ class CrossEntropySiamese(Siamese):
             self.acc_metric.update_state(acc)
 
             # Adds corresponding values to the progress bar
-            b.add(1, values=[('val_loss', self.loss_metric.result()),
-                             ('val_acc', self.acc_metric.result())])
+            b.add(
+                1,
+                values=[
+                    ("val_loss", self.loss_metric.result()),
+                    ("val_acc", self.acc_metric.result()),
+                ],
+            )
 
         logger.to_file(
-            f'Val Loss: {self.loss_metric.result()} | Val Accuracy: {self.acc_metric.result()}')
+            f"Val Loss: {self.loss_metric.result()} | Val Accuracy: {self.acc_metric.result()}"
+        )
 
     def predict(self, x1, x2):
         """Method that performs a forward pass over samples and returns the network's output.
@@ -209,10 +217,10 @@ class CrossEntropySiamese(Siamese):
         z1 = self.B(x1)
         z2 = self.B(x2)
 
-        if self.distance == 'concat':
+        if self.distance == "concat":
             y_pred = tf.squeeze(self.o(tf.concat([z1, z2], -1)), -1)
 
-        elif self.distance == 'diff':
+        elif self.distance == "diff":
             y_pred = tf.squeeze(self.o(tf.abs(z1 - z2)), -1)
 
         # Checks if rank of predictions is equal to two

@@ -6,7 +6,7 @@ from dualing.models.base import cnn
 def test_cnn():
     new_base = cnn.CNN()
 
-    assert new_base.name == 'cnn'
+    assert new_base.name == "cnn"
 
 
 def test_cnn_call():

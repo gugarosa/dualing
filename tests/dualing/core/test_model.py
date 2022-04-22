@@ -5,9 +5,9 @@ from dualing.core import model
 
 
 def test_base():
-    new_base = model.Base(name='new_base')
+    new_base = model.Base(name="new_base")
 
-    assert new_base.name == 'new_base'
+    assert new_base.name == "new_base"
 
 
 def test_base_call():

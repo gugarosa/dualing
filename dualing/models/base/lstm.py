@@ -3,16 +3,14 @@
 
 from tensorflow.keras.layers import RNN, Dense, Embedding, LSTMCell
 
-import dualing.utils.logging as l
 from dualing.core import Base
+from dualing.utils import logging
 
-logger = l.get_logger(__name__)
+logger = logging.get_logger(__name__)
 
 
 class LSTM(Base):
-    """An LSTM class stands for a standard Long Short-Term Memory implementation.
-
-    """
+    """An LSTM class stands for a standard Long Short-Term Memory implementation."""
 
     def __init__(self, vocab_size=1, embedding_size=32, hidden_size=64):
         """Initialization method.
@@ -24,24 +22,29 @@ class LSTM(Base):
 
         """
 
-        logger.info('Overriding class: Base -> LSTM.')
+        logger.info("Overriding class: Base -> LSTM.")
 
-        super(LSTM, self).__init__(name='lstm')
+        super(LSTM, self).__init__(name="lstm")
 
         # Embedding layer
-        self.embedding = Embedding(vocab_size, embedding_size, name='embedding')
+        self.embedding = Embedding(vocab_size, embedding_size, name="embedding")
 
         # LSTM cell
-        self.cell = LSTMCell(hidden_size, name='lstm_cell')
+        self.cell = LSTMCell(hidden_size, name="lstm_cell")
 
         # RNN layer
-        self.rnn = RNN(self.cell, name='rnn_layer', return_sequences=True)
+        self.rnn = RNN(self.cell, name="rnn_layer", return_sequences=True)
 
         # Linear (dense) layer
-        self.fc = Dense(vocab_size, name='out')
+        self.fc = Dense(vocab_size, name="out")
 
-        logger.info('Class overrided.')
-        logger.debug('Embedding: %d | Hidden: %d | Output: %d.', embedding_size, hidden_size, vocab_size)
+        logger.info("Class overrided.")
+        logger.debug(
+            "Embedding: %d | Hidden: %d | Output: %d.",
+            embedding_size,
+            hidden_size,
+            vocab_size,
+        )
 
     def call(self, x):
         """Method that holds vital information whenever this class is called.
