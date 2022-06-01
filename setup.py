@@ -20,7 +20,7 @@ setup(
         "pylint>=2.7.2",
         "pytest>=6.2.2",
         "tensorflow<=2.6.2",
-        "tensorflow-addons<=0.14.0",
+        "tensorflow-addons<0.18.0",
     ],
     extras_require={
         "tests": [
