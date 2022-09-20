@@ -45,10 +45,7 @@ class ContrastiveSiamese(Siamese):
 
         super(ContrastiveSiamese, self).__init__(base, name=name)
 
-        # Radius around embedding space
         self.margin = margin
-
-        # Distance metric
         self.distance = distance_metric
 
         logger.info("Class overrided.")
@@ -89,13 +86,8 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        # Creates an optimizer object
         self.optimizer = optimizer
-
-        # Defines the loss function
         self.loss = ContrastiveLoss()
-
-        # Defines the loss metric
         self.loss_metric = tf.metrics.Mean(name="loss")
 
     @tf.function
@@ -109,21 +101,13 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        # Uses tensorflow's gradient
         with tf.GradientTape() as tape:
-            # Performs the prediction
             y_pred = self.predict(x1, x2)
-
-            # Calculates the loss
             loss = self.loss(y, y_pred, self.margin)
 
-        # Calculates the gradients for each training variable based on the loss function
         gradients = tape.gradient(loss, self.B.trainable_variables)
-
-        # Applies the gradients using an optimizer
         self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
 
-        # Updates the metrics' states
         self.loss_metric.update_state(loss)
 
     def fit(
@@ -141,23 +125,18 @@ class ContrastiveSiamese(Siamese):
 
         logger.info("Fitting model ...")
 
-        # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         for epoch in range(epochs):
             logger.info("Epoch %d/%d", epoch + 1, epochs)
 
-            # Resets metrics' states
             self.loss_metric.reset_states()
 
-            # Defines a customized progress bar
             b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["loss"])
 
             for (x1_batch, x2_batch, y_batch) in batches:
-                # Performs the optimization step
                 self.step(x1_batch, x2_batch, y_batch)
 
-                # Adds corresponding values to the progress bar
                 b.add(1, values=[("loss", self.loss_metric.result())])
 
             logger.to_file(f"Loss: {self.loss_metric.result()}")
@@ -172,26 +151,18 @@ class ContrastiveSiamese(Siamese):
 
         logger.info("Evaluating model ...")
 
-        # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
-        # Resets metrics' states
         self.loss_metric.reset_states()
 
-        # Defines a customized progress bar
         b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["val_loss"])
 
         for (x1_batch, x2_batch, y_batch) in batches:
-            # Performs the prediction
             y_pred = self.predict(x1_batch, x2_batch)
-
-            # Calculates the loss
             loss = self.loss(y_batch, y_pred, self.margin)
 
-            # Updates the metrics' states
             self.loss_metric.update_state(loss)
 
-            # Adds corresponding values to the progress bar
             b.add(1, values=[("val_loss", self.loss_metric.result())])
 
         logger.to_file(f"Val Loss: {self.loss_metric.result()}")
@@ -208,11 +179,9 @@ class ContrastiveSiamese(Siamese):
 
         """
 
-        # Passes samples through the network
         z1 = self.B(x1)
         z2 = self.B(x2)
 
-        # Checks the rank of the output
         if tf.rank(z1) == 3:
             # If it is 3-rank, reduce its mean over the second dimension
             # This is purely to allow recurrrent-based models compatibility

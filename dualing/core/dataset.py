@@ -37,19 +37,11 @@ class Dataset:
 
         """
 
-        # Batch size
         self.batch_size = batch_size
-
-        # Shape of the input tensors
         self.input_shape = input_shape
-
-        # Normalization bounds
         self.normalize = normalize
-
-        # Whether data should be shuffled or not
         self.shuffle = shuffle
 
-        # Defines the tensorflow random seed
         tf.random.set_seed(seed)
 
         logger.debug(
@@ -131,13 +123,9 @@ class Dataset:
             data = data.reshape(self.input_shape)
 
         if self.normalize:
-            # Gathers the lower and upper bounds of normalization
             low, high = self.normalize[0], self.normalize[1]
-
-            # Gathers the minimum and maximum values of the data
             _min, _max = tf.math.reduce_min(data), tf.math.reduce_max(data)
 
-            # Normalizes the data between `low` and `high`
             data = (high - low) * ((data - _min) / (_max - _min)) + low
 
         return data

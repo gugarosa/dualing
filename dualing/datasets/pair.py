@@ -52,13 +52,11 @@ class BalancedPairDataset(Dataset):
         )
 
         try:
-            # Checks if supplied labels are not equal
             assert not np.all(labels == labels[0])
 
         except:
             raise e.ValueError("`labels` should have distinct values")
 
-        # Amount of pairs
         self.n_pairs = n_pairs
 
         data = self.preprocess(data)
@@ -110,35 +108,23 @@ class BalancedPairDataset(Dataset):
 
         logger.debug("Creating pairs ...")
 
-        # Defines the number of samples and number of pairs
         n_samples = data.shape[0]
         n_pairs = self.n_pairs // 2
 
-        # Defines the positive and negative lists
         x1_p, x2_p, y_p = [], [], []
         x1_n, x2_n, y_n = [], [], []
 
-        # Iterates until both positive and negative pairs
         while len(y_p) < n_pairs or len(y_n) < n_pairs:
-            # Samples two random indexes
             idx = tf.random.uniform([2], maxval=n_samples, dtype="int32")
 
-            # If labels are equal on the particular indexes
             if tf.equal(tf.gather(labels, idx[0]), tf.gather(labels, idx[1])):
-                # Appends positive data to `x1` and negative to `x2`
                 x1_p.append(tf.gather(data, idx[0]))
                 x2_p.append(tf.gather(data, idx[1]))
-
-                # Appends positive label to `y`
                 y_p.append(1.0)
 
-            # If labels are not equal on the particular indexes
             else:
-                # Appends negative data to `x1` and negative to `x2`
                 x1_n.append(tf.gather(data, idx[0]))
                 x2_n.append(tf.gather(data, idx[1]))
-
-                # Appends negative label to `y`
                 y_n.append(0.0)
 
         # Merges the positive and negative `x1`, `x2` and labels
@@ -250,23 +236,18 @@ class RandomPairDataset(Dataset):
 
         logger.debug("Creating pairs ...")
 
-        # Defines the number of samples and pairs
         n_samples = data.shape[0]
         n_pairs = n_samples // 2
 
-        # Randomly samples indexes
         indexes = tf.random.shuffle(tf.range(n_samples))
 
-        # Gathers samples and their labels
         x1, x2 = tf.gather(data, indexes[:n_pairs]), tf.gather(data, indexes[n_pairs:])
         y1, y2 = tf.gather(labels, indexes[:n_pairs]), tf.gather(
             labels, indexes[n_pairs:]
         )
 
-        # If labels are equal, it means that samples are similar
         y = tf.cast(tf.equal(y1, y2), "float32")
 
-        # Calculates the number of positive and negative pairs
         n_pos_pairs = tf.math.count_nonzero(y)
         n_neg_pairs = y.shape[0] - n_pos_pairs
 

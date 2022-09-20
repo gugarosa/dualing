@@ -77,11 +77,9 @@ class BatchDataset(Dataset):
 
         """
 
-        # Creates a dataset from tensor slices
         batches = tf.data.Dataset.from_tensor_slices((data, labels))
 
         if self.shuffle:
             batches = batches.shuffle(c.BUFFER_SIZE)
 
-        # Creates the actual batches
         self.batches = batches.batch(self.batch_size)

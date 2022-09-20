@@ -35,16 +35,9 @@ class RNN(Base):
 
         super(RNN, self).__init__(name="rnn")
 
-        # Embedding layer
         self.embedding = Embedding(vocab_size, embedding_size, name="embedding")
-
-        # RNN cell
         self.cell = SimpleRNNCell(hidden_size, name="rnn_cell")
-
-        # RNN layer
         self.rnn = RNNLayer(self.cell, name="rnn_layer", return_sequences=True)
-
-        # Linear (dense) layer
         self.fc = Dense(vocab_size, name="out")
 
         logger.info("Class overrided.")
@@ -66,13 +59,8 @@ class RNN(Base):
 
         """
 
-        # Firstly, we apply the embedding layer
         x = self.embedding(x)
-
-        # We need to apply the input into the first recurrent layer
         x = self.rnn(x)
-
-        # The input also suffers a linear combination to output correct shape
         x = self.fc(x)
 
         return x

@@ -39,21 +39,14 @@ class CNN(Base):
         # Asserting that it will be possible to create the convolutional layers
         assert init_kernel - 2 * (n_blocks - 1) >= 1
 
-        # Convolutional layers
         self.conv = [
             Conv2D(
                 32 * (2**i), init_kernel - 2 * i, activation="relu", padding="same"
             )
             for i in range(n_blocks)
         ]
-
-        # Pooling layers
         self.pool = [MaxPool2D() for _ in range(n_blocks)]
-
-        # Flatenning layer
         self.flatten = Flatten()
-
-        # Final fully-connected layer
         self.fc = Dense(n_output, activation=activation)
 
         logger.info("Class overrided.")
@@ -76,18 +69,10 @@ class CNN(Base):
 
         """
 
-        # Iterate through convolutional and poooling layers
         for (conv, pool) in zip(self.conv, self.pool):
-            # Pass through convolutional layer
             x = conv(x)
-
-            # Pass through pooling layer
             x = pool(x)
-
-        # Flattens the outputs
         x = self.flatten(x)
-
-        # Pass through the fully-connected layer
         x = self.fc(x)
 
         return x

@@ -57,7 +57,6 @@ class Siamese(tf.keras.Model):
 
         super(Siamese, self).__init__(name=name)
 
-        # Defines the Siamese's base twin architecture
         self.B = base
 
     @property

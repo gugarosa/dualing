@@ -27,7 +27,6 @@ class MLP(Base):
 
         super(MLP, self).__init__(name="mlp")
 
-        # Fully-connected layers
         self.fc = [Dense(units) for units in n_hidden]
 
         logger.info("Class overrided.")
@@ -44,9 +43,7 @@ class MLP(Base):
 
         """
 
-        # Iterates through all fully-connected layers
         for fc in self.fc:
-            # Passes down through the layer
             x = fc(x)
 
         return x

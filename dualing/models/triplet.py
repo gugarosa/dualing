@@ -49,16 +49,10 @@ class TripletSiamese(Siamese):
 
         super(TripletSiamese, self).__init__(base, name=name)
 
-        # Type of loss
         self.loss_type = loss
-
-        # Radius around embedding space
         self.margin = margin
-
-        # Soft margin
         self.soft = soft
 
-        # Distance metric
         if distance_metric == "L1":
             self.distance = "L2"
         elif distance_metric == "L2":
@@ -130,18 +124,13 @@ class TripletSiamese(Siamese):
 
         """
 
-        # Creates an optimizer object
         self.optimizer = optimizer
 
-        # Check it is supposed to use hard negative mining
         if self.loss_type == "hard":
             self.loss = TripletHardLoss()
-
-        # If it is supposed to use semi-hard negative mining
         elif self.loss_type == "semi-hard":
             self.loss = TripletSemiHardLoss()
 
-        # Defines the loss metric
         self.loss_metric = tf.metrics.Mean(name="loss")
 
     @tf.function
@@ -154,12 +143,9 @@ class TripletSiamese(Siamese):
 
         """
 
-        # Uses tensorflow's gradient
         with tf.GradientTape() as tape:
-            # Passes the batch inputs through the network
             y_pred = self.B(x)
 
-            # Checks the rank of the output
             if tf.rank(y_pred) == 3:
                 # If it is 3-rank, reduce its mean over the second dimension
                 # This is purely to allow recurrrent-based models compatibility
@@ -167,17 +153,11 @@ class TripletSiamese(Siamese):
 
             # Performs the L2 normalization prior to the loss function
             y_pred = tf.math.l2_normalize(y_pred, axis=-1)
-
-            # Calculates the loss
             loss = self.loss(y, y_pred, self.margin, self.soft, self.distance)
 
-        # Calculates the gradients for each training variable based on the loss function
         gradients = tape.gradient(loss, self.B.trainable_variables)
-
-        # Applies the gradients using an optimizer
         self.optimizer.apply_gradients(zip(gradients, self.B.trainable_variables))
 
-        # Updates the metrics' states
         self.loss_metric.update_state(loss)
 
     def fit(self, batches: BatchDataset, epochs: Optional[int] = 100) -> None:
@@ -191,23 +171,18 @@ class TripletSiamese(Siamese):
 
         logger.info("Fitting model ...")
 
-        # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
         for epoch in range(epochs):
             logger.info("Epoch %d/%d", epoch + 1, epochs)
 
-            # Resets metrics' states
             self.loss_metric.reset_states()
 
-            # Defines a customized progress bar
             b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["loss"])
 
             for (x_batch, y_batch) in batches:
-                # Performs the optimization step
                 self.step(x_batch, y_batch)
 
-                # Adds corresponding values to the progress bar
                 b.add(1, values=[("loss", self.loss_metric.result())])
 
             logger.to_file(f"Loss: {self.loss_metric.result()}")
@@ -222,20 +197,15 @@ class TripletSiamese(Siamese):
 
         logger.info("Evaluating model ...")
 
-        # Gathers the amount of batches
         n_batches = tf.data.experimental.cardinality(batches).numpy()
 
-        # Resets metrics' states
         self.loss_metric.reset_states()
 
-        # Defines a customized progress bar
         b = tf.keras.utils.Progbar(n_batches, stateful_metrics=["val_loss"])
 
         for (x_batch, y_batch) in batches:
-            # Passes the batch inputs through the network
             y_pred = self.B(x_batch)
 
-            # Checks the rank of the output
             if tf.rank(y_pred) == 3:
                 # If it is 3-rank, reduce its mean over the second dimension
                 # This is purely to allow recurrrent-based models compatibility
@@ -243,14 +213,10 @@ class TripletSiamese(Siamese):
 
             # Performs the L2 normalization prior to the loss function
             y_pred = tf.math.l2_normalize(y_pred, axis=-1)
-
-            # Calculates the loss
             loss = self.loss(y_batch, y_pred, self.margin)
 
-            # Updates the metrics' states
             self.loss_metric.update_state(loss)
 
-            # Adds corresponding values to the progress bar
             b.add(1, values=[("val_loss", self.loss_metric.result())])
 
         logger.to_file(f"Val Loss: {self.loss_metric.result()}")
@@ -267,11 +233,9 @@ class TripletSiamese(Siamese):
 
         """
 
-        # Passes samples through the network
         z1 = self.B(x1)
         z2 = self.B(x2)
 
-        # Checks the rank of the output
         if tf.rank(z1) == 3:
             # If it is 3-rank, reduce its mean over the second dimension
             # This is purely to allow recurrrent-based models compatibility

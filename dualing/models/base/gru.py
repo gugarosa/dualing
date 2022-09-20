@@ -34,16 +34,9 @@ class GRU(Base):
 
         super(GRU, self).__init__(name="gru")
 
-        # Embedding layer
         self.embedding = Embedding(vocab_size, embedding_size, name="embedding")
-
-        # GRU cell
         self.cell = GRUCell(hidden_size, name="gru_cell")
-
-        # RNN layer
         self.rnn = RNN(self.cell, name="rnn_layer", return_sequences=True)
-
-        # Linear (dense) layer
         self.fc = Dense(vocab_size, name="out")
 
         logger.info("Class overrided.")
@@ -65,13 +58,8 @@ class GRU(Base):
 
         """
 
-        # Firstly, we apply the embedding layer
         x = self.embedding(x)
-
-        # We need to apply the input into the first recurrent layer
         x = self.rnn(x)
-
-        # The input also suffers a linear combination to output correct shape
         x = self.fc(x)
 
         return x

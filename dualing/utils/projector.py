@@ -39,22 +39,15 @@ def plot_embeddings(
 
     """
 
-    # Makes sure that embeddings and labels are numpy arrays
     embeddings = _tensor_to_numpy(embeddings)
     labels = _tensor_to_numpy(labels)
 
-    # Creates figure and axis subplots
     _, axis = plt.subplots(figsize=(13, 7))
 
-    # Creates the axis labels strings
     x_label, y_label = f"$x_{dims[0]}$", f"$x_{dims[1]}$"
-
-    # Defines some properties, such as axis labels
     axis.set(xlabel=r"{}".format(x_label), ylabel=r"{}".format(y_label))
 
-    # Iterates through every possible labels
     for i in range(np.max(labels) + 1):
-        # Gathers the indexes
         indexes = np.where(labels == i)[0]
 
         # Scatter plot the desired dimensions (2-D)
