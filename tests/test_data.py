@@ -11,7 +11,9 @@ from dualing.data import (
 
 def test_preprocess_and_batch_dataset():
     data = np.arange(12).reshape(4, 3)
+
     processed = preprocess(data, (2, 6), (-1.0, 1.0))
+
     assert processed.shape == (2, 6)
     assert np.isclose(processed.numpy().min(), -1.0)
     assert np.isclose(processed.numpy().max(), 1.0)
@@ -19,6 +21,7 @@ def test_preprocess_and_batch_dataset():
     samples, labels = next(
         iter(batch_dataset(data, np.arange(4), batch_size=2, shuffle=False))
     )
+
     assert samples.shape == (2, 3)
     assert labels.numpy().tolist() == [0, 1]
 
@@ -26,6 +29,7 @@ def test_preprocess_and_batch_dataset():
 def test_balanced_pair_dataset():
     data = np.arange(24).reshape(8, 3)
     labels = np.repeat([0, 1], 4)
+
     (_, _), targets = next(
         iter(
             balanced_pair_dataset(
@@ -38,6 +42,7 @@ def test_balanced_pair_dataset():
             )
         )
     )
+
     assert targets.numpy().tolist() == [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
 
     with pytest.raises(ValueError):
@@ -47,6 +52,7 @@ def test_balanced_pair_dataset():
 def test_random_pair_dataset():
     data = np.arange(15).reshape(5, 3)
     labels = np.arange(5)
+
     (left, right), targets = next(
         iter(
             random_pair_dataset(
@@ -54,5 +60,6 @@ def test_random_pair_dataset():
             )
         )
     )
+
     assert left.shape == right.shape == (2, 3)
     assert targets.shape == (2,)

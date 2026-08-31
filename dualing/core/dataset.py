@@ -1,0 +1,102 @@
+"""Legacy-compatible dataset base class."""
+
+import tensorflow as tf
+
+from dualing.utils import exception
+
+
+class Dataset:
+    """Store common preprocessing and batching options."""
+
+    def __init__(
+        self,
+        batch_size: int = 1,
+        input_shape: tuple[int, ...] | None = None,
+        normalize: tuple[float, float] | None = (0.0, 1.0),
+        shuffle: bool = True,
+        seed: int = 0,
+    ) -> None:
+        self.batch_size = batch_size
+        self.input_shape = input_shape
+        self.normalize = normalize
+        self.shuffle = shuffle
+        self.seed = seed
+
+        tf.random.set_seed(seed)
+
+    @property
+    def batch_size(self) -> int:
+        """Batch size."""
+
+        return self._batch_size
+
+    @batch_size.setter
+    def batch_size(self, batch_size: int) -> None:
+        if not isinstance(batch_size, int):
+            raise exception.TypeError("`batch_size` should be an integer")
+
+        if batch_size <= 0:
+            raise exception.ValueError("`batch_size` should be greater than 0")
+
+        self._batch_size = batch_size
+
+    @property
+    def input_shape(self) -> tuple[int, ...] | None:
+        """Shape of the input tensors."""
+
+        return self._input_shape
+
+    @input_shape.setter
+    def input_shape(self, input_shape: tuple[int, ...] | None) -> None:
+        if not isinstance(input_shape, tuple) and input_shape is not None:
+            raise exception.TypeError("`input_shape` should be a tuple or None")
+
+        self._input_shape = input_shape
+
+    @property
+    def normalize(self) -> tuple[float, float] | None:
+        """Normalization bounds."""
+
+        return self._normalize
+
+    @normalize.setter
+    def normalize(self, normalize: tuple[float, float] | None) -> None:
+        if not isinstance(normalize, tuple) and normalize is not None:
+            raise exception.TypeError("`normalize` should be a tuple or None")
+
+        self._normalize = normalize
+
+    @property
+    def shuffle(self) -> bool:
+        """Whether data should be shuffled."""
+
+        return self._shuffle
+
+    @shuffle.setter
+    def shuffle(self, shuffle: bool) -> None:
+        if not isinstance(shuffle, bool):
+            raise exception.TypeError("`shuffle` should be a boolean")
+
+        self._shuffle = shuffle
+
+    def preprocess(self, data) -> tf.Tensor:
+        """Reshape and normalize input data."""
+
+        data = tf.cast(tf.convert_to_tensor(data), tf.float32)
+
+        if self.input_shape:
+            data = tf.reshape(data, self.input_shape)
+
+        if self.normalize:
+            lower, upper = self.normalize
+            minimum = tf.reduce_min(data)
+            maximum = tf.reduce_max(data)
+
+            data = (upper - lower) * ((data - minimum) / (maximum - minimum)) + lower
+
+        return data
+
+    def _build(self) -> None:
+        """Build the concrete dataset."""
+
+        raise NotImplementedError

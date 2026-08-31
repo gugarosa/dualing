@@ -1,12 +1,19 @@
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+
+# Environments and tools
 .venv/
 .ruff_cache/
+
+# Build artifacts
 build/
 dist/
 docs/_build/
+
+# Local files
 *.log
 .DS_Store
 .vscode/

@@ -33,7 +33,9 @@ model.fit(dataset, epochs=5)
 ```
 
 Dataset helpers return native `tf.data.Dataset` objects and all models use
-standard Keras `compile`, `fit`, and `evaluate` behavior.
+standard Keras `compile`, `fit`, and `evaluate` behavior. The original
+`dualing.core`, `dualing.datasets`, `dualing.models.base`, and `dualing.utils`
+APIs remain available.
 
 ## Development
 

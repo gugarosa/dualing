@@ -20,6 +20,9 @@ model = CrossEntropySiamese(
     merge="concat",
     name="cross_entropy_siamese",
 )
+
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001))
+
 model.fit(train, epochs=10, shuffle=False)
+
 model.evaluate(val)
