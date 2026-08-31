@@ -15,10 +15,10 @@ Thank you!
 
 ### Pre-checkings
 
-- [ ] Check that you are up-to-date with the master branch of Dualing. You can update with:
-pip install git+git://github.com/gugarosa/dualing.git --upgrade --no-deps
+- [ ] Check that you are up-to-date with the main branch of Dualing:
+`uv add --upgrade git+https://github.com/gugarosa/dualing.git`
 
-- [ ] Check that you have read all of our [README](https://github.com/gugarosa/dualing/blob/master/README.md).
+- [ ] Check that you have read our [README](https://github.com/gugarosa/dualing/blob/main/README.md).
 
 ### Description
 

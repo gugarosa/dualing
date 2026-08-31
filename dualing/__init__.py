@@ -1,5 +1,30 @@
-"""This is Dualing main library. Note that this library consists
-    of several modules and sub-modules.
-"""
+"""Dual-based neural learning with TensorFlow."""
 
-__version__ = "1.0.4"
+from importlib.metadata import version
+
+from dualing.data import (
+    balanced_pair_dataset,
+    batch_dataset,
+    preprocess,
+    random_pair_dataset,
+)
+from dualing.embedders import CNN, GRU, LSTM, MLP, RNN
+from dualing.models import ContrastiveSiamese, CrossEntropySiamese, TripletSiamese
+
+__version__ = version("dualing")
+
+__all__ = [
+    "CNN",
+    "GRU",
+    "LSTM",
+    "MLP",
+    "RNN",
+    "ContrastiveSiamese",
+    "CrossEntropySiamese",
+    "TripletSiamese",
+    "__version__",
+    "balanced_pair_dataset",
+    "batch_dataset",
+    "preprocess",
+    "random_pair_dataset",
+]
