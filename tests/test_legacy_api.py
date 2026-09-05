@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import matplotlib
 import numpy as np
 import pytest
@@ -53,6 +55,19 @@ def test_original_dataset_classes():
     assert len(random.create_pairs(data, labels)) == 3
 
 
+@pytest.mark.parametrize(
+    "dataset_class", [BatchDataset, BalancedPairDataset, RandomPairDataset]
+)
+def test_original_datasets_normalize_constant_data(dataset_class):
+    data = np.full((4, 2), 5.0)
+    labels = np.array([0, 0, 1, 1])
+    dataset = dataset_class(data, labels, batch_size=2, normalize=(-1.0, 1.0))
+
+    for batch in dataset.batches:
+        for samples in batch[:-1]:
+            np.testing.assert_array_equal(samples, -np.ones(samples.shape))
+
+
 def test_original_loss_classes():
     assert BinaryCrossEntropy()(tf.zeros(1), tf.zeros(1)).numpy() == 0.0
     assert ContrastiveLoss()(tf.zeros(1), tf.zeros(1)).numpy() == 1.0
@@ -72,7 +87,7 @@ def test_original_base_models_and_paths():
         assert model(inputs).shape == (2, 5, 10)
 
     with pytest.raises(NotImplementedError):
-        Base()(None)
+        Base()(tf.ones((1, 4)))
 
 
 def test_original_siamese_contract():
@@ -145,7 +160,10 @@ def test_original_utilities(monkeypatch):
         with pytest.raises(error):
             raise error("compatibility")
 
-    monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
+    show = Mock()
+    monkeypatch.setattr("matplotlib.pyplot.show", show)
+    monkeypatch.setattr("matplotlib.pyplot.get_backend", lambda: "TkAgg")
 
     assert projector._tensor_to_numpy(tf.zeros(1)).shape == (1,)
     assert projector.plot_embeddings(tf.ones((2, 2)), tf.constant([0, 1])) is None
+    show.assert_called_once_with()

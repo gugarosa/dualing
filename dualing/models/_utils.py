@@ -16,7 +16,11 @@ def pair_dataset(dataset):
 
     element_spec = dataset.element_spec
 
-    if isinstance(element_spec, tuple) and len(element_spec) == 3:
+    if (
+        isinstance(element_spec, tuple)
+        and len(element_spec) == 3
+        and not tf.nest.is_nested(element_spec[0])
+    ):
         return dataset.map(_pack_pair)
 
     return dataset

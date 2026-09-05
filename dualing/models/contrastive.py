@@ -79,7 +79,6 @@ class ContrastiveSiamese(Siamese):
         """Compile the model with contrastive loss by default."""
 
         self.loss = ContrastiveLoss(self.margin)
-        self.loss_metric = tf.keras.metrics.Mean(name="loss")
 
         kwargs.setdefault("loss", self.loss)
 
@@ -105,6 +104,9 @@ class ContrastiveSiamese(Siamese):
         if isinstance(x, tf.data.Dataset):
             x = pair_dataset(x)
             kwargs.setdefault("shuffle", False)
+
+        if "validation_data" in kwargs:
+            kwargs["validation_data"] = pair_dataset(kwargs["validation_data"])
 
         return tf.keras.Model.fit(self, x=x, y=y, epochs=epochs, **kwargs)
 

@@ -28,6 +28,8 @@ class CrossEntropySiamese(Siamese):
         self.distance = distance_metric
         self.o = tf.keras.layers.Dense(1, activation="sigmoid")
         self.output_layer = self.o
+        self.acc = tf.keras.metrics.binary_accuracy
+        self.acc_metric = tf.keras.metrics.Mean(name="acc")
 
     @property
     def distance(self) -> str:
@@ -66,18 +68,31 @@ class CrossEntropySiamese(Siamese):
 
         return tf.squeeze(self.o(features), axis=-1)
 
+    @staticmethod
+    def _pair_loss(labels, predictions) -> tf.Tensor:
+        """Keep one loss per scalar pair prediction for sample weighting."""
+
+        return BinaryCrossEntropy()(
+            tf.reshape(labels, [-1, 1]), tf.reshape(predictions, [-1, 1])
+        )
+
     def compile(self, optimizer="rmsprop", **kwargs) -> None:
         """Compile the model with binary cross-entropy by default."""
 
-        self.loss = BinaryCrossEntropy()
-        self.acc = tf.keras.metrics.binary_accuracy
-        self.loss_metric = tf.keras.metrics.Mean(name="loss")
-        self.acc_metric = tf.keras.metrics.Mean(name="acc")
+        self.loss = self._pair_loss
+        self.acc_metric.reset_state()
 
         kwargs.setdefault("loss", self.loss)
         kwargs.setdefault("metrics", [tf.keras.metrics.BinaryAccuracy(name="accuracy")])
 
         tf.keras.Model.compile(self, optimizer=optimizer, **kwargs)
+
+    def compute_metrics(self, x, y, y_pred, sample_weight=None):
+        """Update legacy accuracy alongside the configured Keras metrics."""
+
+        self.acc_metric.update_state(self.acc(y, y_pred))
+
+        return super().compute_metrics(x, y, y_pred, sample_weight)
 
     def step(self, x1: tf.Tensor, x2: tf.Tensor, y: tf.Tensor) -> None:
         """Run one optimization step."""
@@ -101,6 +116,9 @@ class CrossEntropySiamese(Siamese):
         if isinstance(x, tf.data.Dataset):
             x = pair_dataset(x)
             kwargs.setdefault("shuffle", False)
+
+        if "validation_data" in kwargs:
+            kwargs["validation_data"] = pair_dataset(kwargs["validation_data"])
 
         return tf.keras.Model.fit(self, x=x, y=y, epochs=epochs, **kwargs)
 

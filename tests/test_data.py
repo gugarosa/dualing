@@ -63,3 +63,13 @@ def test_random_pair_dataset():
 
     assert left.shape == right.shape == (2, 3)
     assert targets.shape == (2,)
+
+
+@pytest.mark.parametrize("bounds", [(0.0, 1.0), (-1.0, 1.0), None])
+def test_constant_preprocessing(bounds):
+    data = np.full((4, 2), 5.0)
+    expected = 5.0 if bounds is None else bounds[0]
+
+    np.testing.assert_array_equal(
+        preprocess(data, normalize=bounds), np.full((4, 2), expected)
+    )
