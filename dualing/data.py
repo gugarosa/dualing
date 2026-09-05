@@ -27,7 +27,10 @@ def preprocess(
     input_shape: tuple[int, ...] | None = None,
     normalize: tuple[float, float] | None = (0.0, 1.0),
 ) -> tf.Tensor:
-    """Convert data to float tensors, optionally reshaping and normalizing it."""
+    """Convert to float tensors, optionally reshaping and normalizing.
+
+    Constant data maps to the lower normalization bound.
+    """
 
     data = tf.cast(tf.convert_to_tensor(data), tf.float32)
 

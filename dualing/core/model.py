@@ -47,6 +47,16 @@ class Siamese(tf.keras.Model):
     def base(self, base: tf.keras.Model) -> None:
         self.B = base
 
+    @property
+    def loss_metric(self) -> tf.keras.metrics.Metric:
+        """Native Keras loss tracker, also used by the legacy step methods."""
+
+        for metric in self.metrics:
+            if metric.name == "loss":
+                return metric
+
+        raise AttributeError("compile the model before accessing loss_metric")
+
     def compile(self, optimizer="rmsprop", **kwargs) -> None:
         """Attach optimization configuration in a concrete model."""
 

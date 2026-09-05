@@ -10,12 +10,16 @@ from dualing.losses import (
 
 
 class BinaryCrossEntropy:
-    """Binary cross-entropy loss."""
+    """Binary cross-entropy loss averaged over the final axis."""
 
     def __call__(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
         loss = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+        hard_labels = tf.logical_or(tf.equal(y_true, 0), tf.equal(y_true, 1))
+        exact_matches = tf.logical_and(hard_labels, tf.equal(y_true, y_pred))
 
-        return tf.where(tf.equal(y_true, y_pred), tf.zeros_like(loss), loss)
+        return tf.where(
+            tf.reduce_all(exact_matches, axis=-1), tf.zeros_like(loss), loss
+        )
 
 
 class ContrastiveLoss:

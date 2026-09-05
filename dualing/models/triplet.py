@@ -134,7 +134,6 @@ class TripletSiamese(Siamese):
         )
 
         self.loss = loss_class(self.margin, self.soft, self.distance)
-        self.loss_metric = tf.keras.metrics.Mean(name="loss")
 
         kwargs.setdefault("loss", self.loss)
 
@@ -174,8 +173,8 @@ class TripletSiamese(Siamese):
 
         if x2 is not None and not isinstance(x2, numbers.Integral):
             return pair_distance(
-                self.B(x1, training=False),
-                self.B(x2, training=False),
+                self.embed(x1),
+                self.embed(x2),
                 self.distance,
             )
 

@@ -37,6 +37,16 @@ standard Keras `compile`, `fit`, and `evaluate` behavior. The original
 `dualing.core`, `dualing.datasets`, `dualing.models.base`, and `dualing.utils`
 APIs remain available.
 
+Native pair datasets yield `((left, right), labels)` or
+`((left, right), labels, sample_weights)`. The original pair dataset classes
+yield `(left, right, labels)` through their `.batches` attribute. Both forms
+work with pair-model `fit`, `evaluate`, and `fit(validation_data=...)`.
+Default pair losses retain one value per pair so Keras can apply sample weights.
+
+Native and original dataset APIs share preprocessing: normalization maps
+constant data to the lower bound instead of producing NaNs. Use `normalize=None`
+to leave values unscaled.
+
 ## Development
 
 ```bash

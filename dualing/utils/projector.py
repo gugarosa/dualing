@@ -37,5 +37,4 @@ def plot_embeddings(
 
     axis.legend()
 
-    if "agg" not in plt.get_backend().lower():
-        plt.show()
+    plt.show()

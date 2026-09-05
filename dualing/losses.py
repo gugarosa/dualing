@@ -51,11 +51,11 @@ def pairwise_distances(embeddings: tf.Tensor, metric: str = "L2") -> tf.Tensor:
     if metric == "squared-L2":
         return distances
 
-    return tf.where(
-        distances > 0,
-        tf.sqrt(tf.maximum(distances, tf.keras.backend.epsilon())),
-        0.0,
-    )
+    positive = distances > 0
+    # Protect the gradient at zero without flattening small nonzero distances.
+    safe_distances = tf.where(positive, distances, 1.0)
+
+    return tf.where(positive, tf.sqrt(safe_distances), 0.0)
 
 
 def contrastive_loss(

@@ -2,6 +2,7 @@
 
 import tensorflow as tf
 
+from dualing.data import preprocess
 from dualing.utils import exception
 
 
@@ -82,19 +83,7 @@ class Dataset:
     def preprocess(self, data) -> tf.Tensor:
         """Reshape and normalize input data."""
 
-        data = tf.cast(tf.convert_to_tensor(data), tf.float32)
-
-        if self.input_shape:
-            data = tf.reshape(data, self.input_shape)
-
-        if self.normalize:
-            lower, upper = self.normalize
-            minimum = tf.reduce_min(data)
-            maximum = tf.reduce_max(data)
-
-            data = (upper - lower) * ((data - minimum) / (maximum - minimum)) + lower
-
-        return data
+        return preprocess(data, self.input_shape, self.normalize)
 
     def _build(self) -> None:
         """Build the concrete dataset."""
