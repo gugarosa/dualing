@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 """Callable loss classes retained for the original public API."""
 
 from collections.abc import Callable
@@ -15,53 +18,53 @@ from dualing.losses import (
 class _SerializableLoss:
     @classmethod
     def from_config(cls, config: dict) -> Self:
-        """Restore constructor settings without changing the loss reduction."""
-
         return cls(**config)
 
 
 @tf.keras.utils.register_keras_serializable(package="dualing")
 class BinaryCrossEntropy(_SerializableLoss):
-    """Binary cross-entropy averaged over the final axis.
-
-    Inputs must have matching shapes. A vector produces a scalar; a tensor
-    of shape ``(batch, features)`` produces one value per sample. Exact,
-    correct hard-label predictions have zero loss; soft-label entropy is
-    retained.
-    """
+    """Compute binary cross-entropy averaged over the final axis."""
 
     def get_config(self) -> dict:
-        """Return the configuration of this parameter-free loss."""
-
         return {}
 
     def __call__(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
+        """Compute cross-entropy while retaining soft-label entropy.
+
+        A vector produces a scalar. A batch-by-feature tensor produces one value per sample.
+        Exact, correct hard-label predictions have zero loss.
+
+        Args:
+            y_true: Target probabilities with the same shape as y_pred.
+            y_pred: Predicted probabilities.
+
+        Returns:
+            Loss tensor reduced over the final axis.
+
+        """
+
         loss = tf.keras.losses.binary_crossentropy(y_true, y_pred)
         hard_labels = tf.logical_or(tf.equal(y_true, 0), tf.equal(y_true, 1))
         exact_matches = tf.logical_and(hard_labels, tf.equal(y_true, y_pred))
 
-        return tf.where(
-            tf.reduce_all(exact_matches, axis=-1), tf.zeros_like(loss), loss
-        )
+        return tf.where(tf.reduce_all(exact_matches, axis=-1), tf.zeros_like(loss), loss)
 
 
 @tf.keras.utils.register_keras_serializable(package="dualing")
 class ContrastiveLoss(_SerializableLoss):
-    """Per-pair contrastive loss, with 1 for similar and 0 for dissimilar pairs.
-
-    Args:
-        margin: Distance below which dissimilar pairs incur a penalty.
-
-    The optional call-time margin overrides, but does not mutate, the
-    constructor setting saved in the configuration.
-    """
+    """Compute a configurable contrastive loss for sample pairs."""
 
     def __init__(self, margin: float = 1.0) -> None:
+        """Initialize the default contrastive margin.
+
+        Args:
+            margin: Distance below which dissimilar pairs incur a penalty.
+
+        """
+
         self.margin = margin
 
     def get_config(self) -> dict:
-        """Return the default margin."""
-
         return {"margin": self.margin}
 
     def __call__(
@@ -70,6 +73,18 @@ class ContrastiveLoss(_SerializableLoss):
         y_pred: tf.Tensor,
         margin: float | None = None,
     ) -> tf.Tensor:
+        """Compute one contrastive loss per pair without mutating the configured margin.
+
+        Args:
+            y_true: Pair labels with 1 for similar and 0 for dissimilar.
+            y_pred: Predicted pair distances.
+            margin: Call-specific margin, or None to use the constructor setting.
+
+        Returns:
+            Loss tensor with the same shape as y_pred.
+
+        """
+
         return contrastive_loss(
             y_true,
             y_pred,
@@ -91,8 +106,6 @@ class _TripletLoss(_SerializableLoss):
         self.distance_metric = distance_metric
 
     def get_config(self) -> dict:
-        """Return the mining loss settings."""
-
         return {
             "margin": self.margin,
             "soft": self.soft,
@@ -125,33 +138,43 @@ class _TripletLoss(_SerializableLoss):
 
 @tf.keras.utils.register_keras_serializable(package="dualing")
 class TripletHardLoss(_TripletLoss):
-    """Scalar triplet loss using the hardest positive and negative per anchor.
-
-    Args:
-        margin: Additive margin for the hinge loss.
-        soft: Use softplus instead of the margin-based hinge.
-        distance_metric: One of L1, L2, squared-L2, or angular.
-
-    Labels have shape ``(batch,)`` or ``(batch, 1)`` and embeddings have shape
-    ``(batch, features)``. Call-time settings override constructor defaults.
-    For original-API compatibility, a single-class batch returns the margin.
-    """
+    """Compute scalar triplet loss with hard-negative mining."""
 
     _loss_function = staticmethod(triplet_hard_loss)
+
+    def __init__(self, margin: float = 1.0, soft: bool = False, distance_metric: str = "L2") -> None:
+        """Initialize hard-negative triplet mining.
+
+        Calls accept one class label per embedding and a batch-by-feature embedding tensor.
+        Per-call settings override constructor settings. A single-class batch retains the legacy margin result.
+
+        Args:
+            margin: Additive margin for the hinge loss.
+            soft: Whether to use softplus instead of the margin-based hinge.
+            distance_metric: L1, L2, squared-L2, or angular distance.
+
+        """
+
+        super().__init__(margin, soft, distance_metric)
 
 
 @tf.keras.utils.register_keras_serializable(package="dualing")
 class TripletSemiHardLoss(_TripletLoss):
-    """Scalar triplet loss using semi-hard negative mining.
-
-    Args:
-        margin: Additive margin for the hinge loss.
-        soft: Use softplus instead of the margin-based hinge.
-        distance_metric: One of L1, L2, squared-L2, or angular.
-
-    Inputs and per-call overrides follow ``TripletHardLoss``. Each positive
-    pair uses the nearest farther negative, or the farthest negative when
-    none is farther. A single-class batch retains the legacy margin result.
-    """
+    """Compute scalar triplet loss with semi-hard negative mining."""
 
     _loss_function = staticmethod(triplet_semihard_loss)
+
+    def __init__(self, margin: float = 1.0, soft: bool = False, distance_metric: str = "L2") -> None:
+        """Initialize semi-hard negative triplet mining.
+
+        Inputs and per-call overrides follow TripletHardLoss. Each positive pair selects the nearest farther negative.
+        When none is farther, it uses the farthest negative. A single-class batch retains the legacy margin result.
+
+        Args:
+            margin: Additive margin for the hinge loss.
+            soft: Whether to use softplus instead of the margin-based hinge.
+            distance_metric: L1, L2, squared-L2, or angular distance.
+
+        """
+
+        super().__init__(margin, soft, distance_metric)

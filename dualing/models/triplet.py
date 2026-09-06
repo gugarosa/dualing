@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 """Triplet-loss Siamese model."""
 
 import numbers
@@ -13,30 +16,7 @@ from dualing.utils import exception
 
 @tf.keras.utils.register_keras_serializable(package="dualing")
 class TripletSiamese(Siamese):
-    """Learn normalized embeddings using class labels and triplet mining.
-
-    Args:
-        base: Keras embedding model.
-        loss: Legacy mining name: hard or semi-hard.
-        margin: Positive margin for the default hinge loss.
-        soft: Use softplus instead of the hinge.
-        distance_metric: Requested L1, L2, squared-L2, or angular distance.
-        name: Model name.
-        mining: Explicit mining strategy. When supplied, distance_metric is
-            used directly; otherwise the original distance mapping is retained.
-        **kwargs: Standard Keras model options, including trainable and dtype.
-
-    Calling the model returns L2-normalized ``(batch, features)`` embeddings.
-    Training batches should contain multiple classes and positive examples.
-    ``compare`` measures normalized embeddings with the requested metric.
-    Legacy ``predict(left, right)`` compares unnormalized pooled embeddings
-    with the effective ``distance`` metric. Both metrics survive serialization.
-
-    References:
-        X. Dong and J. Shen.
-        Triplet loss in siamese network for object tracking.
-        Proceedings of the European Conference on Computer Vision (2018).
-    """
+    """Learn normalized embeddings using class labels and triplet mining."""
 
     def __init__(
         self,
@@ -50,6 +30,29 @@ class TripletSiamese(Siamese):
         mining: str | None = None,
         **kwargs,
     ) -> None:
+        """Initialize triplet learning without cloning its shared embedder.
+
+        Model calls return normalized (batch, features) embeddings. Batches need positive and negative examples.
+        Comparisons use the requested metric, while legacy pair prediction retains its effective unnormalized metric.
+        Both metrics survive serialization. Explicit mining selects direct distance semantics.
+
+        Args:
+            base: Keras embedding model.
+            loss: Legacy mining name, either hard or semi-hard.
+            margin: Positive margin for the default hinge loss.
+            soft: Whether to use softplus instead of the hinge.
+            distance_metric: Requested L1, L2, squared-L2, or angular distance.
+            name: Model name.
+            mining: Explicit mining strategy, or None to retain the original distance mapping.
+            **kwargs: Native Keras model options such as trainable and dtype.
+
+        References:
+            X. Dong and J. Shen.
+            Triplet loss in siamese network for object tracking.
+            Proceedings of the European Conference on Computer Vision (2018).
+
+        """
+
         super().__init__(base, name=name, **kwargs)
 
         legacy_mode = mining is None
@@ -69,8 +72,6 @@ class TripletSiamese(Siamese):
             self.distance = distance_metric
 
     def get_config(self) -> dict:
-        """Preserve both the requested and effective legacy distance metrics."""
-
         return {
             **super().get_config(),
             "loss": self.loss_type,
@@ -82,14 +83,14 @@ class TripletSiamese(Siamese):
 
     @classmethod
     def from_config(cls, config: dict) -> Self:
-        """Restore the effective metric without reapplying legacy aliases."""
-
         if "distance" not in config:
             return super().from_config(config)
 
         config = dict(config)
         distance = config.pop("distance")
         model = super().from_config(config)
+
+        # Do not apply the legacy metric mapping again to an already resolved distance
         model.distance = distance
 
         return model
@@ -103,7 +104,7 @@ class TripletSiamese(Siamese):
     @loss_type.setter
     def loss_type(self, loss_type: str) -> None:
         if loss_type not in {"hard", "semi-hard"}:
-            raise exception.ValueError("`loss_type` should be `hard` or `semi-hard`")
+            raise exception.ValueError("`loss_type` must be hard or semi-hard.")
 
         self._loss_type = loss_type
 
@@ -126,7 +127,7 @@ class TripletSiamese(Siamese):
     @soft.setter
     def soft(self, soft: bool) -> None:
         if not isinstance(soft, bool):
-            raise exception.TypeError("`soft` should be a boolean")
+            raise exception.TypeError("`soft` must be a boolean.")
 
         self._soft = soft
 
@@ -139,10 +140,10 @@ class TripletSiamese(Siamese):
     @margin.setter
     def margin(self, margin: float) -> None:
         if not isinstance(margin, numbers.Real):
-            raise exception.TypeError("`margin` should be a number")
+            raise exception.TypeError("`margin` must be a number.")
 
         if margin <= 0:
-            raise exception.ValueError("`margin` should be greater than 0")
+            raise exception.ValueError("`margin` must be greater than 0.")
 
         self._margin = float(margin)
 
@@ -155,9 +156,7 @@ class TripletSiamese(Siamese):
     @distance.setter
     def distance(self, distance: str) -> None:
         if distance not in {"L1", "L2", "squared-L2", "angular"}:
-            raise exception.ValueError(
-                "`distance` should be `L1`, `L2`, `squared-L2`, or `angular`"
-            )
+            raise exception.ValueError("`distance` must be L1, L2, squared-L2, or angular.")
 
         self._distance = distance
 
@@ -170,9 +169,7 @@ class TripletSiamese(Siamese):
     @distance_metric.setter
     def distance_metric(self, distance: str) -> None:
         if distance not in {"L1", "L2", "squared-L2", "angular"}:
-            raise exception.ValueError(
-                "`distance_metric` should be `L1`, `L2`, `squared-L2`, or `angular`"
-            )
+            raise exception.ValueError("`distance_metric` must be L1, L2, squared-L2, or angular.")
 
         self._distance_metric = distance
 
@@ -180,11 +177,15 @@ class TripletSiamese(Siamese):
         return tf.math.l2_normalize(self.embed(inputs, training), axis=-1)
 
     def compile(self, optimizer="rmsprop", **kwargs) -> None:
-        """Compile the model with the selected triplet loss."""
+        """Compile the model with its selected triplet loss unless a loss is supplied.
 
-        loss_class = (
-            TripletHardLoss if self.loss_type == "hard" else TripletSemiHardLoss
-        )
+        Args:
+            optimizer: Keras optimizer instance or identifier.
+            **kwargs: Native Keras compilation options.
+
+        """
+
+        loss_class = TripletHardLoss if self.loss_type == "hard" else TripletSemiHardLoss
 
         self.loss = loss_class(self.margin, self.soft, self.distance)
 
@@ -193,7 +194,13 @@ class TripletSiamese(Siamese):
         tf.keras.Model.compile(self, optimizer=optimizer, **kwargs)
 
     def step(self, x: tf.Tensor, y: tf.Tensor) -> None:
-        """Run one optimization step."""
+        """Update model weights and the legacy loss tracker for one batch.
+
+        Args:
+            x: Input sample batch.
+            y: Class labels for the samples.
+
+        """
 
         with tf.GradientTape() as tape:
             embeddings = self(x, training=True)
@@ -205,15 +212,21 @@ class TripletSiamese(Siamese):
         self.loss_metric.update_state(loss)
 
     @_legacy_fit_epochs
-    def fit(self, batches=None, y=None, epochs: int = 100, **kwargs):
+    def fit(self, batches=None, y=None, epochs: int = 100, **kwargs) -> tf.keras.callbacks.History:
         """Train with native or legacy labeled datasets.
 
-        ``fit(dataset, epochs)`` retains the original positional epoch form.
-        Array inputs use ``fit(samples, labels, epochs=...)``. Other keyword
-        options follow Keras, including validation_data and callbacks.
+        A positional integer after a dataset retains the original epoch argument.
+        Array inputs use fit(samples, labels, epochs=...).
+
+        Args:
+            batches: Labeled dataset or array inputs, also accepted through the x keyword.
+            y: Targets for array inputs.
+            epochs: Number of training epochs.
+            **kwargs: Native Keras fit options such as validation_data and callbacks.
 
         Returns:
             A Keras History object.
+
         """
 
         x = kwargs.pop("x", batches)
@@ -224,14 +237,34 @@ class TripletSiamese(Siamese):
         return tf.keras.Model.fit(self, x=x, y=y, epochs=epochs, **kwargs)
 
     def evaluate(self, batches=None, y=None, **kwargs):
-        """Evaluate with native or legacy labeled datasets."""
+        """Evaluate with native or legacy labeled datasets without updating weights.
+
+        Args:
+            batches: Labeled dataset or array inputs, also accepted through the x keyword.
+            y: Targets for array inputs.
+            **kwargs: Native Keras evaluation options.
+
+        Returns:
+            Keras loss and metric results as a scalar, list, or dictionary.
+
+        """
 
         x = kwargs.pop("x", batches)
 
         return tf.keras.Model.evaluate(self, x=x, y=y, **kwargs)
 
     def predict(self, x1=None, x2=None, **kwargs):
-        """Predict embeddings or compare two sample batches."""
+        """Predict embeddings or compare two sample batches without updating weights.
+
+        Args:
+            x1: Native inputs or the first sample batch, also accepted through the x keyword.
+            x2: Second sample batch for direct comparison, or an integer native batch size.
+            **kwargs: Native Keras prediction options.
+
+        Returns:
+            NumPy embeddings for native calls or a tensor of legacy pair distances.
+
+        """
 
         x1 = _prediction_input(x1, kwargs)
 
@@ -247,7 +280,16 @@ class TripletSiamese(Siamese):
         return tf.keras.Model.predict(self, x1, batch_size=batch_size, **kwargs)
 
     def compare(self, left, right) -> tf.Tensor:
-        """Return distances using the requested 2.x metric."""
+        """Return normalized pair distances using the requested metric.
+
+        Args:
+            left: First sample batch.
+            right: Corresponding second sample batch.
+
+        Returns:
+            Distance tensor with shape (batch,).
+
+        """
 
         return pair_distance(
             self(left, training=False),

@@ -88,5 +88,8 @@ uv build
 
 For an editable runtime-only installation, `pip install -e .` remains supported.
 
+Code style and compatibility rules are documented in
+[CONVENTIONS.md](https://github.com/gugarosa/dualing/blob/main/CONVENTIONS.md).
+
 API documentation is available at
 [dualing.readthedocs.io](https://dualing.readthedocs.io).

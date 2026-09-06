@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 from unittest.mock import Mock
 
 import matplotlib
@@ -55,9 +58,7 @@ def test_original_dataset_classes():
     assert len(random.create_pairs(data, labels)) == 3
 
 
-@pytest.mark.parametrize(
-    "dataset_class", [BatchDataset, BalancedPairDataset, RandomPairDataset]
-)
+@pytest.mark.parametrize("dataset_class", [BatchDataset, BalancedPairDataset, RandomPairDataset])
 def test_original_datasets_normalize_constant_data(dataset_class):
     data = np.full((4, 2), 5.0)
     labels = np.array([0, 0, 1, 1])
@@ -77,9 +78,7 @@ def test_original_loss_classes():
 
 def test_original_base_models_and_paths():
     assert MLP(n_hidden=(8,))(tf.ones((2, 4))).shape == (2, 8)
-    assert CNN(n_blocks=2, init_kernel=3, n_output=8)(
-        tf.ones((2, 16, 16, 1))
-    ).shape == (2, 8)
+    assert CNN(n_blocks=2, init_kernel=3, n_output=8)(tf.ones((2, 16, 16, 1))).shape == (2, 8)
 
     inputs = tf.zeros((2, 5), dtype=tf.int32)
 
@@ -158,7 +157,7 @@ def test_original_utilities(monkeypatch):
         exception.ValueError,
     ):
         with pytest.raises(error):
-            raise error("compatibility")
+            raise error("`value` is invalid.")
 
     show = Mock()
     monkeypatch.setattr("matplotlib.pyplot.show", show)
@@ -167,3 +166,14 @@ def test_original_utilities(monkeypatch):
     assert projector._tensor_to_numpy(tf.zeros(1)).shape == (1,)
     assert projector.plot_embeddings(tf.ones((2, 2)), tf.constant([0, 1])) is None
     show.assert_called_once_with()
+
+
+def test_error_diagnostic_keeps_category_and_message(monkeypatch):
+    diagnostic = Mock()
+    monkeypatch.setattr(exception.logger, "error", diagnostic)
+    message = "`value` is None."
+
+    error = exception.ValueError(message)
+
+    assert str(error) == f"ValueError: {message}"
+    diagnostic.assert_called_once_with(f"`exception=ValueError` was raised with message {message!r}.")

@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 """Core dataset, loss, and model abstractions."""
 
 from dualing.core.dataset import Dataset

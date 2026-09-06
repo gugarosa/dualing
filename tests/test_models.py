@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -83,18 +86,14 @@ def test_pair_models_respect_sample_weights(model_class, as_dataset):
     predictions = model((left, right)).numpy()
 
     if model_class is ContrastiveSiamese:
-        losses = (
-            labels * predictions**2 + (1 - labels) * np.maximum(1 - predictions, 0) ** 2
-        )
+        losses = labels * predictions**2 + (1 - labels) * np.maximum(1 - predictions, 0) ** 2
     else:
         losses = -labels * np.log(predictions) - (1 - labels) * np.log1p(-predictions)
 
     expected = np.mean(losses * weights)
 
     if as_dataset:
-        data = tf.data.Dataset.from_tensor_slices(
-            ((left, right), labels, weights)
-        ).batch(4)
+        data = tf.data.Dataset.from_tensor_slices(((left, right), labels, weights)).batch(4)
         fit_options = {"x": data, "validation_data": data}
         evaluation_options = {"x": data}
     else:
@@ -135,9 +134,7 @@ def test_triplet_model_reports_the_optimized_loss_after_recompiling():
     base = tf.keras.Sequential(
         [
             tf.keras.layers.Input((2,)),
-            tf.keras.layers.Dense(
-                2, use_bias=False, kernel_initializer=tf.keras.initializers.Identity()
-            ),
+            tf.keras.layers.Dense(2, use_bias=False, kernel_initializer=tf.keras.initializers.Identity()),
         ]
     )
     model = TripletSiamese(base, mining="hard")
@@ -146,9 +143,7 @@ def test_triplet_model_reports_the_optimized_loss_after_recompiling():
     expected = np.mean(
         [
             max(
-                max(distances[anchor, labels == label])
-                - min(distances[anchor, labels != label])
-                + 1.0,
+                max(distances[anchor, labels == label]) - min(distances[anchor, labels != label]) + 1.0,
                 0,
             )
             for anchor, label in enumerate(labels)
@@ -201,9 +196,7 @@ def test_legacy_triplet_prediction_reduces_sequence_embeddings(base_class):
     np.testing.assert_allclose(predictions, expected, rtol=1e-5)
 
 
-@pytest.mark.parametrize(
-    "model_class", [ContrastiveSiamese, CrossEntropySiamese, TripletSiamese]
-)
+@pytest.mark.parametrize("model_class", [ContrastiveSiamese, CrossEntropySiamese, TripletSiamese])
 def test_siamese_argument_compatibility(model_class):
     data, labels, pairs = _pairs()
 
@@ -222,15 +215,11 @@ def test_siamese_argument_compatibility(model_class):
 
     assert history.epoch == [0]
 
-    history = model.fit(
-        inputs, targets, epochs=1, batch_size=8, shuffle=False, verbose=0
-    )
+    history = model.fit(inputs, targets, epochs=1, batch_size=8, shuffle=False, verbose=0)
     predictions = model.predict(x=inputs, batch_size=8, verbose=0)
 
     assert history.epoch == [0]
-    np.testing.assert_allclose(
-        predictions, model(inputs, training=False), rtol=1e-6, atol=1e-7
-    )
+    np.testing.assert_allclose(predictions, model(inputs, training=False), rtol=1e-6, atol=1e-7)
 
     with pytest.raises(TypeError, match="epochs"):
         model.fit(dataset, 1, epochs=100, verbose=0)

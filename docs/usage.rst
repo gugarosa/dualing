@@ -171,23 +171,11 @@ estimator facade is unnecessary for these contracts.
 Review conventions
 ------------------
 
-Continue the readability, typing, and comment-cleanup conventions established
-before the recent refactoring:
-
-* Preserve documented imports, defaults, return semantics, and calling forms.
-  Treat intentional migrations separately from cleanup.
-* Separate validation, setup, computation, and result handling with blank
-  lines when they are distinct phases. Keep short, cohesive assignments
-  together rather than adding a blank line mechanically after every statement.
-* Retain useful API contracts and scientific references. Comments should
-  explain intent or a non-obvious constraint, not narrate obvious assignments.
-* Share responsibilities, not merely similar-looking syntax. Private helpers
-  need real callers; public compatibility APIs are not dead just because the
-  implementation no longer calls them internally.
-* Keep failures actionable and preserve resource/state ownership. Do not hide
-  errors or weaken assertions to make a refactor appear safe.
-* Use the existing pytest, Ruff, and strict Sphinx commands. Passing formatting
-  checks does not establish correct numerical behavior or logical separation.
+The canonical code-style and review rules are in
+`CONVENTIONS.md <https://github.com/gugarosa/dualing/blob/main/CONVENTIONS.md>`_.
+They adopt cpmux's Google-style constructor documentation, import ordering,
+diagnostic wording, restrained comments, and logical phase separation while
+retaining Dualing's published APIs and interpreter support.
 
 Design references
 -----------------

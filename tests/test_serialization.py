@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 import json
 import subprocess
 import sys
@@ -66,9 +69,7 @@ def test_embedders_clone_and_reload(model_class, options, shape, tmp_path):
 
 @pytest.mark.parametrize("model_class,options,shape", EMBEDDERS)
 def test_embedders_accept_native_keras_options(model_class, options, shape):
-    model = model_class(
-        **options, name="configured_embedder", trainable=False, dtype="float64"
-    )
+    model = model_class(**options, name="configured_embedder", trainable=False, dtype="float64")
 
     assert model(tf.ones(shape)).dtype == tf.float64
     assert not model.trainable_variables
@@ -125,9 +126,7 @@ def test_callable_loss_configuration_roundtrip(loss, labels, predictions):
     np.testing.assert_allclose(restored(labels, predictions), loss(labels, predictions))
 
 
-@pytest.mark.parametrize(
-    "loss", [contrastive_loss, triplet_hard_loss, triplet_semihard_loss]
-)
+@pytest.mark.parametrize("loss", [contrastive_loss, triplet_hard_loss, triplet_semihard_loss])
 def test_functional_losses_are_registered(loss):
     config = tf.keras.utils.serialize_keras_object(loss)
 
@@ -166,7 +165,7 @@ def test_siamese_models_resume_training(model_class, options, tmp_path):
     restored = tf.keras.models.load_model(path)
 
     assert type(restored) is model_class
-    # Nested Keras build shapes cross a tuple/list boundary in JSON.
+    # Nested Keras build shapes cross a tuple/list boundary in JSON
     assert json.loads(restored.to_json()) == json.loads(model.to_json())
     assert restored.compiled
     assert int(restored.optimizer.iterations.numpy()) == 1
@@ -174,12 +173,8 @@ def test_siamese_models_resume_training(model_class, options, tmp_path):
 
     assert len(restored.optimizer.variables) == len(model.optimizer.variables)
 
-    for original, loaded in zip(
-        model.optimizer.variables, restored.optimizer.variables
-    ):
-        np.testing.assert_allclose(
-            original.numpy(), loaded.numpy(), rtol=1e-6, atol=1e-7
-        )
+    for original, loaded in zip(model.optimizer.variables, restored.optimizer.variables):
+        np.testing.assert_allclose(original.numpy(), loaded.numpy(), rtol=1e-6, atol=1e-7)
 
     model.train_on_batch(inputs, labels)
     restored.train_on_batch(inputs, labels)
@@ -242,7 +237,7 @@ def test_saved_model_loads_in_a_fresh_process(tmp_path):
         """
     )
 
-    result = subprocess.run(
+    subprocess.run(
         [
             sys.executable,
             "-c",
@@ -251,8 +246,5 @@ def test_saved_model_loads_in_a_fresh_process(tmp_path):
             str(expected),
         ],
         cwd=tmp_path,
-        capture_output=True,
-        text=True,
+        check=True,
     )
-
-    assert result.returncode == 0, result.stdout + result.stderr

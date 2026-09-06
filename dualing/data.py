@@ -1,4 +1,7 @@
-"""Dataset helpers built on ``tf.data``."""
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
+"""Dataset helpers built on tf.data."""
 
 import numpy as np
 import tensorflow as tf
@@ -12,7 +15,7 @@ def _length(values: tf.Tensor) -> int:
 
 def _batch(values, size: int, batch_size: int, shuffle: bool, seed: int):
     if batch_size < 1:
-        raise ValueError("batch_size must be greater than zero")
+        raise ValueError("`batch_size` must be greater than zero.")
 
     dataset = tf.data.Dataset.from_tensor_slices(values)
 
@@ -27,21 +30,22 @@ def preprocess(
     input_shape: tuple[int, ...] | None = None,
     normalize: tuple[float, float] | None = (0.0, 1.0),
 ) -> tf.Tensor:
-    """Convert to float tensors, optionally reshaping and normalizing.
+    """Convert numeric data to a reshaped and globally normalized float tensor.
+
+    Scaling uses one minimum and maximum for the entire input, not separate feature statistics.
+    Constant data maps to the lower bound. TensorFlow conversion and reshape errors propagate.
 
     Args:
         data: Numeric array-like values or an eager tensor.
-        input_shape: Full output shape, including the sample dimension. One
-            dimension may be -1 for inference; None preserves the input shape.
+        input_shape: Full output shape with optional -1 inference, or None to preserve the input shape.
         normalize: Increasing lower/upper bounds, or None to disable scaling.
 
     Returns:
-        A float32 tensor. Scaling uses the minimum and maximum of the entire
-        input, not separate statistics per feature. Constant data maps to the
-        lower bound. TensorFlow conversion and reshape errors propagate.
+        Float32 tensor with the configured shape and global scaling.
 
     Raises:
         ValueError: Normalization bounds are not an increasing pair.
+
     """
 
     data = tf.cast(tf.convert_to_tensor(data), tf.float32)
@@ -51,7 +55,7 @@ def preprocess(
 
     if normalize is not None:
         if len(normalize) != 2 or normalize[0] >= normalize[1]:
-            raise ValueError("normalize must contain increasing lower and upper bounds")
+            raise ValueError("`normalize` must contain increasing lower and upper bounds.")
 
         lower, upper = normalize
         minimum = tf.reduce_min(data)
@@ -71,7 +75,9 @@ def batch_dataset(
     shuffle: bool = True,
     seed: int = 0,
 ) -> tf.data.Dataset:
-    """Create an eagerly constructed dataset yielding ``(samples, labels)``.
+    """Create an eager dataset of preprocessed sample and label batches.
+
+    The dataset yields (samples, labels), keeps the label dtype, and retains the final partial batch.
 
     Args:
         data: Numeric samples, with the sample dimension first.
@@ -83,18 +89,17 @@ def batch_dataset(
         seed: Seed passed to TensorFlow shuffling.
 
     Returns:
-        A prefetched tf.data.Dataset with float32 samples and unchanged label
-        dtype. The final partial batch is retained.
+        Prefetched tf.data.Dataset containing float32 samples and their labels.
 
     Raises:
-        ValueError: Sample counts differ, batch_size is nonpositive, or
-            normalization bounds are invalid.
+        ValueError: Sample counts differ, batch_size is nonpositive, or normalization bounds are invalid.
+
     """
 
     data = preprocess(data, input_shape, normalize)
 
     if _length(data) != _length(tf.convert_to_tensor(labels)):
-        raise ValueError("data and labels must contain the same number of samples")
+        raise ValueError("`data` and `labels` must contain the same number of samples.")
 
     return _batch((data, labels), _length(data), batch_size, shuffle, seed)
 
@@ -111,6 +116,9 @@ def balanced_pair_dataset(
 ) -> tf.data.Dataset:
     """Create an equal number of similar and dissimilar sample pairs.
 
+    Targets are 1 for similar pairs and 0 for dissimilar pairs. Without shuffling, similar pairs come first.
+    Classes are sampled uniformly. Sampling permits repeated samples and self-pairs.
+
     Args:
         data: Numeric samples, with the sample dimension first.
         labels: One class label per sample, flattened before pairing.
@@ -122,29 +130,26 @@ def balanced_pair_dataset(
         seed: Seed for local pair sampling and TensorFlow shuffling.
 
     Returns:
-        A prefetched dataset yielding ``((left, right), targets)``. Each side
-        contains float32 samples; targets are float32, with 1 for similar and
-        0 for dissimilar pairs. Without shuffling, similar pairs come first.
-        Classes are sampled uniformly. Sampling permits repeats and self-pairs.
+        Prefetched dataset yielding ((left, right), targets), with all components in float32.
 
     Raises:
-        ValueError: n_pairs is not positive and even, sample counts differ,
-            fewer than two classes exist, or preprocessing/batching is invalid.
+        ValueError: Pair counts, sample counts, class diversity, preprocessing, or batching options are invalid.
+
     """
 
     if n_pairs < 2 or n_pairs % 2:
-        raise ValueError("n_pairs must be a positive even number")
+        raise ValueError("`n_pairs` must be a positive even number.")
 
     data = preprocess(data, input_shape, normalize)
     labels = np.asarray(labels).reshape(-1)
 
     if _length(data) != labels.size:
-        raise ValueError("data and labels must contain the same number of samples")
+        raise ValueError("`data` and `labels` must contain the same number of samples.")
 
     classes = np.unique(labels)
 
     if classes.size < 2:
-        raise ValueError("labels must contain at least two classes")
+        raise ValueError("`labels` must contain at least two classes.")
 
     rng = np.random.default_rng(seed)
     indices = {label: np.flatnonzero(labels == label) for label in classes}
@@ -186,6 +191,9 @@ def random_pair_dataset(
 ) -> tf.data.Dataset:
     """Randomly pair samples without reusing a sample within this dataset.
 
+    There are floor(n_samples / 2) pairs, with one unused sample for odd input counts.
+    Targets are 1 for equal labels and 0 otherwise. Pair counts are not balanced by class.
+
     Args:
         data: At least two numeric samples, with the sample dimension first.
         labels: One class label per sample, flattened before pairing.
@@ -196,14 +204,11 @@ def random_pair_dataset(
         seed: Seed for the sample permutation and optional shuffling.
 
     Returns:
-        A prefetched dataset yielding ``((left, right), targets)``. Targets
-        are float32: 1 for equal labels and 0 otherwise. There are
-        ``floor(n_samples / 2)`` pairs; an odd leftover sample is unused.
-        Pair counts are not balanced by class.
+        Prefetched dataset yielding ((left, right), targets), with all components in float32.
 
     Raises:
-        ValueError: Sample counts differ, fewer than two samples exist,
-            or preprocessing/batching is invalid.
+        ValueError: Sample counts differ, fewer than two samples exist, or preprocessing/batching is invalid.
+
     """
 
     data = preprocess(data, input_shape, normalize)
@@ -211,19 +216,17 @@ def random_pair_dataset(
     size = _length(data)
 
     if size != _length(labels):
-        raise ValueError("data and labels must contain the same number of samples")
+        raise ValueError("`data` and `labels` must contain the same number of samples.")
 
     n_pairs = size // 2
 
     if not n_pairs:
-        raise ValueError("at least two samples are required")
+        raise ValueError("`data` must contain at least two samples.")
 
     indices = np.random.default_rng(seed).permutation(size)[: 2 * n_pairs]
     left, right = indices[:n_pairs], indices[n_pairs:]
 
     pairs = (tf.gather(data, left), tf.gather(data, right))
-    targets = tf.cast(
-        tf.equal(tf.gather(labels, left), tf.gather(labels, right)), tf.float32
-    )
+    targets = tf.cast(tf.equal(tf.gather(labels, left), tf.gather(labels, right)), tf.float32)
 
     return _batch((pairs, targets), n_pairs, batch_size, shuffle, seed)
