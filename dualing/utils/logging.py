@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 """Logging helpers."""
 
 import logging
@@ -14,6 +17,15 @@ class Logger(logging.Logger):
     """Logger that can emit a message only to its file handler."""
 
     def to_file(self, msg: str, *args, **kwargs) -> None:
+        """Emit an info message while temporarily muting the first console handler.
+
+        Args:
+            msg: Message format string.
+            *args: Positional values forwarded to logging.
+            **kwargs: Keyword logging options.
+
+        """
+
         console_level = self.handlers[0].level
         self.handlers[0].setLevel(logging.CRITICAL)
 
@@ -23,7 +35,12 @@ class Logger(logging.Logger):
 
 
 def get_console_handler() -> StreamHandler:
-    """Create the console handler."""
+    """Create a stdout handler using the project formatter.
+
+    Returns:
+        A new console handler owned by its attaching logger.
+
+    """
 
     handler = StreamHandler(sys.stdout)
     handler.setFormatter(FORMATTER)
@@ -32,7 +49,12 @@ def get_console_handler() -> StreamHandler:
 
 
 def get_timed_file_handler() -> TimedRotatingFileHandler:
-    """Create the rotating file handler."""
+    """Create a midnight-rotating handler that opens the log file lazily.
+
+    Returns:
+        A new file handler owned by its attaching logger.
+
+    """
 
     handler = TimedRotatingFileHandler(LOG_FILE, delay=True, when="midnight")
     handler.setFormatter(FORMATTER)
@@ -41,7 +63,17 @@ def get_timed_file_handler() -> TimedRotatingFileHandler:
 
 
 def get_logger(logger_name: str) -> Logger:
-    """Return a configured project logger."""
+    """Return a project logger with console and delayed rotating-file handlers.
+
+    Existing handlers are retained. The original logger-class and propagation behavior is preserved.
+
+    Args:
+        logger_name: Logger name.
+
+    Returns:
+        Configured project logger.
+
+    """
 
     logging.setLoggerClass(Logger)
 

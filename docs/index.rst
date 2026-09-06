@@ -8,4 +8,5 @@ models for contrastive, cross-entropy, and triplet learning.
     :maxdepth: 2
     :caption: Reference
 
+    usage
     api

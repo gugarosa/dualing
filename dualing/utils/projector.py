@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 """Embedding projection helpers."""
 
 import matplotlib.pyplot as plt
@@ -6,8 +9,6 @@ import tensorflow as tf
 
 
 def _tensor_to_numpy(tensor: tf.Tensor) -> np.ndarray:
-    """Convert TensorFlow tensors to NumPy arrays."""
-
     return tensor.numpy() if tf.is_tensor(tensor) else tensor
 
 
@@ -16,7 +17,16 @@ def plot_embeddings(
     labels: tf.Tensor | np.ndarray,
     dims: tuple[int, int] = (0, 1),
 ) -> None:
-    """Plot two embedding dimensions grouped by integer labels."""
+    """Create and display a two-dimensional projection grouped by integer labels.
+
+    Display is delegated to Matplotlib and the function does not return the created figure.
+
+    Args:
+        embeddings: Tensor or array of sample-by-feature embeddings.
+        labels: Integer class labels for the samples.
+        dims: Indices of the two embedding dimensions to display.
+
+    """
 
     embeddings = _tensor_to_numpy(embeddings)
     labels = _tensor_to_numpy(labels)

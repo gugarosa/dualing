@@ -1,12 +1,13 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 import tensorflow as tf
 
 from dualing import MLP, CrossEntropySiamese, balanced_pair_dataset
 
 (x, y), (x_val, y_val) = tf.keras.datasets.mnist.load_data()
 
-train = balanced_pair_dataset(
-    x, y, n_pairs=1000, batch_size=64, input_shape=(x.shape[0], 784)
-)
+train = balanced_pair_dataset(x, y, n_pairs=1000, batch_size=64, input_shape=(x.shape[0], 784))
 val = balanced_pair_dataset(
     x_val,
     y_val,

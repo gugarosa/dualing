@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 """Dual-based neural learning with TensorFlow."""
 
 from importlib.metadata import version

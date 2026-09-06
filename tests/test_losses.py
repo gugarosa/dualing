@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -25,9 +28,7 @@ def test_pair_distances():
 
 
 def test_contrastive_loss():
-    loss = contrastive_loss(
-        tf.constant([1.0, 0.0]), tf.constant([0.5, 0.5]), margin=1.0
-    )
+    loss = contrastive_loss(tf.constant([1.0, 0.0]), tf.constant([0.5, 0.5]), margin=1.0)
 
     assert np.allclose(loss, [0.25, 0.25])
 
@@ -88,9 +89,7 @@ def test_pairwise_l2_preserves_small_distances_and_gradients(compiled):
 @pytest.mark.parametrize("soft", [False, True])
 def test_triplet_losses_match_explicit_mining(loss_function, metric, soft):
     labels = np.array([0, 0, 1, 1, 1, 2])
-    embeddings = np.array(
-        [[0.1, 0.3], [0.4, 0.2], [1.0, 0.0], [1.0, 0.3], [1.3, 1.0], [2.0, 2.0]]
-    )
+    embeddings = np.array([[0.1, 0.3], [0.4, 0.2], [1.0, 0.0], [1.0, 0.3], [1.3, 1.0], [2.0, 2.0]])
     differences = embeddings[:, None] - embeddings[None, :]
 
     if metric == "L1":
@@ -108,9 +107,7 @@ def test_triplet_losses_match_explicit_mining(loss_function, metric, soft):
 
     for anchor, label in enumerate(labels):
         positives = [
-            distances[anchor, other]
-            for other in range(len(labels))
-            if other != anchor and labels[other] == label
+            distances[anchor, other] for other in range(len(labels)) if other != anchor and labels[other] == label
         ]
         negatives = distances[anchor, labels != label]
 
@@ -127,10 +124,7 @@ def test_triplet_losses_match_explicit_mining(loss_function, metric, soft):
                 selected = min(farther) if len(farther) else max(negatives)
                 differences.append(positive - selected)
 
-        losses.extend(
-            np.logaddexp(0, difference) if soft else max(difference + 0.5, 0)
-            for difference in differences
-        )
+        losses.extend(np.logaddexp(0, difference) if soft else max(difference + 0.5, 0) for difference in differences)
 
     actual = loss_function(
         tf.constant(labels),

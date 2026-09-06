@@ -1,3 +1,6 @@
+# Copyright (c) 2020-2026 Gustavo Rosa.
+# Licensed under the Apache License, Version 2.0.
+
 from dualing.models import TripletSiamese
 from dualing.models.base import CNN
 
