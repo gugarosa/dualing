@@ -6,12 +6,35 @@ import tensorflow as tf
 
 from dualing.core import ContrastiveLoss, Siamese
 from dualing.losses import pair_distance
-from dualing.models._utils import pair_dataset
+from dualing.models._utils import (
+    _legacy_fit_epochs,
+    _prediction_input,
+    pair_dataset,
+)
 from dualing.utils import exception
 
 
+@tf.keras.utils.register_keras_serializable(package="dualing")
 class ContrastiveSiamese(Siamese):
-    """Train a shared embedder with contrastive loss."""
+    """Train one shared embedder to separate dissimilar sample pairs.
+
+    Args:
+        base: Keras embedding model shared by both branches.
+        margin: Positive margin used by the default contrastive loss.
+        distance_metric: L1, L2, squared-L2, or angular distance.
+        name: Model name.
+        **kwargs: Standard Keras model options, including trainable and dtype.
+
+    Calling the model with ``(left, right)`` returns shape ``(batch,)``.
+    Targets are 1 for similar pairs and 0 for dissimilar pairs. Rank-three
+    embeddings are mean-pooled over time. ``predict(left, right)`` retains
+    the original direct-comparison API; ``compare`` is its explicit form.
+
+    References:
+        I. Melekhov, J. Kannala and E. Rahtu.
+        Siamese network features for image matching.
+        23rd International Conference on Pattern Recognition (2016).
+    """
 
     def __init__(
         self,
@@ -19,11 +42,21 @@ class ContrastiveSiamese(Siamese):
         margin: float = 1.0,
         distance_metric: str = "L2",
         name: str = "",
+        **kwargs,
     ) -> None:
-        super().__init__(base, name=name)
+        super().__init__(base, name=name, **kwargs)
 
         self.margin = margin
         self.distance = distance_metric
+
+    def get_config(self) -> dict:
+        """Return the shared embedder, margin, and distance configuration."""
+
+        return {
+            **super().get_config(),
+            "margin": self.margin,
+            "distance_metric": self.distance,
+        }
 
     @property
     def margin(self) -> float:
@@ -96,8 +129,17 @@ class ContrastiveSiamese(Siamese):
 
         self.loss_metric.update_state(loss)
 
+    @_legacy_fit_epochs
     def fit(self, batches=None, y=None, epochs: int = 100, **kwargs):
-        """Train with native or legacy pair datasets."""
+        """Train with native or legacy pair datasets.
+
+        ``fit(dataset, epochs)`` retains the original positional epoch form.
+        Array inputs use ``fit((left, right), labels, epochs=...)``. Other
+        keyword options follow Keras, including validation_data and callbacks.
+
+        Returns:
+            A Keras History object.
+        """
 
         x = kwargs.pop("x", batches)
 
@@ -117,8 +159,10 @@ class ContrastiveSiamese(Siamese):
 
         return tf.keras.Model.evaluate(self, x=pair_dataset(x), y=y, **kwargs)
 
-    def predict(self, x1, x2=None, **kwargs):
+    def predict(self, x1=None, x2=None, **kwargs):
         """Predict natively or compare two sample batches."""
+
+        x1 = _prediction_input(x1, kwargs)
 
         if x2 is not None and not isinstance(x2, numbers.Integral):
             return self((x1, x2), training=False)

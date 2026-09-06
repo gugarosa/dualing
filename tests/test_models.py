@@ -199,3 +199,44 @@ def test_legacy_triplet_prediction_reduces_sequence_embeddings(base_class):
 
     assert predictions.shape == (2,)
     np.testing.assert_allclose(predictions, expected, rtol=1e-5)
+
+
+@pytest.mark.parametrize(
+    "model_class", [ContrastiveSiamese, CrossEntropySiamese, TripletSiamese]
+)
+def test_siamese_argument_compatibility(model_class):
+    data, labels, pairs = _pairs()
+
+    if model_class is TripletSiamese:
+        inputs = tf.constant(data)
+        targets = tf.constant(labels)
+        dataset = tf.data.Dataset.from_tensors((inputs, targets))
+    else:
+        inputs, targets = next(iter(pairs))
+        dataset = tf.data.Dataset.from_tensors((*inputs, targets))
+
+    model = model_class(MLP((4,)))
+    model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.0))
+
+    history = model.fit(dataset, 1, verbose=0)
+
+    assert history.epoch == [0]
+
+    history = model.fit(
+        inputs, targets, epochs=1, batch_size=8, shuffle=False, verbose=0
+    )
+    predictions = model.predict(x=inputs, batch_size=8, verbose=0)
+
+    assert history.epoch == [0]
+    np.testing.assert_allclose(
+        predictions, model(inputs, training=False), rtol=1e-6, atol=1e-7
+    )
+
+    with pytest.raises(TypeError, match="epochs"):
+        model.fit(dataset, 1, epochs=100, verbose=0)
+
+    with pytest.raises(ValueError):
+        model.fit(dataset, y=1, epochs=1, verbose=0)
+
+    with pytest.raises(TypeError, match="x"):
+        model.predict(inputs, x=inputs, verbose=0)

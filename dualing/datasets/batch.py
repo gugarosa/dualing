@@ -7,7 +7,19 @@ from dualing.utils import constants, exception
 
 
 class BatchDataset(Dataset):
-    """Preprocess samples and expose labeled batches."""
+    """Preprocess samples and expose the original labeled-batch interface.
+
+    Args:
+        data: Numeric samples, with the sample dimension first.
+        labels: Targets whose first dimension matches the preprocessed samples.
+        batch_size: Positive maximum number of samples per batch.
+        input_shape: Optional full shape passed to Dataset preprocessing.
+        normalize: Global scaling bounds, or None to disable scaling.
+        shuffle: Shuffle before batching, reshuffling on each traversal.
+        seed: Dataset seed; construction also resets TensorFlow's global seed.
+
+    Access the prefetched dataset through the ``batches`` property.
+    """
 
     def __init__(
         self,
@@ -25,7 +37,11 @@ class BatchDataset(Dataset):
 
     @property
     def batches(self) -> tf.data.Dataset:
-        """Batches of samples and labels."""
+        """Prefetched ``(samples, labels)`` batches.
+
+        Samples are float32, label dtype is retained, and the final partial
+        batch is not discarded.
+        """
 
         return self._batches
 

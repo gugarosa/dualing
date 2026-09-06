@@ -4,7 +4,20 @@ import tensorflow as tf
 
 
 def pair_distance(left: tf.Tensor, right: tf.Tensor, metric: str = "L2") -> tf.Tensor:
-    """Compute row-wise distances between two embedding tensors."""
+    """Reduce distances over the final dimension of paired embeddings.
+
+    Args:
+        left: Embeddings with shape ``(..., features)``.
+        right: Corresponding embeddings with a compatible shape.
+        metric: L1 (sum of absolute differences), L2 (Euclidean), squared-L2,
+            or angular (one minus the dot product of L2-normalized vectors).
+
+    Returns:
+        Distances with the final feature dimension removed.
+
+    Raises:
+        ValueError: The metric name is not supported.
+    """
 
     if metric == "L1":
         return tf.reduce_sum(tf.abs(left - right), axis=-1)
@@ -25,7 +38,19 @@ def pair_distance(left: tf.Tensor, right: tf.Tensor, metric: str = "L2") -> tf.T
 
 
 def pairwise_distances(embeddings: tf.Tensor, metric: str = "L2") -> tf.Tensor:
-    """Compute all pairwise distances in an embedding batch."""
+    """Compute all distances within a ``(batch, features)`` embedding tensor.
+
+    Args:
+        embeddings: Floating-point embedding vectors.
+        metric: Distance definition from ``pair_distance``.
+
+    Returns:
+        A ``(batch, batch)`` matrix. Euclidean distances retain small positive
+        values while assigning a finite zero gradient at exact zero.
+
+    Raises:
+        ValueError: The metric name is not supported.
+    """
 
     if metric == "L1":
         return tf.reduce_sum(
@@ -58,10 +83,21 @@ def pairwise_distances(embeddings: tf.Tensor, metric: str = "L2") -> tf.Tensor:
     return tf.where(positive, tf.sqrt(safe_distances), 0.0)
 
 
+@tf.keras.utils.register_keras_serializable(package="dualing")
 def contrastive_loss(
     y_true: tf.Tensor, y_pred: tf.Tensor, margin: float = 1.0
 ) -> tf.Tensor:
-    """Return the standard contrastive loss for pair labels and distances."""
+    """Return one contrastive loss per pair.
+
+    Args:
+        y_true: Pair labels: 1 for similar and 0 for dissimilar.
+        y_pred: Predicted pair distances, typically shape ``(batch,)``.
+        margin: Distance below which dissimilar pairs incur a penalty.
+
+    Returns:
+        Losses with y_pred's shape; no batch reduction is performed. Labels
+        are reshaped to match the distances.
+    """
 
     y_true = tf.reshape(tf.cast(y_true, y_pred.dtype), tf.shape(y_pred))
 
@@ -89,6 +125,7 @@ def _masked_mean(values: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
     )
 
 
+@tf.keras.utils.register_keras_serializable(package="dualing")
 def triplet_hard_loss(
     labels: tf.Tensor,
     embeddings: tf.Tensor,
@@ -96,7 +133,20 @@ def triplet_hard_loss(
     soft: bool = False,
     metric: str = "L2",
 ) -> tf.Tensor:
-    """Use the hardest positive and negative for each valid anchor."""
+    """Average the hardest-positive/hardest-negative loss over valid anchors.
+
+    Args:
+        labels: One class label per embedding, flattened before comparison.
+        embeddings: Floating-point tensor of shape ``(batch, features)``.
+        margin: Additive hinge margin, ignored when soft is True.
+        soft: Use softplus of the distance difference instead of a hinge.
+        metric: Distance definition from ``pair_distance``.
+
+    Returns:
+        A scalar loss. An anchor needs another sample of its class and one
+        of a different class; invalid anchors are excluded. No valid anchors
+        produces zero. Embeddings are not automatically normalized.
+    """
 
     distances = pairwise_distances(embeddings, metric)
     positive, negative = _triplet_masks(labels)
@@ -115,6 +165,7 @@ def triplet_hard_loss(
     return _masked_mean(losses, valid)
 
 
+@tf.keras.utils.register_keras_serializable(package="dualing")
 def triplet_semihard_loss(
     labels: tf.Tensor,
     embeddings: tf.Tensor,
@@ -122,7 +173,21 @@ def triplet_semihard_loss(
     soft: bool = False,
     metric: str = "L2",
 ) -> tf.Tensor:
-    """Use the nearest negative farther away than each positive pair."""
+    """Average semi-hard loss over valid ordered positive pairs.
+
+    Args:
+        labels: One class label per embedding, flattened before comparison.
+        embeddings: Floating-point tensor of shape ``(batch, features)``.
+        margin: Additive hinge margin, ignored when soft is True.
+        soft: Use softplus of the distance difference instead of a hinge.
+        metric: Distance definition from ``pair_distance``.
+
+    Returns:
+        A scalar loss. Each positive pair selects the nearest farther
+        negative, falling back to the farthest negative when none is farther.
+        Self-pairs and anchors without negatives are excluded. No valid pairs
+        produces zero. Embeddings are not automatically normalized.
+    """
 
     distances = pairwise_distances(embeddings, metric)
     positive, negative = _triplet_masks(labels)

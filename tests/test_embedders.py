@@ -13,5 +13,6 @@ def test_dense_and_convolutional_embedders():
 
 def test_recurrent_embedders():
     inputs = tf.zeros((2, 5), dtype=tf.int32)
+
     for model in (RNN(10), GRU(10), LSTM(10)):
         assert model(inputs).shape == (2, 5, 10)

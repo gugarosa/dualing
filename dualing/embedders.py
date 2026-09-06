@@ -1,29 +1,60 @@
 """Keras embedding models."""
 
+from collections.abc import Callable
+
 import tensorflow as tf
 
 from dualing.core.model import Base
 
+_Activation = str | Callable[[tf.Tensor], tf.Tensor] | None
 
+
+@tf.keras.utils.register_keras_serializable(package="dualing")
 class MLP(Base):
-    """A stack of dense embedding layers."""
+    """Apply dense layers to the final input dimension.
+
+    Args:
+        n_hidden: Width of each dense layer; an empty tuple is an identity map.
+        activation: Keras activation name or callable. None means linear.
+        name: Model name.
+        hidden_units: Alias taking precedence over n_hidden when supplied.
+        **kwargs: Standard Keras model options, including trainable and dtype.
+
+    Inputs have shape ``(..., features)``. Leading dimensions are preserved;
+    the output width is the last hidden width, or the input width when empty.
+    """
 
     def __init__(
         self,
         n_hidden: tuple[int, ...] = (128,),
-        activation: str | None = None,
+        activation: _Activation = None,
         name: str = "mlp",
         *,
         hidden_units: tuple[int, ...] | None = None,
+        **kwargs,
     ) -> None:
-        super().__init__(name=name)
+        super().__init__(name=name, **kwargs)
 
         if hidden_units is not None:
             n_hidden = hidden_units
 
         self.fc = [
-            tf.keras.layers.Dense(units, activation=activation) for units in n_hidden
+            tf.keras.layers.Dense(units, activation=activation, dtype=self.dtype_policy)
+            for units in n_hidden
         ]
+
+    def get_config(self) -> dict:
+        """Return canonical widths and activation, not constructor aliases."""
+
+        return {
+            **super().get_config(),
+            "n_hidden": tuple(layer.units for layer in self.fc),
+            "activation": (
+                tf.keras.activations.serialize(self.fc[0].activation)
+                if self.fc
+                else None
+            ),
+        }
 
     def call(self, x):
         for layer in self.fc:
@@ -32,22 +63,41 @@ class MLP(Base):
         return x
 
 
+@tf.keras.utils.register_keras_serializable(package="dualing")
 class CNN(Base):
-    """A convolutional embedder."""
+    """Embed images with convolution/pooling blocks and a dense projection.
+
+    Args:
+        n_blocks: Number of convolution/pooling blocks.
+        init_kernel: First square convolution kernel size; later kernels
+            decrease by two per block and must remain positive.
+        n_output: Output embedding width.
+        activation: Projection activation; convolutions always use relu.
+        name: Model name.
+        blocks: Alias taking precedence over n_blocks.
+        kernel_size: Alias taking precedence over init_kernel.
+        embedding_dim: Alias taking precedence over n_output.
+        **kwargs: Standard Keras model options, including trainable and dtype.
+
+    Prefer ``(batch, height, width, channels)`` inputs. The original heuristic
+    also accepts channels-first inputs when the second dimension is 1, 3,
+    or 4 and the last is not. Output shape is ``(batch, n_output)``.
+    """
 
     def __init__(
         self,
         n_blocks: int = 3,
         init_kernel: int = 5,
         n_output: int = 128,
-        activation: str | None = "sigmoid",
+        activation: _Activation = "sigmoid",
         name: str = "cnn",
         *,
         blocks: int | None = None,
         kernel_size: int | None = None,
         embedding_dim: int | None = None,
+        **kwargs,
     ) -> None:
-        super().__init__(name=name)
+        super().__init__(name=name, **kwargs)
 
         n_blocks = n_blocks if blocks is None else blocks
         init_kernel = init_kernel if kernel_size is None else kernel_size
@@ -62,12 +112,28 @@ class CNN(Base):
                 init_kernel - 2 * index,
                 activation="relu",
                 padding="same",
+                dtype=self.dtype_policy,
             )
             for index in range(n_blocks)
         ]
-        self.pool = [tf.keras.layers.MaxPool2D() for _ in range(n_blocks)]
-        self.flatten = tf.keras.layers.Flatten()
-        self.fc = tf.keras.layers.Dense(n_output, activation=activation)
+        self.pool = [
+            tf.keras.layers.MaxPool2D(dtype=self.dtype_policy) for _ in range(n_blocks)
+        ]
+        self.flatten = tf.keras.layers.Flatten(dtype=self.dtype_policy)
+        self.fc = tf.keras.layers.Dense(
+            n_output, activation=activation, dtype=self.dtype_policy
+        )
+
+    def get_config(self) -> dict:
+        """Return the effective convolution and projection configuration."""
+
+        return {
+            **super().get_config(),
+            "n_blocks": len(self.conv),
+            "init_kernel": self.conv[0].kernel_size[0],
+            "n_output": self.fc.units,
+            "activation": tf.keras.activations.serialize(self.fc.activation),
+        }
 
     def call(self, x):
         if (
@@ -86,8 +152,69 @@ class CNN(Base):
         return self.fc(x)
 
 
-class RNN(Base):
-    """A simple recurrent embedder."""
+class _RecurrentEmbedder(Base):
+    _cell_class: type[tf.keras.layers.Layer]
+
+    def __init__(
+        self,
+        vocab_size: int,
+        embedding_size: int,
+        hidden_size: int,
+        name: str,
+        *,
+        embedding_dim: int | None = None,
+        hidden_units: int | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(name=name, **kwargs)
+
+        embedding_size = embedding_size if embedding_dim is None else embedding_dim
+        hidden_size = hidden_size if hidden_units is None else hidden_units
+
+        self.embedding = tf.keras.layers.Embedding(
+            vocab_size, embedding_size, dtype=self.dtype_policy
+        )
+        self.cell = self._cell_class(hidden_size, dtype=self.dtype_policy)
+        self.rnn = tf.keras.layers.RNN(
+            self.cell, return_sequences=True, dtype=self.dtype_policy
+        )
+        self.fc = tf.keras.layers.Dense(vocab_size, dtype=self.dtype_policy)
+
+    def get_config(self) -> dict:
+        """Return the token, embedding, and recurrent dimensions."""
+
+        return {
+            **super().get_config(),
+            "vocab_size": self.embedding.input_dim,
+            "embedding_size": self.embedding.output_dim,
+            "hidden_size": self.cell.units,
+        }
+
+    def call(self, x):
+        x = self.embedding(x)
+        x = self.rnn(x)
+
+        return self.fc(x)
+
+
+@tf.keras.utils.register_keras_serializable(package="dualing")
+class RNN(_RecurrentEmbedder):
+    """Embed token sequences with a simple recurrent cell and linear projection.
+
+    Args:
+        vocab_size: Number of token IDs and output features.
+        embedding_size: Token embedding width.
+        hidden_size: Recurrent state width.
+        name: Model name.
+        embedding_dim: Alias taking precedence over embedding_size.
+        hidden_units: Alias taking precedence over hidden_size.
+        **kwargs: Standard Keras model options, including trainable and dtype.
+
+    Integer IDs in ``[0, vocab_size)`` have shape ``(batch, time)``. Outputs
+    have shape ``(batch, time, vocab_size)``; Siamese models pool over time.
+    """
+
+    _cell_class = tf.keras.layers.SimpleRNNCell
 
     def __init__(
         self,
@@ -98,26 +225,36 @@ class RNN(Base):
         *,
         embedding_dim: int | None = None,
         hidden_units: int | None = None,
+        **kwargs,
     ) -> None:
-        super().__init__(name=name)
-
-        embedding_size = embedding_size if embedding_dim is None else embedding_dim
-        hidden_size = hidden_size if hidden_units is None else hidden_units
-
-        self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_size)
-        self.cell = tf.keras.layers.SimpleRNNCell(hidden_size)
-        self.rnn = tf.keras.layers.RNN(self.cell, return_sequences=True)
-        self.fc = tf.keras.layers.Dense(vocab_size)
-
-    def call(self, x):
-        x = self.embedding(x)
-        x = self.rnn(x)
-
-        return self.fc(x)
+        super().__init__(
+            vocab_size,
+            embedding_size,
+            hidden_size,
+            name,
+            embedding_dim=embedding_dim,
+            hidden_units=hidden_units,
+            **kwargs,
+        )
 
 
-class GRU(Base):
-    """A gated recurrent embedder."""
+@tf.keras.utils.register_keras_serializable(package="dualing")
+class GRU(_RecurrentEmbedder):
+    """Embed token sequences with a gated recurrent cell and linear projection.
+
+    Args:
+        vocab_size: Number of token IDs and output features.
+        embedding_size: Token embedding width.
+        hidden_size: Recurrent state width.
+        name: Model name.
+        embedding_dim: Alias taking precedence over embedding_size.
+        hidden_units: Alias taking precedence over hidden_size.
+        **kwargs: Standard Keras model options, including trainable and dtype.
+
+    Input/output shapes and token ranges follow ``RNN``.
+    """
+
+    _cell_class = tf.keras.layers.GRUCell
 
     def __init__(
         self,
@@ -128,26 +265,36 @@ class GRU(Base):
         *,
         embedding_dim: int | None = None,
         hidden_units: int | None = None,
+        **kwargs,
     ) -> None:
-        super().__init__(name=name)
-
-        embedding_size = embedding_size if embedding_dim is None else embedding_dim
-        hidden_size = hidden_size if hidden_units is None else hidden_units
-
-        self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_size)
-        self.cell = tf.keras.layers.GRUCell(hidden_size)
-        self.rnn = tf.keras.layers.RNN(self.cell, return_sequences=True)
-        self.fc = tf.keras.layers.Dense(vocab_size)
-
-    def call(self, x):
-        x = self.embedding(x)
-        x = self.rnn(x)
-
-        return self.fc(x)
+        super().__init__(
+            vocab_size,
+            embedding_size,
+            hidden_size,
+            name,
+            embedding_dim=embedding_dim,
+            hidden_units=hidden_units,
+            **kwargs,
+        )
 
 
-class LSTM(Base):
-    """A long short-term memory embedder."""
+@tf.keras.utils.register_keras_serializable(package="dualing")
+class LSTM(_RecurrentEmbedder):
+    """Embed token sequences with an LSTM cell and linear projection.
+
+    Args:
+        vocab_size: Number of token IDs and output features.
+        embedding_size: Token embedding width.
+        hidden_size: Recurrent state width.
+        name: Model name.
+        embedding_dim: Alias taking precedence over embedding_size.
+        hidden_units: Alias taking precedence over hidden_size.
+        **kwargs: Standard Keras model options, including trainable and dtype.
+
+    Input/output shapes and token ranges follow ``RNN``.
+    """
+
+    _cell_class = tf.keras.layers.LSTMCell
 
     def __init__(
         self,
@@ -158,19 +305,14 @@ class LSTM(Base):
         *,
         embedding_dim: int | None = None,
         hidden_units: int | None = None,
+        **kwargs,
     ) -> None:
-        super().__init__(name=name)
-
-        embedding_size = embedding_size if embedding_dim is None else embedding_dim
-        hidden_size = hidden_size if hidden_units is None else hidden_units
-
-        self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_size)
-        self.cell = tf.keras.layers.LSTMCell(hidden_size)
-        self.rnn = tf.keras.layers.RNN(self.cell, return_sequences=True)
-        self.fc = tf.keras.layers.Dense(vocab_size)
-
-    def call(self, x):
-        x = self.embedding(x)
-        x = self.rnn(x)
-
-        return self.fc(x)
+        super().__init__(
+            vocab_size,
+            embedding_size,
+            hidden_size,
+            name,
+            embedding_dim=embedding_dim,
+            hidden_units=hidden_units,
+            **kwargs,
+        )

@@ -1,5 +1,7 @@
 """Base embedding and Siamese model classes."""
 
+from typing import Self
+
 import numpy as np
 import tensorflow as tf
 
@@ -7,22 +9,62 @@ from dualing.utils import exception
 
 
 class Base(tf.keras.Model):
-    """Base class for shared embedding models."""
+    """Keras model base for embedders implementing ``call(inputs)``.
 
-    def __init__(self, name: str = "") -> None:
-        super().__init__(name=name)
+    ``name``, ``trainable``, ``dtype``, and other model options are delegated
+    to Keras. Subclasses with constructor parameters should implement
+    ``get_config`` to support cloning and persistence.
+    """
+
+    def __init__(self, name: str = "", **kwargs) -> None:
+        super().__init__(name=name, **kwargs)
 
     def call(self, x):
         raise NotImplementedError
 
 
 class Siamese(tf.keras.Model):
-    """Base class for Siamese models."""
+    """Own one shared Keras embedder and its serialization configuration.
 
-    def __init__(self, base: tf.keras.Model, name: str = "") -> None:
-        super().__init__(name=name)
+    Args:
+        base: Keras model reused for both branches. Sequence outputs of shape
+            ``(batch, time, features)`` are mean-pooled by ``embed``.
+        name: Model name.
+        **kwargs: Standard Keras model options, including trainable and dtype.
+    """
+
+    def __init__(self, base: tf.keras.Model, name: str = "", **kwargs) -> None:
+        super().__init__(name=name, **kwargs)
 
         self.B = base
+
+    def get_config(self) -> dict:
+        """Serialize the shared embedder alongside native Keras model options."""
+
+        return {
+            **super().get_config(),
+            "base": tf.keras.utils.serialize_keras_object(self.B),
+        }
+
+    @classmethod
+    def from_config(cls, config: dict) -> Self:
+        """Reconstruct a model with its nested, shared embedder."""
+
+        config = dict(config)
+        base = config.pop("base")
+
+        if isinstance(base, dict):
+            base = tf.keras.utils.deserialize_keras_object(base)
+
+        return cls(base=base, **config)
+
+    def compile_from_config(self, config: dict) -> None:
+        """Restore compilation and optimizer slots for resumed training."""
+
+        self.compile(**tf.keras.utils.deserialize_keras_object(config))
+
+        if self.built and self.optimizer is not None:
+            self.optimizer.build(self.trainable_variables)
 
     @property
     def B(self) -> tf.keras.Model:

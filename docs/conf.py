@@ -6,6 +6,8 @@ copyright = "2020, Gustavo Rosa"
 version = release = distribution_version("dualing")
 
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary", "sphinx.ext.napoleon"]
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
 autosummary_generate = True
 autodoc_member_order = "bysource"
 html_theme = "alabaster"

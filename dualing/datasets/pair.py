@@ -32,7 +32,26 @@ class _PairDataset(Dataset):
 
 
 class BalancedPairDataset(_PairDataset):
-    """Create equal numbers of similar and dissimilar pairs."""
+    """Expose balanced pairs through the original three-item batch layout.
+
+    Args:
+        data: Numeric samples, with the sample dimension first.
+        labels: One class label per sample, with at least two distinct classes.
+        n_pairs: Requested pair count. Prefer a positive even value; original
+            generation rounds positive odd counts down to preserve balance.
+        batch_size: Positive maximum number of pairs per batch.
+        input_shape: Optional full shape passed to Dataset preprocessing.
+        normalize: Global scaling bounds, or None to disable scaling.
+        shuffle: Shuffle generated pairs before batching.
+        seed: Sampling seed; construction also resets TensorFlow's global seed.
+
+    ``batches`` is a prefetched dataset yielding ``(left, right, targets)``.
+    Targets are 1 for similar and 0 for dissimilar pairs. Without shuffling,
+    similar pairs precede dissimilar pairs.
+
+    Sampling retains the original sample-based rejection scheme, including
+    repeats and self-pairs; it is not the native helper's uniform-class sampler.
+    """
 
     def __init__(
         self,
@@ -58,7 +77,7 @@ class BalancedPairDataset(_PairDataset):
 
     @property
     def n_pairs(self) -> int:
-        """Number of generated pairs."""
+        """Requested pair count; positive odd counts are rounded down."""
 
         return self._n_pairs
 
@@ -70,6 +89,17 @@ class BalancedPairDataset(_PairDataset):
         self._n_pairs = n_pairs
 
     def create_pairs(self, data, labels):
+        """Generate pairs from supplied samples without preprocessing them.
+
+        Args:
+            data: Samples to gather into pairs.
+            labels: Corresponding class labels.
+
+        Returns:
+            A tuple of left-sample, right-sample, and target lists. Targets
+            are 1 for similar and 0 for dissimilar pairs, in that order.
+        """
+
         labels = np.asarray(labels)
 
         if np.all(labels == labels[0]):
@@ -100,7 +130,20 @@ class BalancedPairDataset(_PairDataset):
 
 
 class RandomPairDataset(_PairDataset):
-    """Create random disjoint sample pairs."""
+    """Expose disjoint random pairs through the original batch interface.
+
+    Args:
+        data: At least two numeric samples, with the sample dimension first.
+        labels: One class label per sample.
+        batch_size: Positive maximum number of pairs per batch.
+        input_shape: Optional full shape passed to Dataset preprocessing.
+        normalize: Global scaling bounds, or None to disable scaling.
+        seed: Sampling seed; construction also resets TensorFlow's global seed.
+
+    ``batches`` is a prefetched dataset yielding ``(left, right, targets)``.
+    Targets are 1 for equal labels and 0 otherwise. Pairing does not reuse
+    samples; an odd leftover is unused. Traversal is not shuffled.
+    """
 
     def __init__(
         self,
@@ -118,6 +161,16 @@ class RandomPairDataset(_PairDataset):
         self._build(pairs)
 
     def create_pairs(self, data, labels):
+        """Return disjoint pairs without reshaping or normalizing the samples.
+
+        Args:
+            data: Numeric samples, converted to float32.
+            labels: Corresponding class labels.
+
+        Returns:
+            Three tensors: left samples, right samples, and float32 targets.
+        """
+
         n_pairs = len(data) // 2
         dataset = random_pair_dataset(
             data,

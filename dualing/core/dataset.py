@@ -7,7 +7,19 @@ from dualing.utils import exception
 
 
 class Dataset:
-    """Store common preprocessing and batching options."""
+    """Store the original dataset API's preprocessing and batching options.
+
+    Args:
+        batch_size: Positive maximum number of samples or pairs per batch.
+        input_shape: Optional full tensor shape, including the sample dimension.
+        normalize: Increasing global scaling bounds, or None to disable scaling.
+        shuffle: Whether concrete datasets shuffle before batching.
+        seed: Seed used by concrete datasets. Construction also resets
+            TensorFlow's global random seed, as in the original interface.
+
+    Native dataset helper functions do not reset the global seed. Subclasses
+    build and expose their own ``batches`` dataset.
+    """
 
     def __init__(
         self,
@@ -81,7 +93,15 @@ class Dataset:
         self._shuffle = shuffle
 
     def preprocess(self, data) -> tf.Tensor:
-        """Reshape and normalize input data."""
+        """Apply the configured shape and global normalization.
+
+        Args:
+            data: Numeric array-like values or an eager tensor.
+
+        Returns:
+            A float32 tensor. Constant values map to the lower bound when
+            normalization is enabled.
+        """
 
         return preprocess(data, self.input_shape, self.normalize)
 
